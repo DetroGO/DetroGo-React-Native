@@ -1,98 +1,306 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+import { StyleSheet, View, ScrollView, Pressable, Image } from "react-native";
+import { Button, useTheme, Text, Icon } from "react-native-paper";
+import SearchBar from "@/components/ui/searchbar";
+import { router } from "expo-router";
 
-import { HelloWave } from '@/components/hello-wave';
-import ParallaxScrollView from '@/components/parallax-scroll-view';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { Link } from 'expo-router';
+interface Trip {
+  start: string;
+  end: string;
+  stops: number;
+  transfers: number;
+  price: number;
+}
+
+const DATA: Trip[] = [
+  {
+    start: "Preet Vihar",
+    end: "Mandi House",
+    stops: 12,
+    transfers: 2,
+    price: 20,
+  },
+  {
+    start: "Rajiv Chowk",
+    end: "Huda City Centre",
+    stops: 18,
+    transfers: 0,
+    price: 30,
+  },
+  {
+    start: "Kashmere Gate",
+    end: "Noida Sec 62",
+    stops: 22,
+    transfers: 1,
+    price: 40,
+  },
+  { start: "New Delhi", end: "IGI Airport", stops: 8, transfers: 0, price: 60 },
+  {
+    start: "Preet Vihar",
+    end: "Mandi House",
+    stops: 12,
+    transfers: 2,
+    price: 20,
+  },
+  {
+    start: "Preet Vihar",
+    end: "Mandi House",
+    stops: 12,
+    transfers: 2,
+    price: 20,
+  },
+];
+
+const BookmarkCard = ({ item, theme }: { item: Trip; theme: any }) => (
+  <Pressable
+    onPress={() => router.push("/journey")}
+    style={({ pressed }) => [
+      styles.bookmarkCard,
+      {
+        backgroundColor: theme.colors.onSecondary,
+        opacity: pressed ? 0.85 : 1,
+      },
+    ]}
+  >
+    <Text
+      variant="labelLarge"
+      style={{ color: theme.colors.onSecondaryContainer, opacity: 0.7 }}
+    >
+      {item.start}
+    </Text>
+    <Text
+      variant="titleMedium"
+      style={{
+        color: theme.colors.onSecondaryContainer,
+
+        marginTop: 4,
+        marginBottom: 12,
+      }}
+      numberOfLines={1}
+    >
+      {item.end}
+    </Text>
+    <View style={styles.bookmarkMeta}>
+      <View style={styles.metaChip}>
+        <Icon
+          source="subway-variant"
+          size={20}
+          color={theme.colors.onSecondaryContainer}
+        />
+        <Text variant="labelMedium" style={{ color: theme.colors.onSurface }}>
+          {item.stops} stops
+        </Text>
+      </View>
+      <View style={styles.metaChip}>
+        <Icon
+          source="transit-transfer"
+          size={20}
+          color={theme.colors.onSecondaryContainer}
+        />
+        <Text variant="labelMedium" style={{ color: theme.colors.onSurface }}>
+          {item.transfers} Transfer
+        </Text>
+      </View>
+    </View>
+  </Pressable>
+);
 
 export default function HomeScreen() {
-  return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <Link href="/modal">
-          <Link.Trigger>
-            <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-          </Link.Trigger>
-          <Link.Preview />
-          <Link.Menu>
-            <Link.MenuAction title="Action" icon="cube" onPress={() => alert('Action pressed')} />
-            <Link.MenuAction
-              title="Share"
-              icon="square.and.arrow.up"
-              onPress={() => alert('Share pressed')}
-            />
-            <Link.Menu title="More" icon="ellipsis">
-              <Link.MenuAction
-                title="Delete"
-                icon="trash"
-                destructive
-                onPress={() => alert('Delete pressed')}
-              />
-            </Link.Menu>
-          </Link.Menu>
-        </Link>
+  const theme = useTheme();
 
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+  return (
+    <ScrollView
+      style={{ backgroundColor: theme.colors.background }}
+      contentContainerStyle={styles.scroll}
+      showsVerticalScrollIndicator={false}
+    >
+      {/* Header */}
+      <View style={styles.header}>
+        <View
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "space-between",
+          }}
+        >
+          <View>
+            <Image
+              source={{ uri: "https://detrogo.vercel.app/detroname.png" }}
+              style={{
+                width: 120,
+                height: 40,
+                marginRight: 8,
+                marginLeft: 10,
+                tintColor: theme.colors.primary,
+              }}
+            />
+            {/*<Text
+              variant="headlineSmall"
+              style={{ color: theme.colors.onBackground }}
+            >
+              Where to?
+            </Text>*/}
+          </View>
+          <View style={{ alignItems: "center", justifyContent: "center" }}>
+            <Button
+              icon="crosshairs-gps"
+              mode="outlined"
+              onPress={() => console.log("Pressed")}
+            >
+              Delhi
+            </Button>
+          </View>
+        </View>
+      </View>
+
+      {/* Search */}
+      <View style={styles.searchWrapper}>
+        <SearchBar hint="Search stations..." />
+      </View>
+
+      {/* Bookmarks */}
+      <View style={{ marginTop: 16, paddingTop: 15, gap: 10 }}>
+        <View
+          style={{
+            marginLeft: 20,
+            marginBottom: 10,
+            flexDirection: "row",
+            alignItems: "center",
+          }}
+        >
+          <Icon
+            source="bookmark-box-multiple"
+            size={24}
+            color={theme.colors.onSurfaceVariant}
+          />
+          <Text style={{ marginLeft: 6 }}>Bookmarks</Text>
+        </View>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={{ paddingHorizontal: 16, gap: 10 }}
+        >
+          {DATA.map((item, index) => (
+            <BookmarkCard key={index} item={item} theme={theme} />
+          ))}
+        </ScrollView>
+      </View>
+
+      {/* Recent Trips */}
+      <View style={{ marginTop: 24, paddingHorizontal: 16 }}>
+        <View
+          style={{
+            marginBottom: 20,
+            flexDirection: "row",
+            alignItems: "center",
+          }}
+        >
+          <Icon
+            source="history"
+            size={24}
+            color={theme.colors.onSurfaceVariant}
+          />
+          <Text style={{ marginLeft: 6 }}>Recent Trips</Text>
+        </View>
+
+        <Text
+          variant="labelSmall"
+          style={{
+            color: theme.colors.onSurfaceVariant,
+            paddingHorizontal: 4,
+            paddingBottom: 6,
+            letterSpacing: 0.5,
+          }}
+        >
+          TODAY
+        </Text>
+
+        {DATA.map((item, index) => (
+          <View key={index}>
+            <Pressable
+              android_ripple={{ color: theme.colors.primary + "22" }}
+              style={({ pressed }) => ({
+                flexDirection: "row",
+                alignItems: "center",
+                paddingHorizontal: 14,
+                paddingVertical: 12,
+                gap: 14,
+                backgroundColor: pressed
+                  ? theme.colors.surfaceVariant
+                  : theme.colors.elevation.level1,
+                marginBottom: 3,
+                borderTopLeftRadius: index === 0 ? 28 : 6,
+                borderTopRightRadius: index === 0 ? 28 : 6,
+                borderBottomLeftRadius: index === DATA.length - 1 ? 28 : 6,
+                borderBottomRightRadius: index === DATA.length - 1 ? 28 : 6,
+              })}
+            >
+              <View
+                style={{
+                  width: 50,
+                  height: 50,
+                  backgroundColor: theme.colors.secondaryContainer,
+                  alignItems: "center",
+                  justifyContent: "center",
+                  borderRadius: 17,
+                }}
+              >
+                <Icon
+                  source="source-commit"
+                  size={30}
+                  color={theme.colors.secondary}
+                />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text
+                  variant="bodyMedium"
+                  style={{ color: theme.colors.onSurface }}
+                >
+                  {item.start}
+                </Text>
+                <Text
+                  variant="labelSmall"
+                  style={{ color: theme.colors.onSurfaceVariant, marginTop: 1 }}
+                >
+                  → {item.end}
+                </Text>
+              </View>
+              <View
+                style={{
+                  padding: 8,
+                  backgroundColor: theme.colors.secondaryContainer,
+                  borderRadius: 18,
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+              >
+                <Icon
+                  source="chevron-right"
+                  size={18}
+                  color={theme.colors.onSurfaceVariant}
+                />
+              </View>
+            </Pressable>
+            {index < DATA.length - 1 && (
+              <View
+                style={{
+                  height: 0.5,
+                  backgroundColor: theme.colors.outlineVariant,
+                  marginLeft: 72,
+                }}
+              />
+            )}
+          </View>
+        ))}
+      </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
-  },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
-  },
+  scroll: { paddingBottom: 40 },
+  header: { paddingHorizontal: 20, paddingTop: 60, paddingBottom: 8 },
+  searchWrapper: { paddingHorizontal: 16, paddingVertical: 12 },
+  bookmarkCard: { width: 220, borderRadius: 20, padding: 16 },
+  bookmarkMeta: { flexDirection: "row", gap: 10 },
+  metaChip: { flexDirection: "row", alignItems: "center", gap: 4 },
 });

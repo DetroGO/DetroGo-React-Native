@@ -1,35 +1,43 @@
-import { Tabs } from 'expo-router';
-import React from 'react';
+import { useState } from "react";
+import { BottomNavigation } from "react-native-paper";
+import { useTheme } from "react-native-paper";
 
-import { HapticTab } from '@/components/haptic-tab';
-import { IconSymbol } from '@/components/ui/icon-symbol';
-import { Colors } from '@/constants/theme';
-import { useColorScheme } from '@/hooks/use-color-scheme';
+import HomeScreen from "./index";
+import MapScreen from "./map";
+
+const HomeRoute = () => <HomeScreen />;
+const MapRoute = () => <MapScreen />;
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
+  const theme = useTheme();
+  const [index, setIndex] = useState(0);
+
+  const [routes] = useState([
+    {
+      key: "home",
+      title: "Home",
+      focusedIcon: "home",
+      unfocusedIcon: "home-outline",
+    },
+    {
+      key: "map",
+      title: "Map",
+      focusedIcon: "map",
+      unfocusedIcon: "map-outline",
+    },
+  ]);
+
+  const renderScene = BottomNavigation.SceneMap({
+    home: HomeRoute,
+    map: MapRoute,
+  });
 
   return (
-    <Tabs
-      screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
-        headerShown: false,
-        tabBarButton: HapticTab,
-      }}>
-      <Tabs.Screen
-        name="index"
-        options={{
-          title: 'Home',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
-        }}
-      />
-      <Tabs.Screen
-        name="explore"
-        options={{
-          title: 'Explore',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
-        }}
-      />
-    </Tabs>
+    <BottomNavigation
+      navigationState={{ index, routes }}
+      onIndexChange={setIndex}
+      renderScene={renderScene}
+      theme={theme} // this is all you need — pulls everything from Material3 dynamic theme
+    />
   );
 }
