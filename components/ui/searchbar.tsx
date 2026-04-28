@@ -1,11 +1,10 @@
-import { Pressable, Text, StyleSheet } from "react-native";
+import { StyleSheet } from "react-native";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
   withSpring,
 } from "react-native-reanimated";
-import { useTheme } from "react-native-paper";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { useTheme, Card, Text, Icon } from "react-native-paper";
 
 interface Props {
   onPress: () => void;
@@ -15,49 +14,42 @@ interface Props {
 export default function SearchBar({ onPress, hint }: Props) {
   const theme = useTheme();
   const scale = useSharedValue(1);
-
   const animStyle = useAnimatedStyle(() => ({
     transform: [{ scale: scale.value }],
   }));
 
   return (
     <Animated.View style={animStyle}>
-      <Pressable
+      <Card
+        mode="elevated"
+        style={{ borderRadius: 36, padding: 6 }}
+        onPress={onPress}
         onPressIn={() => {
           scale.value = withSpring(0.97);
         }}
         onPressOut={() => {
           scale.value = withSpring(1);
         }}
-        onPress={onPress}
-        style={[
-          styles.bar,
-          {
-            backgroundColor: theme.colors.elevation.level3,
-            borderRadius: 36,
-          },
-        ]}
       >
-        <Text style={[styles.placeholder, { color: theme.colors.onSurface }]}>
-          {hint || "Search stations..."}
-        </Text>
-      </Pressable>
+        <Card.Content style={styles.content}>
+          <Text
+            variant="bodyLarge"
+            style={{ color: theme.colors.onSurfaceVariant, flex: 1 }}
+          >
+            {hint || "Search stations..."}
+          </Text>
+        </Card.Content>
+      </Card>
     </Animated.View>
   );
 }
 
 const styles = StyleSheet.create({
-  bar: {
+  content: {
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: 20,
-    paddingVertical: 20,
-
-    width: "100%",
+    paddingVertical: 14,
     gap: 10,
-  },
-  placeholder: {
-    flex: 1,
-    fontSize: 16,
   },
 });
