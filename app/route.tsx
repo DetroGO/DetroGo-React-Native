@@ -16,6 +16,7 @@ export default function RoutePlanScreen() {
   const [routeData, setRouteData] = useState(null);
 
   const { start, end } = useLocalSearchParams();
+  console.log(start, end);
   const [fromStation, setFromStation] = useState(start || "Preet Vihar");
   const [toStation, setToStation] = useState(end || "Mandi House");
 
@@ -60,6 +61,8 @@ export default function RoutePlanScreen() {
         <WebView
           ref={webviewRef}
           source={require("../assets/routemap/index.html")}
+          javaScriptEnabled={true}
+          startInLoadingState={true}
           onMessage={handleWebViewMessage}
           style={{ flex: 1, backgroundColor: "transparent" }}
           // ADD THESE TWO PROPS:

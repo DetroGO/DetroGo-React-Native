@@ -21,8 +21,12 @@ export default function SearchBar({ onPress, hint }: Props) {
   return (
     <Animated.View style={animStyle}>
       <Card
-        mode="elevated"
-        style={{ borderRadius: 36, padding: 6 }}
+        mode="contained"
+        style={{
+          borderRadius: 36,
+          padding: 8,
+          backgroundColor: theme.colors.secondaryContainer,
+        }}
         onPress={onPress}
         onPressIn={() => {
           scale.value = withSpring(0.97);
@@ -34,7 +38,7 @@ export default function SearchBar({ onPress, hint }: Props) {
         <Card.Content style={styles.content}>
           <Text
             variant="bodyLarge"
-            style={{ color: theme.colors.onSurfaceVariant, flex: 1 }}
+            style={{ color: theme.colors.onSecondaryContainer, flex: 1 }}
           >
             {hint || "Search stations..."}
           </Text>

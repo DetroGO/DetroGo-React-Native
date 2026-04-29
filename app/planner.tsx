@@ -9,9 +9,17 @@ import {
   Icon,
   Button,
 } from "react-native-paper";
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withSpring,
+  withTiming,
+  runOnJS,
+} from "react-native-reanimated";
 import { StyleSheet, View, SectionList } from "react-native";
 import { useState } from "react";
-
+import { useRouter } from "expo-router";
+import { useRef } from "react";
 type TransitLines = Record<string, string[]>;
 const lines: TransitLines = metroLines as TransitLines;
 
@@ -23,6 +31,16 @@ const initialSections = Object.entries(lines).map(([title, data]) => ({
 
 export default function ModalScreen() {
   const theme = useTheme();
+  const scale = useSharedValue(1);
+  const scale2 = useSharedValue(1);
+  const workstation = "Knowledge Park";
+  const homestation = "Vaishali";
+  const animStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+  }));
+  const animStyle2 = useAnimatedStyle(() => ({
+    transform: [{ scale: scale2.value }],
+  }));
   const [searchPhrase, setPhrase] = useState("");
   const [searchv, setSearchv] = useState("block");
   const [plannerv, setPlannerv] = useState("none");
@@ -30,27 +48,81 @@ export default function ModalScreen() {
   const [startStation, setStartStation] = useState("");
   const [finalsel, setFinalsel] = useState(false);
   const [startsel, setStartsel] = useState(false);
+  const [editingMode, setEditingMode] = useState<"start" | "final" | null>(
+    null,
+  );
   // State to hold the filtered sections
   const [filteredSections, setFilteredSections] = useState(initialSections);
+  const router = useRouter();
+  const buttonRef = useRef(null);
+  const scale3 = useSharedValue(0);
+  const [origin, setOrigin] = useState({ x: 0, y: 0 });
+
+  const animatedCircle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale3.value }],
+    opacity: scale3.value > 0 ? 1 : 0,
+  }));
+
+  const handleGo = () => {
+    buttonRef.current?.measure(
+      (
+        x: number,
+        y: number,
+        width: number,
+        height: number,
+        pageX: number,
+        pageY: number,
+      ) => {
+        setOrigin({ x: pageX + width / 2, y: pageY + height / 2 });
+        scale3.value = withTiming(40, { duration: 500 }, (finished) => {
+          if (finished)
+            router.push({
+              pathname: "/route",
+              params: { fromStation: startStation, toStation: finalStation },
+            });
+        });
+      },
+    );
+  };
+
+  const handleStationSelect = (item: string) => {
+    if (editingMode === "start") {
+      setStartStation(item);
+      setStartsel(true);
+      setFinalsel(false);
+      setEditingMode(null);
+      setSearchv("none");
+      setPlannerv("block");
+    } else if (editingMode === "final" || !startsel) {
+      setFinalStation(item);
+      setFinalsel(true);
+      setStartsel(false);
+      setEditingMode(null);
+      setSearchv("none");
+      setPlannerv("block");
+    }
+  };
 
   const showPlan = (item: string) => {
+    setFinalStation(item);
+    setFinalsel(true);
     setSearchv("none");
     setPlannerv("block");
-    console.log(item);
-    setFinalStation(item);
   };
 
   const startStationsel = (item: string) => {
-    setStartsel(true);
-    setFinalsel(false);
-    setStartStation(item);
-    return;
+    setEditingMode("start");
+    setPlannerv("none");
+    setSearchv("block");
+    setPhrase("");
+    setFilteredSections(initialSections);
   };
   const finalStationsel = (item: string) => {
-    setFinalsel(true);
-    setStartsel(false);
-    setFinalStation(item);
-    return;
+    setEditingMode("final");
+    setPlannerv("none");
+    setSearchv("block");
+    setPhrase("");
+    setFilteredSections(initialSections);
   };
 
   const searchData = (text: string) => {
@@ -99,58 +171,94 @@ export default function ModalScreen() {
         }}
       >
         <View style={{ padding: 15, display: plannerv }}>
-          {" "}
-          <Card
-            style={{
-              backgroundColor: theme.colors.elevation.level1,
-              marginBottom: 5,
-              borderRadius: 18,
-              borderColor: startsel
-                ? theme.colors.primary
-                : theme.colors.elevation.level1,
-              borderWidth: startsel ? 1 : 0,
-            }}
-            mode="contained"
-            onPress={() => startStationsel()}
-          >
-            <Card.Content
+          <Animated.View style={animStyle}>
+            <Card
               style={{
-                flexDirection: "row",
-
-                gap: 10,
+                backgroundColor: theme.colors.elevation.level1,
+                marginBottom: 5,
+                borderRadius: 18,
+                borderColor:
+                  editingMode === "start"
+                    ? theme.colors.primary
+                    : theme.colors.elevation.level1,
+                borderWidth: editingMode === "start" ? 1 : 0,
+              }}
+              mode="contained"
+              onPress={() => startStationsel()}
+              onPressIn={() => {
+                scale.value = withSpring(0.97);
+              }}
+              onPressOut={() => {
+                scale.value = withSpring(1);
               }}
             >
-              <Icon source="home" size={24} />
-              <Text variant="titleMedium">
-                {startsel ? startStation : "Your Location"}
-              </Text>
-            </Card.Content>
-          </Card>
-          <Card
-            style={{
-              backgroundColor: theme.colors.elevation.level1,
-              marginBottom: 15,
-              borderRadius: 18,
-              borderColor: finalsel
-                ? theme.colors.primary
-                : theme.colors.elevation.level1,
-              borderWidth: finalsel ? 1 : 0,
-            }}
-            mode="contained"
-            onPress={() => finalStationsel()}
-          >
-            <Card.Content
-              style={{
-                flexDirection: "row",
+              <Card.Content
+                style={{
+                  flexDirection: "row",
 
-                gap: 10,
+                  gap: 10,
+                }}
+              >
+                <Icon
+                  source={editingMode ? "home" : "crosshairs-gps"}
+                  size={24}
+                />
+                <Text variant="titleMedium">
+                  {startsel ? startStation : "Your Location"}
+                </Text>
+              </Card.Content>
+            </Card>
+          </Animated.View>
+          <Animated.View style={animStyle2}>
+            <Card
+              style={{
+                backgroundColor: theme.colors.elevation.level1,
+                marginBottom: 15,
+                borderRadius: 18,
+                borderColor:
+                  editingMode === "final"
+                    ? theme.colors.primary
+                    : theme.colors.elevation.level1,
+                borderWidth: editingMode === "final" ? 1 : 0,
               }}
+              mode="contained"
+              onPressIn={() => {
+                scale2.value = withSpring(0.97);
+              }}
+              onPressOut={() => {
+                scale2.value = withSpring(1);
+              }}
+              onPress={() => finalStationsel()}
             >
-              <Icon source="home" size={24} />
-              <Text variant="titleMedium">{finalStation}</Text>
-            </Card.Content>
-          </Card>
-          <Button style={{ marginBottom: 10 }} mode="contained">
+              <Card.Content
+                style={{
+                  flexDirection: "row",
+
+                  gap: 10,
+                }}
+              >
+                <Icon source="flag" size={24} />
+                <Text variant="titleMedium">{finalStation}</Text>
+              </Card.Content>
+            </Card>
+          </Animated.View>
+          <Animated.View
+            style={[
+              {
+                position: "absolute",
+                width: 20,
+                height: 20,
+                borderRadius: 10,
+                backgroundColor: theme.colors.primary,
+                left: origin.x - 10,
+                top: origin.y - 10,
+                zIndex: 99,
+              },
+              animatedCircle,
+            ]}
+          />
+
+          <Button ref={buttonRef} mode="contained" onPress={handleGo}>
             GO
           </Button>
         </View>
@@ -169,7 +277,13 @@ export default function ModalScreen() {
           showDivider={true}
           // Call searchData when text changes
           onChangeText={searchData}
-          placeholder="Search Line or Station"
+          placeholder={
+            editingMode === "start"
+              ? "Select Start Station"
+              : editingMode === "final"
+                ? "Select Final Station"
+                : "Search Line or Station"
+          }
           // Set the value of the searchbar to the current searchPhrase
           value={searchPhrase}
         />
@@ -201,6 +315,7 @@ export default function ModalScreen() {
                   borderBottomRightRadius: 6,
                 }}
                 mode="contained"
+                onPress={() => handleStationSelect(homestation)}
               >
                 <Card.Content
                   style={{
@@ -224,6 +339,7 @@ export default function ModalScreen() {
                   borderBottomRightRadius: 18,
                 }}
                 mode="contained"
+                onPress={() => handleStationSelect(workstation)}
               >
                 <Card.Content
                   style={{
@@ -263,7 +379,7 @@ export default function ModalScreen() {
                 borderBottomRightRadius:
                   index === section.data.length - 1 ? 28 : 6,
               }}
-              onPress={() => showPlan(item)}
+              onPress={() => handleStationSelect(item)}
             >
               <Card.Content
                 style={{

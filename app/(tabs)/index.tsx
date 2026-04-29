@@ -175,6 +175,7 @@ const BookmarkCard = ({ item }: { item: Trip }) => {
         mode="contained"
         style={{
           width: 220,
+          padding: 4,
           backgroundColor: theme.colors.secondaryContainer,
           borderRadius: 20,
           marginBottom: 4,
