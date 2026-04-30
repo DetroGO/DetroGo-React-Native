@@ -10,7 +10,6 @@ import { useState } from "react";
 
 import {
   Button,
-  useTheme,
   Text,
   Icon,
   Card,
@@ -18,6 +17,7 @@ import {
   Portal,
   Dialog,
 } from "react-native-paper";
+import { useAppTheme } from "@/hooks/useAppTheme";
 import SearchBar from "@/components/ui/searchbar";
 
 import { router } from "expo-router";
@@ -105,17 +105,17 @@ const DATA: Trip[] = [
 ];
 
 const RecentCard = ({ index, item }: { index: number; item: Trip }) => {
-  const theme = useTheme();
+  const theme = useAppTheme();
   return (
     <Card
-      mode="elevated"
-      elevation={1}
+      mode="contained"
       style={{
-        marginBottom: 3,
-        borderTopLeftRadius: index === 0 ? 28 : 6,
-        borderTopRightRadius: index === 0 ? 28 : 6,
-        borderBottomLeftRadius: index === DATA.length - 1 ? 28 : 6,
-        borderBottomRightRadius: index === DATA.length - 1 ? 28 : 6,
+        backgroundColor: theme.dark ? theme.colors.surfaceContainerLow : theme.colors.elevation.level2,
+        marginBottom: 2.8,
+        borderTopLeftRadius: index === 0 ? 24 : 6,
+        borderTopRightRadius: index === 0 ? 24 : 6,
+        borderBottomLeftRadius: index === DATA.length - 1 ? 24 : 6,
+        borderBottomRightRadius: index === DATA.length - 1 ? 24 : 6,
       }}
       onPress={() => {}}
     >
@@ -152,7 +152,7 @@ const RecentCard = ({ index, item }: { index: number; item: Trip }) => {
             variant="labelSmall"
             style={{ color: theme.colors.onSurfaceVariant, marginTop: 1 }}
           >
-            → {item.end}
+            > {item.end}
           </Text>
         </View>
       </Card.Content>
@@ -161,7 +161,7 @@ const RecentCard = ({ index, item }: { index: number; item: Trip }) => {
 };
 
 const BookmarkCard = ({ item }: { item: Trip }) => {
-  const theme = useTheme();
+  const theme = useAppTheme();
   return (
     <Pressable
       onPress={() =>
@@ -176,7 +176,7 @@ const BookmarkCard = ({ item }: { item: Trip }) => {
         style={{
           width: 220,
           padding: 4,
-          backgroundColor: theme.colors.secondaryContainer,
+          backgroundColor: theme.colors.elevation.level1,
           borderRadius: 20,
           marginBottom: 4,
         }}
@@ -191,7 +191,7 @@ const BookmarkCard = ({ item }: { item: Trip }) => {
           <Text
             variant="titleMedium"
             style={{
-              color: theme.colors.onSurface,
+              color: theme.colors.secondary,
               marginTop: 4,
               marginBottom: 12,
             }}
@@ -238,7 +238,7 @@ const BookmarkCard = ({ item }: { item: Trip }) => {
 };
 
 const SystemCards = ({ index, item }: { index: number; item: Cities }) => {
-  const theme = useTheme();
+  const theme = useAppTheme();
   return (
     <Card
       mode="elevated"
@@ -248,10 +248,10 @@ const SystemCards = ({ index, item }: { index: number; item: Cities }) => {
         backgroundColor: item.selected
           ? theme.colors.secondaryContainer
           : theme.colors.elevation.level1,
-        borderTopLeftRadius: index === 0 ? 28 : 6,
-        borderTopRightRadius: index === 0 ? 28 : 6,
-        borderBottomLeftRadius: index === SYSTEMS.length - 1 ? 28 : 6,
-        borderBottomRightRadius: index === SYSTEMS.length - 1 ? 28 : 6,
+        borderTopLeftRadius: index === 0 ? 24 : 6,
+        borderTopRightRadius: index === 0 ? 24 : 6,
+        borderBottomLeftRadius: index === SYSTEMS.length - 1 ? 24 : 6,
+        borderBottomRightRadius: index === SYSTEMS.length - 1 ? 24 : 6,
       }}
       onPress={() => {
         item.selected = true;
@@ -322,7 +322,7 @@ const SystemCards = ({ index, item }: { index: number; item: Cities }) => {
 };
 
 export default function HomeScreen() {
-  const theme = useTheme();
+  const theme = useAppTheme();
   const [visible, setVisible] = useState(false);
 
   const showDialog = () => setVisible(true);
@@ -332,7 +332,11 @@ export default function HomeScreen() {
   return (
     <SafeAreaView>
       <ScrollView
-        style={{ backgroundColor: theme.colors.surface }}
+        style={{
+          backgroundColor: theme.dark
+            ? theme.colors.surfaceDim
+            : theme.colors.surface,
+        }}
         contentContainerStyle={styles.scroll}
         showsVerticalScrollIndicator={false}
       >
@@ -387,7 +391,7 @@ export default function HomeScreen() {
         <View style={styles.searchWrapper}>
           <SearchBar
             onPress={() => router.push("/planner")}
-            hint="Search your route.."
+            hint="Search Route"
           />
         </View>
 
@@ -401,12 +405,24 @@ export default function HomeScreen() {
               alignItems: "center",
             }}
           >
-            <Icon
-              source="bookmark-box-multiple"
-              size={24}
-              color={theme.colors.onSurfaceVariant}
-            />
-            <Text style={{ marginLeft: 6 }}>Saved Routes</Text>
+            <View
+              style={{ flex: 1, flexDirection: "row", alignItems: "center" }}
+            >
+              <Icon
+                source="bookmark-box-multiple"
+                size={24}
+                color={theme.colors.onSurfaceVariant}
+              />
+              <Text style={{ marginLeft: 6 }}>Saved Routes</Text>
+            </View>
+            <Button
+              style={{ width: "auto", marginRight: 12 }}
+              onPress={() => router.push("/bookmarks")}
+            >
+              <Text style={{ fontSize: 12, color: theme.colors.secondary }}>
+                View All
+              </Text>
+            </Button>
           </View>
           <ScrollView
             horizontal
@@ -423,19 +439,31 @@ export default function HomeScreen() {
         <View style={{ marginTop: 24, paddingHorizontal: 16 }}>
           <View
             style={{
-              marginBottom: 20,
+              marginLeft: 5,
+              marginBottom: 10,
               flexDirection: "row",
               alignItems: "center",
             }}
           >
-            <Icon
-              source="history"
-              size={24}
-              color={theme.colors.onSurfaceVariant}
-            />
-            <Text style={{ marginLeft: 6 }}>Recent Trips</Text>
+            <View
+              style={{ flex: 1, flexDirection: "row", alignItems: "center" }}
+            >
+              <Icon
+                source="history"
+                size={24}
+                color={theme.colors.onSurfaceVariant}
+              />
+              <Text style={{ marginLeft: 5 }}>Recent Trips</Text>
+            </View>
+            <Button
+              style={{ width: "auto", marginRight: 0 }}
+              onPress={() => router.push("/bookmarks")}
+            >
+              <Text style={{ fontSize: 12, color: theme.colors.secondary }}>
+                View All
+              </Text>
+            </Button>
           </View>
-
           {DATA.map((item, index) => (
             <RecentCard index={index} item={item} theme={theme} />
           ))}
@@ -457,7 +485,11 @@ export default function HomeScreen() {
         onPress={showDialog}
       />
       <Portal>
-        <Dialog visible={visible} onDismiss={hideDialog}>
+        <Dialog
+          style={{ backgroundColor: theme.colors.surface }}
+          visible={visible}
+          onDismiss={hideDialog}
+        >
           <Dialog.Title style={{ textAlign: "center" }}>
             Select a Metro System
           </Dialog.Title>

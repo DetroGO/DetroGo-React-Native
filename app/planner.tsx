@@ -1,4 +1,5 @@
-import { Link } from "expo-router";
+import { router } from "expo-router";
+
 import metroLines from "../constants/metrolines.json";
 import {
   useTheme,
@@ -75,11 +76,12 @@ export default function ModalScreen() {
       ) => {
         setOrigin({ x: pageX + width / 2, y: pageY + height / 2 });
         scale3.value = withTiming(40, { duration: 500 }, (finished) => {
-          if (finished)
+          if (finished) {
             router.push({
               pathname: "/route",
               params: { fromStation: startStation, toStation: finalStation },
             });
+          }
         });
       },
     );
@@ -258,7 +260,16 @@ export default function ModalScreen() {
             ]}
           />
 
-          <Button ref={buttonRef} mode="contained" onPress={handleGo}>
+          <Button
+            ref={buttonRef}
+            mode="contained"
+            onPress={() =>
+              router.push({
+                pathname: "/route",
+                params: { fromStation: startStation, toStation: finalStation },
+              })
+            }
+          >
             GO
           </Button>
         </View>

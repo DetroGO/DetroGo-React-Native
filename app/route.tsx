@@ -6,6 +6,7 @@ import { WebView } from "react-native-webview";
 // 1. Import your local routing engine
 import { calculateRoute } from "../utils/metroRouting";
 import { useLocalSearchParams } from "expo-router";
+import { transparent } from "react-native-paper/lib/typescript/styles/themes/v2/colors";
 
 export default function RoutePlanScreen() {
   const webviewRef = useRef(null);
@@ -32,6 +33,7 @@ export default function RoutePlanScreen() {
 
     // Save it to state so React Native can render the journey cards
     setRouteData(result);
+    console.log(routeData);
 
     // Send it to the WebView so Svelte can draw the SVG path
     if (isMapReady && webviewRef.current) {
@@ -57,14 +59,14 @@ export default function RoutePlanScreen() {
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: theme.colors.background }}>
       {/* --- BACKGROUND MAP --- */}
-      <View style={{ flex: 1 }}>
+      <View style={{ height: 450 }}>
         <WebView
           ref={webviewRef}
           source={require("../assets/routemap/index.html")}
           javaScriptEnabled={true}
           startInLoadingState={true}
           onMessage={handleWebViewMessage}
-          style={{ flex: 1, backgroundColor: "transparent" }}
+          style={{ backgroundColor: "transparent" }}
           // ADD THESE TWO PROPS:
           originWhitelist={["*"]}
           allowFileAccess={true}
@@ -72,11 +74,10 @@ export default function RoutePlanScreen() {
       </View>
 
       {/* --- FOREGROUND UI (Bottom Sheet style) --- */}
-      <Surface
-        style={[
-          styles.bottomSheet,
-          { backgroundColor: theme.colors.elevation.level2 },
-        ]}
+      <View
+        style={{
+          paddingTop: 20,
+        }}
       >
         {/* Input Simulation */}
         <Text variant="titleMedium" style={{ marginBottom: 16 }}>
@@ -99,9 +100,13 @@ export default function RoutePlanScreen() {
             <Text variant="bodyLarge">
               Interchanges: {routeData.transferStations.length}
             </Text>
+
+            <Text variant="bodyLarge">
+              Route: {routeData.route.join(" → ")}
+            </Text>
           </View>
         )}
-      </Surface>
+      </View>
     </SafeAreaView>
   );
 }

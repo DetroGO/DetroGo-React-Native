@@ -1,10 +1,11 @@
-import { StyleSheet } from "react-native";
+import { Image, StyleSheet } from "react-native";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
   withSpring,
 } from "react-native-reanimated";
-import { useTheme, Card, Text, Icon } from "react-native-paper";
+import { Card, Text } from "react-native-paper";
+import { useAppTheme } from "@/hooks/useAppTheme";
 
 interface Props {
   onPress: () => void;
@@ -12,7 +13,7 @@ interface Props {
 }
 
 export default function SearchBar({ onPress, hint }: Props) {
-  const theme = useTheme();
+  const theme = useAppTheme();
   const scale = useSharedValue(1);
   const animStyle = useAnimatedStyle(() => ({
     transform: [{ scale: scale.value }],
@@ -23,9 +24,8 @@ export default function SearchBar({ onPress, hint }: Props) {
       <Card
         mode="contained"
         style={{
-          borderRadius: 36,
-          padding: 8,
-          backgroundColor: theme.colors.secondaryContainer,
+          borderRadius: 40,
+          backgroundColor: theme.colors.elevation.level3,
         }}
         onPress={onPress}
         onPressIn={() => {
@@ -36,6 +36,15 @@ export default function SearchBar({ onPress, hint }: Props) {
         }}
       >
         <Card.Content style={styles.content}>
+          <Image
+            source={require("@/assets/images/detrologowhite.png")}
+            style={{
+              width: 50,
+              height: 45,
+              resizeMode: "center",
+              tintColor: theme.colors.secondary,
+            }}
+          />
           <Text
             variant="bodyLarge"
             style={{ color: theme.colors.onSecondaryContainer, flex: 1 }}
@@ -52,8 +61,10 @@ const styles = StyleSheet.create({
   content: {
     flexDirection: "row",
     alignItems: "center",
-    paddingHorizontal: 20,
-    paddingVertical: 14,
-    gap: 10,
+    justifyContent: "center",
+    paddingHorizontal: 16,
+    paddingVertical: 18,
+    marginVertical: -4, // neutralizes Card.Content's built-in 8px vertical padding
+    gap: 2,
   },
 });
