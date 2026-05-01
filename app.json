@@ -2,7 +2,7 @@
   "expo": {
     "name": "DetroGo",
     "slug": "DetroGo",
-    "version": "1.0.0",
+    "version": "alpha 0.0.2",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "detrogo",
@@ -27,6 +27,12 @@
       "favicon": "./assets/images/favicon.png"
     },
     "plugins": [
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Allow $(PRODUCT_NAME) to use your location."
+        }
+      ],
       "expo-router",
       [
         "expo-splash-screen",
@@ -45,6 +51,12 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "31827b02-01b6-4027-a0ff-6701277af0bc"
+      }
     }
   }
 }

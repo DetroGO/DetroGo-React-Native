@@ -167,7 +167,7 @@ const BookmarkCard = ({ item }: { item: Trip }) => {
       onPress={() =>
         router.push({
           pathname: "/route",
-          params: { fromStation: item.start, toStation: item.end },
+          params: { start: item.start, end: item.end },
         })
       }
     >

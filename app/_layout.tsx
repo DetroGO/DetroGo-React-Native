@@ -6,6 +6,7 @@ import {
 
 import { useMaterial3Theme } from "@pchmn/expo-material3-theme";
 import { MD3DarkTheme, MD3LightTheme } from "react-native-paper";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
@@ -29,12 +30,14 @@ export default function RootLayout() {
 
   return (
     <PaperProvider theme={paperTheme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="planner" options={{ headerShown: false }} />
-        <Stack.Screen name="route" options={{ headerShown: false }} />
-      </Stack>
-      <StatusBar style="auto" />
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        <Stack>
+          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+          <Stack.Screen name="planner" options={{ headerShown: false }} />
+          <Stack.Screen name="route" options={{ headerShown: false }} />
+        </Stack>
+        <StatusBar style="auto" />
+      </GestureHandlerRootView>
     </PaperProvider>
   );
 }

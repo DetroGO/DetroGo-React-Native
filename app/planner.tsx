@@ -1,8 +1,8 @@
 import { router } from "expo-router";
 
 import metroLines from "../constants/metrolines.json";
+import { useAppTheme } from "@/hooks/useAppTheme";
 import {
-  useTheme,
   Text,
   Surface,
   Searchbar,
@@ -31,7 +31,7 @@ const initialSections = Object.entries(lines).map(([title, data]) => ({
 }));
 
 export default function ModalScreen() {
-  const theme = useTheme();
+  const theme = useAppTheme();
   const scale = useSharedValue(1);
   const scale2 = useSharedValue(1);
   const workstation = "Knowledge Park";
@@ -162,12 +162,16 @@ export default function ModalScreen() {
         paddingTop: 0,
 
         paddingHorizontal: 0,
-        backgroundColor: theme.colors.background,
+        backgroundColor: theme.dark
+          ? theme.colors.surfaceDim
+          : theme.colors.surface,
       }}
     >
       <View
         style={{
-          backgroundColor: theme.colors.secondaryContainer,
+          backgroundColor: theme.dark
+            ? theme.colors.secondaryContainer
+            : theme.colors.elevation.level3,
           padding: 0,
           paddingTop: 56,
         }}
@@ -266,7 +270,7 @@ export default function ModalScreen() {
             onPress={() =>
               router.push({
                 pathname: "/route",
-                params: { fromStation: startStation, toStation: finalStation },
+                params: { start: startStation, end: finalStation },
               })
             }
           >
@@ -278,7 +282,9 @@ export default function ModalScreen() {
 
         <Searchbar
           style={{
-            backgroundColor: theme.colors.secondaryContainer,
+            backgroundColor: theme.dark
+              ? theme.colors.secondaryContainer
+              : theme.colors.elevation.level3,
             color: theme.colors.onSecondaryContainer,
             fontSize: 25,
             display: searchv,
@@ -302,6 +308,7 @@ export default function ModalScreen() {
 
       <View style={{ flex: 1, padding: 10 }}>
         <SectionList
+          showsVerticalScrollIndicator={false}
           // Use filteredSections for rendering
           sections={filteredSections}
           keyExtractor={(item, idx) => item + idx}
