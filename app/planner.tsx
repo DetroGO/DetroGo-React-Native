@@ -1,6 +1,8 @@
 import { router } from "expo-router";
-
+import { useEffect } from "react";
+import * as Location from "expo-location";
 import metroLines from "../constants/metrolines.json";
+import stations from "../constants/stationsdata.json";
 import { useAppTheme } from "@/hooks/useAppTheme";
 import {
   Text,
@@ -30,6 +32,39 @@ const initialSections = Object.entries(lines).map(([title, data]) => ({
   data,
 }));
 
+const haversine = (lat1, lon1, lat2, lon2) => {
+  const toRad = (v) => (v * Math.PI) / 180;
+  const R = 6371;
+  const dLat = toRad(lat2 - lat1);
+  const dLon = toRad(lon2 - lon1);
+
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) ** 2;
+
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+};
+
+const findNearestMetroStation = (userLat, userLon, stationList) => {
+  let nearestStation = null;
+  let minDistance = Infinity;
+
+  stationList.forEach((station) => {
+    const d = haversine(
+      userLat,
+      userLon,
+      parseFloat(station.stop_lat),
+      parseFloat(station.stop_lon),
+    );
+    if (d < minDistance) {
+      minDistance = d;
+      nearestStation = station;
+    }
+  });
+
+  return { nearestStation, minDistance };
+};
+
 export default function ModalScreen() {
   const theme = useAppTheme();
   const scale = useSharedValue(1);
@@ -50,7 +85,7 @@ export default function ModalScreen() {
   const [finalsel, setFinalsel] = useState(false);
   const [startsel, setStartsel] = useState(false);
   const [editingMode, setEditingMode] = useState<"start" | "final" | null>(
-    null,
+    "start",
   );
   // State to hold the filtered sections
   const [filteredSections, setFilteredSections] = useState(initialSections);
@@ -58,6 +93,10 @@ export default function ModalScreen() {
   const buttonRef = useRef(null);
   const scale3 = useSharedValue(0);
   const [origin, setOrigin] = useState({ x: 0, y: 0 });
+  const [location, setLocation] = useState(null);
+  const [nearest, setNearest] = useState(null);
+  const [errorMsg, setErrorMsg] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   const animatedCircle = useAnimatedStyle(() => ({
     transform: [{ scale: scale3.value }],
@@ -65,40 +104,22 @@ export default function ModalScreen() {
   }));
 
   const handleGo = () => {
-    buttonRef.current?.measure(
-      (
-        x: number,
-        y: number,
-        width: number,
-        height: number,
-        pageX: number,
-        pageY: number,
-      ) => {
-        setOrigin({ x: pageX + width / 2, y: pageY + height / 2 });
-        scale3.value = withTiming(40, { duration: 500 }, (finished) => {
-          if (finished) {
-            router.push({
-              pathname: "/route",
-              params: { fromStation: startStation, toStation: finalStation },
-            });
-          }
-        });
-      },
-    );
+    router.push({
+      pathname: "/route",
+      params: { start: startStation, end: finalStation },
+    });
   };
 
   const handleStationSelect = (item: string) => {
     if (editingMode === "start") {
       setStartStation(item);
       setStartsel(true);
-      setFinalsel(false);
       setEditingMode(null);
       setSearchv("none");
       setPlannerv("block");
-    } else if (editingMode === "final" || !startsel) {
+    } else if (editingMode === "final") {
       setFinalStation(item);
       setFinalsel(true);
-      setStartsel(false);
       setEditingMode(null);
       setSearchv("none");
       setPlannerv("block");
@@ -155,6 +176,52 @@ export default function ModalScreen() {
     setFilteredSections(filtered as typeof initialSections); // Update the state with filtered sections
   };
 
+  useEffect(() => {
+    (async () => {
+      try {
+        // Request permission from the user
+        let { status } = await Location.requestForegroundPermissionsAsync();
+        if (status !== "granted") {
+          setErrorMsg("Permission to access location was denied");
+          setIsLoading(false);
+          return;
+        }
+
+        // Fetch current position
+        let currentPosition = await Location.getCurrentPositionAsync({});
+        const lat = currentPosition.coords.latitude;
+        const lon = currentPosition.coords.longitude;
+        setLocation({ lat, lon });
+
+        // Run your custom logic
+        const result = findNearestMetroStation(lat, lon, stations);
+        setNearest(result);
+
+        // Auto-fill start station if we found one
+        if (result.nearestStation) {
+          setStartStation(result.nearestStation.stop_name);
+        }
+      } catch (error) {
+        setErrorMsg("Error fetching location: " + error.message);
+      } finally {
+        setIsLoading(false);
+      }
+    })();
+  }, []);
+
+  useEffect(() => {
+    if (startsel && !finalsel) {
+      setEditingMode(null); // clear first
+      setTimeout(() => {
+        setEditingMode("final");
+        setPlannerv("none");
+        setSearchv("block");
+        setPhrase("");
+        setFilteredSections(initialSections);
+      }, 50);
+    }
+  }, [startsel]);
+
   return (
     <Surface
       style={{
@@ -206,11 +273,11 @@ export default function ModalScreen() {
                 }}
               >
                 <Icon
-                  source={editingMode ? "home" : "crosshairs-gps"}
+                  source={editingMode === "start" ? "crosshairs-gps" : "home"}
                   size={24}
                 />
                 <Text variant="titleMedium">
-                  {startsel ? startStation : "Your Location"}
+                  {startsel ? startStation : "Select a start station"}
                 </Text>
               </Card.Content>
             </Card>
@@ -264,16 +331,7 @@ export default function ModalScreen() {
             ]}
           />
 
-          <Button
-            ref={buttonRef}
-            mode="contained"
-            onPress={() =>
-              router.push({
-                pathname: "/route",
-                params: { start: startStation, end: finalStation },
-              })
-            }
-          >
+          <Button ref={buttonRef} mode="contained" onPress={() => handleGo()}>
             GO
           </Button>
         </View>
@@ -290,13 +348,14 @@ export default function ModalScreen() {
             display: searchv,
           }}
           mode="view"
+          icon={editingMode === "start" ? "home" : "flag"}
           autoFocus={true}
           showDivider={true}
           // Call searchData when text changes
           onChangeText={searchData}
           placeholder={
             editingMode === "start"
-              ? "Select Start Station"
+              ? "Select Starting Station"
               : editingMode === "final"
                 ? "Select Final Station"
                 : "Search Line or Station"
@@ -313,63 +372,110 @@ export default function ModalScreen() {
           sections={filteredSections}
           keyExtractor={(item, idx) => item + idx}
           ListHeaderComponent={
-            <View
-              style={{
-                flexDirection: "row",
-                alignItems: "center",
-                gap: 4,
-                marginBottom: 10,
-                marginTop: 10,
-              }}
-            >
-              <Card
-                style={{
-                  backgroundColor: theme.colors.primaryContainer,
-                  flex: 1,
-                  alignItems: "center",
-                  borderTopLeftRadius: 18,
-                  borderTopRightRadius: 6,
-                  borderBottomLeftRadius: 18,
-                  borderBottomRightRadius: 6,
-                }}
-                mode="contained"
-                onPress={() => handleStationSelect(homestation)}
-              >
-                <Card.Content
+            <View>
+              {nearest && nearest.nearestStation && editingMode === "start" && (
+                <Card
                   style={{
-                    flexDirection: "row",
-
-                    gap: 10,
+                    backgroundColor:
+                      editingMode === "start"
+                        ? theme.colors.primaryContainer
+                        : theme.colors.secondaryContainer,
+                    flex: 1,
+                    marginTop: 12,
+                    padding: 5,
+                    borderTopLeftRadius: 18,
+                    borderTopRightRadius: 18,
+                    borderBottomLeftRadius: 18,
+                    borderBottomRightRadius: 18,
                   }}
+                  mode="contained"
+                  onPress={() =>
+                    handleStationSelect(nearest.nearestStation.stop_name)
+                  }
                 >
-                  <Icon source="home" size={24} />
-                  <Text variant="titleMedium">Home</Text>
-                </Card.Content>
-              </Card>
-              <Card
+                  <Card.Content style={{ flexDirection: "row", gap: 10 }}>
+                    <Icon
+                      color={theme.colors.onPrimaryContainer}
+                      source="crosshairs-gps"
+                      size={24}
+                    />
+                    <Text
+                      variant="titleMedium"
+                      style={{ color: theme.colors.onPrimaryContainer }}
+                    >
+                      {editingMode === "start"
+                        ? "Nearest Station"
+                        : "Station Near You"}{" "}
+                      : {nearest.nearestStation.stop_name}
+                    </Text>
+                  </Card.Content>
+                </Card>
+              )}
+
+              <View
                 style={{
-                  backgroundColor: theme.colors.primaryContainer,
-                  flex: 1,
+                  flexDirection: "row",
                   alignItems: "center",
-                  borderTopLeftRadius: 6,
-                  borderTopRightRadius: 18,
-                  borderBottomLeftRadius: 6,
-                  borderBottomRightRadius: 18,
+                  gap: 4,
+                  marginBottom: 10,
+                  marginTop: 10,
                 }}
-                mode="contained"
-                onPress={() => handleStationSelect(workstation)}
               >
-                <Card.Content
+                <Card
                   style={{
-                    flexDirection: "row",
-
-                    gap: 10,
+                    backgroundColor:
+                      editingMode === "start"
+                        ? theme.colors.secondaryContainer
+                        : theme.colors.primaryContainer,
+                    flex: 1,
+                    alignItems: "center",
+                    borderTopLeftRadius: 18,
+                    borderTopRightRadius: 6,
+                    borderBottomLeftRadius: 18,
+                    borderBottomRightRadius: 6,
                   }}
+                  mode="contained"
+                  onPress={() => handleStationSelect(homestation)}
                 >
-                  <Icon source="briefcase-variant" size={24} />
-                  <Text variant="titleMedium">Work</Text>
-                </Card.Content>
-              </Card>
+                  <Card.Content
+                    style={{
+                      flexDirection: "row",
+
+                      gap: 10,
+                    }}
+                  >
+                    <Icon source="home" size={24} />
+                    <Text variant="titleMedium">Home</Text>
+                  </Card.Content>
+                </Card>
+                <Card
+                  style={{
+                    backgroundColor:
+                      editingMode === "start"
+                        ? theme.colors.secondaryContainer
+                        : theme.colors.primaryContainer,
+                    flex: 1,
+                    alignItems: "center",
+                    borderTopLeftRadius: 6,
+                    borderTopRightRadius: 18,
+                    borderBottomLeftRadius: 6,
+                    borderBottomRightRadius: 18,
+                  }}
+                  mode="contained"
+                  onPress={() => handleStationSelect(workstation)}
+                >
+                  <Card.Content
+                    style={{
+                      flexDirection: "row",
+
+                      gap: 10,
+                    }}
+                  >
+                    <Icon source="briefcase-variant" size={24} />
+                    <Text variant="titleMedium">Work</Text>
+                  </Card.Content>
+                </Card>
+              </View>
             </View>
           }
           renderSectionHeader={({ section }) => (

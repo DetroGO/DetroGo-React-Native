@@ -207,7 +207,17 @@ export default function RoutePlanScreen() {
               mode="contained"
               icon="chevron-left"
             />
-            <Text variant="bodyLarge">{currentStation}</Text>
+            <Text
+              style={{
+                width: 180,
+                alignItems: "center",
+                textAlign: "center",
+              }}
+              numberOfLines={1}
+              variant="bodyLarge"
+            >
+              {currentStation}
+            </Text>
             <IconButton
               style={{
                 width: 80,
