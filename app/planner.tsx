@@ -10,6 +10,7 @@ import {
   Searchbar,
   Card,
   Icon,
+  ProgressBar,
   Button,
 } from "react-native-paper";
 import Animated, {
@@ -19,7 +20,7 @@ import Animated, {
   withTiming,
   runOnJS,
 } from "react-native-reanimated";
-import { StyleSheet, View, SectionList } from "react-native";
+import { StyleSheet, View, SectionList, ActivityIndicator } from "react-native";
 import { useState } from "react";
 import { useRouter } from "expo-router";
 import { useRef } from "react";
@@ -237,7 +238,7 @@ export default function ModalScreen() {
       <View
         style={{
           backgroundColor: theme.dark
-            ? theme.colors.secondaryContainer
+            ? theme.colors.elevation.level3
             : theme.colors.elevation.level3,
           padding: 0,
           paddingTop: 56,
@@ -341,7 +342,7 @@ export default function ModalScreen() {
         <Searchbar
           style={{
             backgroundColor: theme.dark
-              ? theme.colors.secondaryContainer
+              ? theme.colors.elevation.level3
               : theme.colors.elevation.level3,
             color: theme.colors.onSecondaryContainer,
             fontSize: 25,
@@ -373,44 +374,75 @@ export default function ModalScreen() {
           keyExtractor={(item, idx) => item + idx}
           ListHeaderComponent={
             <View>
-              {nearest && nearest.nearestStation && editingMode === "start" && (
-                <Card
-                  style={{
-                    backgroundColor:
-                      editingMode === "start"
-                        ? theme.colors.primaryContainer
-                        : theme.colors.secondaryContainer,
-                    flex: 1,
-                    marginTop: 12,
-                    padding: 5,
-                    borderTopLeftRadius: 18,
-                    borderTopRightRadius: 18,
-                    borderBottomLeftRadius: 18,
-                    borderBottomRightRadius: 18,
-                  }}
-                  mode="contained"
-                  onPress={() =>
-                    handleStationSelect(nearest.nearestStation.stop_name)
-                  }
-                >
-                  <Card.Content style={{ flexDirection: "row", gap: 10 }}>
-                    <Icon
-                      color={theme.colors.onPrimaryContainer}
-                      source="crosshairs-gps"
-                      size={24}
-                    />
-                    <Text
-                      variant="titleMedium"
-                      style={{ color: theme.colors.onPrimaryContainer }}
+              <View>
+                {editingMode === "start" && nearest && (
+                  <Card
+                    style={{
+                      backgroundColor: theme.colors.primaryContainer,
+                      flex: 1,
+                      marginTop: 12,
+                      paddingLeft: 5,
+                      borderRadius: 18,
+                    }}
+                    mode="contained"
+                    onPress={() =>
+                      !isLoading && handleStationSelect("Rajiv Chowk")
+                    }
+                  >
+                    <Card.Content
+                      style={{
+                        flexDirection: "row",
+                        gap: 15,
+                        alignItems: "center",
+                      }}
                     >
-                      {editingMode === "start"
-                        ? "Nearest Station"
-                        : "Station Near You"}{" "}
-                      : {nearest.nearestStation.stop_name}
-                    </Text>
-                  </Card.Content>
-                </Card>
-              )}
+                      {isLoading ? (
+                        <ActivityIndicator
+                          color={theme.colors.onPrimaryContainer}
+                          size={26}
+                        />
+                      ) : (
+                        <Icon
+                          color={theme.colors.onPrimaryContainer}
+                          source="crosshairs-gps"
+                          size={26}
+                        />
+                      )}
+
+                      <View style={{ flex: 1 }}>
+                        <Text
+                          variant="labelSmall"
+                          style={{ color: theme.colors.onPrimaryContainer }}
+                        >
+                          {isLoading
+                            ? "Finding nearest station..."
+                            : "Nearest Station"}
+                        </Text>
+
+                        {isLoading ? (
+                          <ProgressBar
+                            indeterminate
+                            color={theme.colors.onPrimaryContainer}
+                            style={{
+                              marginTop: 6,
+                              borderRadius: 4,
+                              backgroundColor: theme.colors.tertiary,
+                              opacity: 0.4,
+                            }}
+                          />
+                        ) : (
+                          <Text
+                            variant="titleMedium"
+                            style={{ color: theme.colors.onPrimaryContainer }}
+                          >
+                            Rajiv Chowk
+                          </Text>
+                        )}
+                      </View>
+                    </Card.Content>
+                  </Card>
+                )}
+              </View>
 
               <View
                 style={{
@@ -425,7 +457,7 @@ export default function ModalScreen() {
                   style={{
                     backgroundColor:
                       editingMode === "start"
-                        ? theme.colors.secondaryContainer
+                        ? theme.colors.primaryContainer
                         : theme.colors.primaryContainer,
                     flex: 1,
                     alignItems: "center",
@@ -444,15 +476,24 @@ export default function ModalScreen() {
                       gap: 10,
                     }}
                   >
-                    <Icon source="home" size={24} />
-                    <Text variant="titleMedium">Home</Text>
+                    <Icon
+                      color={theme.colors.onPrimaryContainer}
+                      source="home"
+                      size={24}
+                    />
+                    <Text
+                      style={{ color: theme.colors.onPrimaryContainer }}
+                      variant="titleMedium"
+                    >
+                      Home
+                    </Text>
                   </Card.Content>
                 </Card>
                 <Card
                   style={{
                     backgroundColor:
                       editingMode === "start"
-                        ? theme.colors.secondaryContainer
+                        ? theme.colors.primaryContainer
                         : theme.colors.primaryContainer,
                     flex: 1,
                     alignItems: "center",
@@ -471,8 +512,17 @@ export default function ModalScreen() {
                       gap: 10,
                     }}
                   >
-                    <Icon source="briefcase-variant" size={24} />
-                    <Text variant="titleMedium">Work</Text>
+                    <Icon
+                      color={theme.colors.onPrimaryContainer}
+                      source="briefcase-variant"
+                      size={24}
+                    />
+                    <Text
+                      style={{ color: theme.colors.onPrimaryContainer }}
+                      variant="titleMedium"
+                    >
+                      Work
+                    </Text>
                   </Card.Content>
                 </Card>
               </View>
@@ -495,7 +545,7 @@ export default function ModalScreen() {
               style={{
                 marginBottom: 3,
                 padding: 10,
-                backgroundColor: theme.colors.elevation.level1,
+                backgroundColor: theme.colors.surfaceContainerHigh,
                 borderTopLeftRadius: index === 0 ? 28 : 6,
                 borderTopRightRadius: index === 0 ? 28 : 6,
                 borderBottomLeftRadius:

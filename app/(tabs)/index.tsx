@@ -110,7 +110,9 @@ const RecentCard = ({ index, item }: { index: number; item: Trip }) => {
     <Card
       mode="contained"
       style={{
-        backgroundColor: theme.dark ? theme.colors.surfaceContainerLow : theme.colors.elevation.level2,
+        backgroundColor: theme.dark
+          ? theme.colors.surfaceContainerLow
+          : theme.colors.elevation.level2,
         marginBottom: 2.8,
         borderTopLeftRadius: index === 0 ? 24 : 6,
         borderTopRightRadius: index === 0 ? 24 : 6,
@@ -152,7 +154,7 @@ const RecentCard = ({ index, item }: { index: number; item: Trip }) => {
             variant="labelSmall"
             style={{ color: theme.colors.onSurfaceVariant, marginTop: 1 }}
           >
-            > {item.end}
+            {item.end}
           </Text>
         </View>
       </Card.Content>
