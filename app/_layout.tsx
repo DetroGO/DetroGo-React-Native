@@ -35,6 +35,7 @@ export default function RootLayout() {
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
           <Stack.Screen name="planner" options={{ headerShown: false }} />
           <Stack.Screen name="route" options={{ headerShown: false }} />
+          <Stack.Screen name="listpage" options={{ headerShown: false }} />
         </Stack>
         <StatusBar style="auto" />
       </GestureHandlerRootView>

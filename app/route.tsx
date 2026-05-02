@@ -1,8 +1,8 @@
-import { StyleSheet, View } from "react-native";
+import { StyleSheet, View, Pressable, Animated } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
 
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useState, useRef } from "react";
+import { useState, useRef, useCallback } from "react";
 import {
   Text,
   Button,
@@ -11,29 +11,173 @@ import {
   Card,
   IconButton,
 } from "react-native-paper";
+import { router } from "expo-router";
+
 import { LinearGradient } from "expo-linear-gradient";
 import { useAppTheme } from "@/hooks/useAppTheme";
 import { WebView } from "react-native-webview";
 
-// 1. Import your local routing engine
 import { calculateRoute } from "../utils/metroRouting";
 import { useLocalSearchParams } from "expo-router";
+import { transparent } from "react-native-paper/lib/typescript/styles/themes/v2/colors";
+
+// ─── M3 Expressive spring hook ─────────────────────────────────────────────
+function useSpringPress() {
+  const scale = useRef(new Animated.Value(1)).current;
+
+  const onPressIn = useCallback(() => {
+    Animated.spring(scale, {
+      toValue: 0.88,
+      useNativeDriver: true,
+      tension: 300,
+      friction: 20,
+    }).start();
+  }, [scale]);
+
+  const onPressOut = useCallback(() => {
+    Animated.spring(scale, {
+      toValue: 1,
+      useNativeDriver: true,
+      tension: 300,
+      friction: 15,
+    }).start();
+  }, [scale]);
+
+  return { scale, onPressIn, onPressOut };
+}
+
+// ─── M3 Expressive Station Navigator ──────────────────────────────────────
+function StationNavigator({
+  currentStation,
+  onPrev,
+  onNext,
+}: {
+  currentStation: string;
+  onPrev: () => void;
+  onNext: () => void;
+}) {
+  const theme = useAppTheme();
+  const prevSpring = useSpringPress();
+  const nextSpring = useSpringPress();
+
+  const prevRadius = prevSpring.scale.interpolate({
+    inputRange: [0.88, 1],
+    outputRange: [20, 50],
+  });
+  const nextRadius = nextSpring.scale.interpolate({
+    inputRange: [0.88, 1],
+    outputRange: [20, 50],
+  });
+
+  return (
+    <View
+      style={{
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: 15,
+        paddingHorizontal: 12,
+        marginBottom: 14,
+      }}
+    >
+      {/* Prev */}
+      <Animated.View
+        style={{ flex: 1, transform: [{ scale: prevSpring.scale }] }}
+      >
+        <Pressable
+          onPressIn={prevSpring.onPressIn}
+          onPressOut={prevSpring.onPressOut}
+          onPress={onPrev}
+          android_ripple={{
+            color: theme.colors.onSecondaryContainer + "33",
+            borderless: false,
+          }}
+        >
+          <Animated.View
+            style={{
+              height: 50,
+              alignItems: "center",
+              justifyContent: "center",
+              backgroundColor: theme.colors.secondaryContainer,
+              borderRadius: prevRadius,
+            }}
+          >
+            <Icon
+              source="chevron-left"
+              size={26}
+              color={theme.colors.onSecondaryContainer}
+            />
+          </Animated.View>
+        </Pressable>
+      </Animated.View>
+
+      {/* Station label */}
+      <Text
+        style={{
+          maxWidth: 200,
+          flex: 1.4,
+          alignItems: "center",
+          textAlign: "center",
+        }}
+        numberOfLines={1}
+        variant="bodyLarge"
+      >
+        {currentStation}
+      </Text>
+
+      {/* Next */}
+      <Animated.View
+        style={{ flex: 1, transform: [{ scale: nextSpring.scale }] }}
+      >
+        <Pressable
+          onPressIn={nextSpring.onPressIn}
+          onPressOut={nextSpring.onPressOut}
+          onPress={onNext}
+          android_ripple={{
+            color: theme.colors.onSecondaryContainer + "33",
+            borderless: false,
+          }}
+        >
+          <Animated.View
+            style={{
+              height: 50,
+              alignItems: "center",
+              justifyContent: "center",
+              backgroundColor: theme.colors.secondaryContainer,
+              borderRadius: nextRadius,
+            }}
+          >
+            <Icon
+              source="chevron-right"
+              size={26}
+              color={theme.colors.onSecondaryContainer}
+            />
+          </Animated.View>
+        </Pressable>
+      </Animated.View>
+    </View>
+  );
+}
 
 export default function RoutePlanScreen() {
   const webviewRef = useRef(null);
   const theme = useAppTheme();
 
-  // 2. Set up state for your logic
   const [isMapReady, setIsMapReady] = useState(false);
   const [currentStation, setCurrentStation] = useState("");
-
   const [routeData, setRouteData] = useState(null);
 
   const { start, end } = useLocalSearchParams<{ start: string; end: string }>();
   const [fromStation, setFromStation] = useState(start ?? "Preet Vihar");
   const [toStation, setToStation] = useState(end ?? "Mandi House");
 
-  // 3. The Core Function: Triggered when user wants to find a route
+  // Swap button spring
+  const swapSpring = useSpringPress();
+  const swapRadius = swapSpring.scale.interpolate({
+    inputRange: [0.88, 1],
+    outputRange: [14, 28],
+  });
+
   const handleFindRoute = (from = fromStation, to = toStation) => {
     const result = calculateRoute(from, to);
     if (result.error) {
@@ -46,11 +190,8 @@ export default function RoutePlanScreen() {
     }
   };
 
-  // Fix: bridge handshake + auto-calculate on map ready
   const handleWebViewMessage = (event) => {
     const stationName = event.nativeEvent.data;
-
-    // Update your React Native state!
     setCurrentStation(stationName);
     const message = event.nativeEvent.data;
     if (message === "READY") {
@@ -64,10 +205,9 @@ export default function RoutePlanScreen() {
   };
 
   const moveMapAhead = () => {
-    // Note: Adding "true;" at the end prevents a known React Native WebView bug
-    // where injecting scripts that return undefined can cause crashes.
     const run = `window.nextStation(); true;`;
     webviewRef.current?.injectJavaScript(run);
+    console.log(routeData.stops);
   };
 
   const moveMapBack = () => {
@@ -81,7 +221,6 @@ export default function RoutePlanScreen() {
     setFromStation(newFrom);
     setToStation(newTo);
 
-    // Pass values directly instead of relying on state
     const result = calculateRoute(newFrom, newTo);
     if (!result.error) {
       setRouteData(result);
@@ -93,6 +232,7 @@ export default function RoutePlanScreen() {
 
   const StationCard = ({ index, item, data }) => {
     const theme = useAppTheme();
+    console.log(index);
     return (
       <Card
         mode="contained"
@@ -101,9 +241,8 @@ export default function RoutePlanScreen() {
           marginBottom: 2.8,
           borderTopLeftRadius: index === 0 ? 24 : 6,
           borderTopRightRadius: index === 0 ? 24 : 6,
-          borderBottomLeftRadius: index === routeData.stops.length - 1 ? 24 : 6,
-          borderBottomRightRadius:
-            index === routeData.stops.length - 1 ? 24 : 6,
+          borderBottomLeftRadius: index === routeData.stops ? 24 : 6,
+          borderBottomRightRadius: index === routeData.stops ? 24 : 6,
         }}
         onPress={() => {}}
       >
@@ -154,6 +293,7 @@ export default function RoutePlanScreen() {
   return (
     <SafeAreaView
       style={{
+        marginTop: -40,
         backgroundColor: theme.colors.background,
       }}
     >
@@ -161,8 +301,43 @@ export default function RoutePlanScreen() {
       <ScrollView
         showsVerticalScrollIndicator={false}
         nestedScrollEnabled={true}
+        style={{ padding: 0 }}
       >
-        <View style={{ height: 390 }}>
+        <View style={{ height: 400 }}>
+          <View
+            style={{
+              position: "absolute",
+              top: 35,
+              left: 10,
+              zIndex: 1000,
+              alignItems: "center",
+              display: "flex",
+              flexDirection: "row",
+            }}
+          >
+            <IconButton
+              icon="arrow-left"
+              mode="contained"
+              containerColor="transparent"
+              onPress={() => router.back()}
+            />
+
+            <View style={{ flex: 1, alignItems: "center" }}>
+              <Text
+                style={{ maxWidth: 400 }}
+                numberOfLines={1}
+                variant="bodyLarge"
+              ></Text>
+            </View>
+            <IconButton
+              icon="bookmark-outline"
+              mode="contained"
+              containerColor="transparent"
+              style={{ marginRight: 20 }}
+              onPress={() => router.back()}
+            />
+          </View>
+
           <WebView
             ref={webviewRef}
             source={require("../assets/routemap/index.html")}
@@ -184,52 +359,12 @@ export default function RoutePlanScreen() {
             paddingTop: 20,
           }}
         >
-          {/* Input Simulation */}
-          <View
-            style={{
-              display: "flex",
-              flexDirection: "row",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: 15,
-
-              marginBottom: 16,
-            }}
-          >
-            <IconButton
-              style={{
-                width: 80,
-                height: 45,
-                borderRadius: 28,
-                backgroundColor: theme.colors.secondaryContainer,
-              }}
-              onPress={moveMapBack}
-              mode="contained"
-              icon="chevron-left"
-            />
-            <Text
-              style={{
-                width: 180,
-                alignItems: "center",
-                textAlign: "center",
-              }}
-              numberOfLines={1}
-              variant="bodyLarge"
-            >
-              {currentStation}
-            </Text>
-            <IconButton
-              style={{
-                width: 80,
-                height: 45,
-                borderRadius: 28,
-                backgroundColor: theme.colors.secondaryContainer,
-              }}
-              onPress={moveMapAhead}
-              mode="contained"
-              icon="chevron-right"
-            />
-          </View>
+          {/* M3 Expressive Station Navigator */}
+          <StationNavigator
+            currentStation={currentStation}
+            onPrev={moveMapBack}
+            onNext={moveMapAhead}
+          />
 
           {routeData ? (
             <Card
@@ -254,7 +389,7 @@ export default function RoutePlanScreen() {
                     paddingTop: 16,
                     paddingHorizontal: 16,
                     paddingBottom: 14,
-                    marginVertical: -4, // add this
+                    marginVertical: -4,
                   }}
                 >
                   <Text
@@ -264,19 +399,39 @@ export default function RoutePlanScreen() {
                   >
                     {fromStation}
                   </Text>
-                  <IconButton
-                    style={{
-                      width: 80,
-                      height: 45,
-                      borderRadius: 28,
-                      backgroundColor: theme.colors.secondaryContainer,
-                    }}
-                    mode="contained"
-                    icon="swap-horizontal-hidden"
-                    onPress={() => {
-                      swapStations();
-                    }}
-                  />
+
+                  {/* M3 Expressive swap button */}
+                  <Animated.View
+                    style={{ transform: [{ scale: swapSpring.scale }] }}
+                  >
+                    <Pressable
+                      onPressIn={swapSpring.onPressIn}
+                      onPressOut={swapSpring.onPressOut}
+                      onPress={swapStations}
+                      android_ripple={{
+                        color: theme.colors.onSecondaryContainer + "33",
+                        borderless: false,
+                      }}
+                    >
+                      <Animated.View
+                        style={{
+                          width: 80,
+                          height: 45,
+                          alignItems: "center",
+                          justifyContent: "center",
+                          backgroundColor: theme.colors.secondaryContainer,
+                          borderRadius: swapRadius,
+                        }}
+                      >
+                        <Icon
+                          source="swap-horizontal-hidden"
+                          size={22}
+                          color={theme.colors.onSecondaryContainer}
+                        />
+                      </Animated.View>
+                    </Pressable>
+                  </Animated.View>
+
                   <Text
                     style={{ flex: 1, flexWrap: "wrap", textAlign: "right" }}
                     numberOfLines={2}
@@ -309,8 +464,19 @@ export default function RoutePlanScreen() {
                         gap: 8,
                       }}
                     >
-                      <Icon source="subway-variant" size={28} />
-                      <Text variant="titleLarge" numberOfLines={2}>
+                      <Icon
+                        color={theme.colors.onSecondaryContainer}
+                        source="subway-variant"
+                        size={28}
+                      />
+                      <Text
+                        variant="headlineMedium"
+                        style={{
+                          fontWeight: 700,
+                          color: theme.colors.onSecondaryContainer,
+                        }}
+                        numberOfLines={2}
+                      >
                         {routeData.stops}
                       </Text>
                     </View>
@@ -322,7 +488,6 @@ export default function RoutePlanScreen() {
                     style={{
                       flex: 1,
                       gap: 8,
-
                       alignItems: "center",
                       justifyContent: "center",
                     }}
@@ -337,8 +502,18 @@ export default function RoutePlanScreen() {
                         gap: 8,
                       }}
                     >
-                      <Icon source="transit-transfer" size={28} />
-                      <Text variant="titleLarge">
+                      <Icon
+                        source="transit-transfer"
+                        color={theme.colors.onSecondaryContainer}
+                        size={28}
+                      />
+                      <Text
+                        variant="headlineMedium"
+                        style={{
+                          fontWeight: 700,
+                          color: theme.colors.onSecondaryContainer,
+                        }}
+                      >
                         {routeData.transferStations.length}
                       </Text>
                     </View>
@@ -356,8 +531,8 @@ export default function RoutePlanScreen() {
           {/* Display React Native UI based on the calculation */}
           {routeData && (
             <View style={{ marginTop: 24, margin: 15 }}>
-              {routeData.route.map((step, index) => (
-                <StationCard key={index} item={step} data={routeData.stops} />
+              {routeData.route.map((step: any, index: number) => (
+                <StationCard index={index} item={step} data={routeData.stops} />
               ))}
             </View>
           )}

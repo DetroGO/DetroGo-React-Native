@@ -350,7 +350,6 @@ export default function ModalScreen() {
           }}
           mode="view"
           icon={editingMode === "start" ? "home" : "flag"}
-          autoFocus={true}
           showDivider={true}
           // Call searchData when text changes
           onChangeText={searchData}
@@ -386,7 +385,8 @@ export default function ModalScreen() {
                     }}
                     mode="contained"
                     onPress={() =>
-                      !isLoading && handleStationSelect("Rajiv Chowk")
+                      !isLoading &&
+                      handleStationSelect(nearest.nearestStation.stop_name)
                     }
                   >
                     <Card.Content
@@ -435,7 +435,7 @@ export default function ModalScreen() {
                             variant="titleMedium"
                             style={{ color: theme.colors.onPrimaryContainer }}
                           >
-                            Rajiv Chowk
+                            {nearest.nearestStation.stop_name}
                           </Text>
                         )}
                       </View>

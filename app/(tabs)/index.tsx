@@ -419,7 +419,12 @@ export default function HomeScreen() {
             </View>
             <Button
               style={{ width: "auto", marginRight: 12 }}
-              onPress={() => router.push("/bookmarks")}
+              onPress={() =>
+                router.push({
+                  pathname: "/listpage",
+                  params: { type: "saved" },
+                })
+              }
             >
               <Text style={{ fontSize: 12, color: theme.colors.secondary }}>
                 View All
@@ -459,7 +464,12 @@ export default function HomeScreen() {
             </View>
             <Button
               style={{ width: "auto", marginRight: 0 }}
-              onPress={() => router.push("/bookmarks")}
+              onPress={() =>
+                router.push({
+                  pathname: "/listpage",
+                  params: { type: "recent" },
+                })
+              }
             >
               <Text style={{ fontSize: 12, color: theme.colors.secondary }}>
                 View All
