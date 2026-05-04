@@ -8,7 +8,7 @@ import { usePrefStore } from "@/store/usePrefStore";
 import { useMaterial3Theme } from "@pchmn/expo-material3-theme";
 import { MD3DarkTheme, MD3LightTheme } from "react-native-paper";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-
+import { amoledColors } from "@/constants/amoled";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { PaperProvider, useTheme } from "react-native-paper";
@@ -28,12 +28,18 @@ export default function RootLayout() {
   });
 
   const isDark =
-    themeMode === "system" ? colorScheme === "dark" : themeMode === "dark";
+    themeMode === "system" ? colorScheme === "dark" : themeMode !== "light";
 
-  const paperTheme = isDark
-    ? { ...MD3DarkTheme, colors: theme.dark }
-    : { ...MD3LightTheme, colors: theme.light };
-
+  const paperTheme =
+    themeMode === "amoled"
+      ? { ...MD3DarkTheme, colors: { ...theme.dark, ...amoledColors } }
+      : themeMode === "system"
+        ? colorScheme === "dark"
+          ? { ...MD3DarkTheme, colors: theme.dark }
+          : { ...MD3LightTheme, colors: theme.light }
+        : themeMode === "dark"
+          ? { ...MD3DarkTheme, colors: theme.dark }
+          : { ...MD3LightTheme, colors: theme.light };
   return (
     <PaperProvider theme={paperTheme}>
       <GestureHandlerRootView style={{ flex: 1 }}>

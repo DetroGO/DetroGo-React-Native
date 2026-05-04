@@ -10,7 +10,7 @@ export type MetroSystem =
   | "pune"
   | "kochi";
 
-export type ThemeMode = "system" | "light" | "dark";
+export type ThemeMode = "system" | "light" | "dark" | "amoled";
 
 /** A single station-stop inside a route */
 export interface RouteStop {
