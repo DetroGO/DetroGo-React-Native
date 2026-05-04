@@ -20,6 +20,8 @@ import Animated, {
   withTiming,
   runOnJS,
 } from "react-native-reanimated";
+import strings from "@/constants/strings";
+
 import { StyleSheet, View, SectionList, ActivityIndicator } from "react-native";
 import { useState } from "react";
 import { useRouter } from "expo-router";
@@ -183,7 +185,7 @@ export default function ModalScreen() {
         // Request permission from the user
         let { status } = await Location.requestForegroundPermissionsAsync();
         if (status !== "granted") {
-          setErrorMsg("Permission to access location was denied");
+          setErrorMsg(strings.common.locationpermissiondenied);
           setIsLoading(false);
           return;
         }
@@ -203,7 +205,7 @@ export default function ModalScreen() {
           setStartStation(result.nearestStation.stop_name);
         }
       } catch (error) {
-        setErrorMsg("Error fetching location: " + error.message);
+        setErrorMsg(strings.common.error + error.message);
       } finally {
         setIsLoading(false);
       }
@@ -278,7 +280,7 @@ export default function ModalScreen() {
                   size={24}
                 />
                 <Text variant="titleMedium">
-                  {startsel ? startStation : "Select a start station"}
+                  {startsel ? startStation : strings.planner.startStation}
                 </Text>
               </Card.Content>
             </Card>
@@ -333,7 +335,7 @@ export default function ModalScreen() {
           />
 
           <Button ref={buttonRef} mode="contained" onPress={() => handleGo()}>
-            GO
+            {strings.common.go}
           </Button>
         </View>
 
@@ -355,10 +357,10 @@ export default function ModalScreen() {
           onChangeText={searchData}
           placeholder={
             editingMode === "start"
-              ? "Select Starting Station"
+              ? strings.planner.startStation
               : editingMode === "final"
-                ? "Select Final Station"
-                : "Search Line or Station"
+                ? strings.planner.finalStation
+                : strings.planner.placeholder
           }
           // Set the value of the searchbar to the current searchPhrase
           value={searchPhrase}
@@ -415,8 +417,8 @@ export default function ModalScreen() {
                           style={{ color: theme.colors.onPrimaryContainer }}
                         >
                           {isLoading
-                            ? "Finding nearest station..."
-                            : "Nearest Station"}
+                            ? strings.common.loading
+                            : strings.planner.nearestStation}
                         </Text>
 
                         {isLoading ? (
@@ -485,7 +487,7 @@ export default function ModalScreen() {
                       style={{ color: theme.colors.onPrimaryContainer }}
                       variant="titleMedium"
                     >
-                      Home
+                      {strings.common.home}
                     </Text>
                   </Card.Content>
                 </Card>
@@ -521,7 +523,7 @@ export default function ModalScreen() {
                       style={{ color: theme.colors.onPrimaryContainer }}
                       variant="titleMedium"
                     >
-                      Work
+                      {strings.common.work}
                     </Text>
                   </Card.Content>
                 </Card>

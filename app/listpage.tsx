@@ -1,158 +1,256 @@
-import React from "react";
-
-import { StyleSheet, View } from "react-native";
+import React, { useRef, useCallback } from "react";
+import { Animated, Pressable, View } from "react-native";
 import { Text, Card, Icon, IconButton } from "react-native-paper";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { ScrollView } from "react-native-gesture-handler";
 import { useAppTheme } from "@/hooks/useAppTheme";
-import { useLocalSearchParams } from "expo-router";
-import WebView from "react-native-webview";
-import { router } from "expo-router";
+import { useLocalSearchParams, router } from "expo-router";
 
-export default function ListPage() {
-  const theme = useAppTheme();
-  const { type } = useLocalSearchParams();
+// ─── Spring hook ────────────────────────────────────────────────────────────
+function useSpringPress() {
+  const scale = useRef(new Animated.Value(1)).current;
+  const onPressIn = useCallback(() => {
+    Animated.spring(scale, {
+      toValue: 0.88,
+      useNativeDriver: true,
+      tension: 300,
+      friction: 20,
+    }).start();
+  }, [scale]);
+  const onPressOut = useCallback(() => {
+    Animated.spring(scale, {
+      toValue: 1,
+      useNativeDriver: true,
+      tension: 300,
+      friction: 15,
+    }).start();
+  }, [scale]);
+  return { scale, onPressIn, onPressOut };
+}
+
+// ─── Mock data ───────────────────────────────────────────────────────────────
+const MOCK_ROUTES = [
+  { from: "Rajiv Chowk", to: "Preet Vihar", stops: 5, transfers: 1 },
+  { from: "Kashmere Gate", to: "Botanical Garden", stops: 12, transfers: 2 },
+  { from: "Dwarka Sec 21", to: "Noida Sector 62", stops: 18, transfers: 1 },
+  { from: "Huda City Centre", to: "Samaypur Badli", stops: 26, transfers: 0 },
+];
+
+// ─── RouteCard ───────────────────────────────────────────────────────────────
+function RouteCard({
+  item,
+  index,
+  total,
+  theme,
+}: {
+  item: (typeof MOCK_ROUTES)[0];
+  index: number;
+  total: number;
+  theme: ReturnType<typeof useAppTheme>;
+}) {
+  const spring = useSpringPress();
+  const radius = spring.scale.interpolate({
+    inputRange: [0.88, 1],
+    outputRange: [10, 17],
+  });
+
+  const isFirst = index === 0;
+  const isLast = index === total - 1;
+
   return (
-    <View
-      style={{
-        backgroundColor: theme.colors.surface,
-        flex: 1,
-        paddingTop: 0,
-        padding: 0,
-      }}
+    <Animated.View
+      style={{ transform: [{ scale: spring.scale }], marginBottom: 2.8 }}
     >
-      <View
-        style={{
-          display: "flex",
-          flexDirection: "row",
-          marginBottom: 5,
-          paddingTop: 50,
-          padding: 15,
-          backgroundColor: theme.colors.elevation.level4,
-          alignItems: "center",
+      <Pressable
+        onPressIn={spring.onPressIn}
+        onPressOut={spring.onPressOut}
+        onPress={() => {}}
+        android_ripple={{
+          color: theme.colors.onSurface + "18",
+          borderless: false,
         }}
       >
-        <View style={{ flex: 1 }}>
+        <Card
+          mode="contained"
+          style={{
+            backgroundColor: theme.colors.elevation.level1,
+            borderTopLeftRadius: isFirst ? 24 : 6,
+            borderTopRightRadius: isFirst ? 24 : 6,
+            borderBottomLeftRadius: isLast ? 24 : 6,
+            borderBottomRightRadius: isLast ? 24 : 6,
+          }}
+        >
+          <Card.Content
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              gap: 14,
+              paddingHorizontal: 14,
+              paddingVertical: 12,
+            }}
+          >
+            {/* Leading icon box */}
+            <Animated.View
+              style={{
+                width: 50,
+                height: 50,
+                backgroundColor: theme.colors.surfaceVariant,
+                alignItems: "center",
+                justifyContent: "center",
+                borderRadius: radius,
+              }}
+            >
+              <Icon
+                source="source-commit"
+                size={30}
+                color={theme.colors.onSurfaceVariant}
+              />
+            </Animated.View>
+
+            {/* Text block */}
+            <View style={{ flex: 1 }}>
+              <Text
+                variant="labelSmall"
+                style={{ color: theme.colors.onSurfaceVariant }}
+                numberOfLines={1}
+              >
+                {item.from}
+              </Text>
+              <Text
+                variant="titleSmall"
+                style={{
+                  color: theme.colors.onSurface,
+                  marginTop: 2,
+                  marginBottom: 6,
+                }}
+                numberOfLines={1}
+              >
+                {item.to}
+              </Text>
+              <View style={{ flexDirection: "row", gap: 12 }}>
+                <View
+                  style={{ flexDirection: "row", alignItems: "center", gap: 4 }}
+                >
+                  <Icon
+                    source="subway-variant"
+                    size={14}
+                    color={theme.colors.onSurfaceVariant}
+                  />
+                  <Text
+                    variant="labelSmall"
+                    style={{ color: theme.colors.onSurfaceVariant }}
+                  >
+                    {item.stops} stops
+                  </Text>
+                </View>
+                <View
+                  style={{ flexDirection: "row", alignItems: "center", gap: 4 }}
+                >
+                  <Icon
+                    source="transit-transfer"
+                    size={14}
+                    color={theme.colors.onSurfaceVariant}
+                  />
+                  <Text
+                    variant="labelSmall"
+                    style={{ color: theme.colors.onSurfaceVariant }}
+                  >
+                    {item.transfers} transfer{item.transfers !== 1 ? "s" : ""}
+                  </Text>
+                </View>
+              </View>
+            </View>
+
+            {/* Trailing chevron */}
+            <Icon
+              source="chevron-right"
+              size={20}
+              color={theme.colors.onSurfaceVariant}
+            />
+          </Card.Content>
+        </Card>
+      </Pressable>
+    </Animated.View>
+  );
+}
+
+// ─── Screen ──────────────────────────────────────────────────────────────────
+export default function ListPage() {
+  const theme = useAppTheme();
+  const { type } = useLocalSearchParams<{ type: string }>();
+  const isSaved = type === "saved";
+
+  return (
+    <SafeAreaView
+      style={{
+        flex: 1,
+        marginTop: -40,
+        backgroundColor: theme.colors.background,
+      }}
+    >
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        nestedScrollEnabled={true}
+        style={{ padding: 0 }}
+      >
+        {/* ── Header ── */}
+        <View
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            paddingTop: 56,
+            paddingBottom: 16,
+            paddingHorizontal: 4,
+          }}
+        >
           <IconButton
             icon="arrow-left"
             size={24}
             mode="contained"
-            containerColor={theme.colors.secondaryContainer}
-            iconColor={theme.colors.secondary}
-            style={{ marginRight: 0 }}
+            containerColor="transparent"
+            iconColor={theme.colors.onSurface}
             onPress={() => router.back()}
           />
-        </View>
-
-        <View
-          style={{
-            display: "flex",
-            flexDirection: "row",
-
-            paddingRight: 0,
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <Icon
-            source={type === "saved" ? "bookmark-multiple" : "history"}
-            size={24}
-            color={theme.colors.onPrimaryContainer}
-          />
-          <Text
-            style={{ marginLeft: 8, color: theme.colors.onPrimaryContainer }}
-            variant="titleLarge"
+          <View
+            style={{
+              flex: 1,
+              flexDirection: "row",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 8,
+            }}
           >
-            {type === "saved" ? "Saved Routes" : "Recent Trips"}
-          </Text>
+            <Icon
+              source={isSaved ? "bookmark-multiple" : "history"}
+              size={22}
+              color={theme.colors.onSurface}
+            />
+            <Text
+              variant="titleLarge"
+              style={{ color: theme.colors.onSurface }}
+            >
+              {isSaved ? "Saved Routes" : "Recent Trips"}
+            </Text>
+          </View>
+          {/* Right slot — keeps title centred */}
+          <View style={{ width: 48 }} />
         </View>
+
+        {/* ── List ── */}
         <View
-          style={{
-            flex: 1,
-            alignItems: "flex-end",
-            justifyContent: "flex-end",
-          }}
+          style={{ paddingHorizontal: 15, paddingTop: 8, paddingBottom: 32 }}
         >
-          <IconButton
-            icon="menu"
-            size={24}
-            mode="contained"
-            containerColor={theme.colors.secondaryContainer}
-            iconColor={theme.colors.secondary}
-            style={{ marginRight: 0, flex: 1 }}
-          />
+          {MOCK_ROUTES.map((item, index) => (
+            <RouteCard
+              key={index}
+              item={item}
+              index={index}
+              total={MOCK_ROUTES.length}
+              theme={theme}
+            />
+          ))}
         </View>
-      </View>
-      <View style={{ flex: 1, padding: 15, paddingTop: 20 }}>
-        <Card
-          mode="contained"
-          style={{
-            padding: 4,
-            backgroundColor: theme.colors.elevation.level1,
-            borderRadius: 20,
-            marginBottom: 4,
-          }}
-        >
-          <Card.Content style={{ paddingTop: 16, paddingHorizontal: 16 }}>
-            <Text
-              variant="labelLarge"
-              style={{ color: theme.colors.onSurfaceVariant, opacity: 0.7 }}
-            >
-              Rajiv Chowk
-            </Text>
-            <Text
-              variant="titleMedium"
-              style={{
-                color: theme.colors.secondary,
-                marginTop: 4,
-                marginBottom: 12,
-              }}
-              numberOfLines={1}
-            >
-              Preet Vihar
-            </Text>
-            <View style={{ flexDirection: "row", gap: 10 }}>
-              <View
-                style={{ flexDirection: "row", alignItems: "center", gap: 4 }}
-              >
-                <Icon
-                  source="subway-variant"
-                  size={16}
-                  color={theme.colors.onSurfaceVariant}
-                />
-                <Text
-                  variant="labelMedium"
-                  style={{ color: theme.colors.onSurfaceVariant }}
-                >
-                  5 stops
-                </Text>
-              </View>
-              <View
-                style={{ flexDirection: "row", alignItems: "center", gap: 4 }}
-              >
-                <Icon
-                  source="transit-transfer"
-                  size={16}
-                  color={theme.colors.onSurfaceVariant}
-                />
-                <Text
-                  variant="labelMedium"
-                  style={{ color: theme.colors.onSurfaceVariant }}
-                >
-                  1 transfer
-                </Text>
-              </View>
-            </View>
-          </Card.Content>
-        </Card>
-      </View>
-    </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  text: {
-    fontSize: 16,
-  },
-});

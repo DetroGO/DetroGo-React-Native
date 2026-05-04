@@ -3,6 +3,7 @@ import {
   DefaultTheme,
   ThemeProvider,
 } from "@react-navigation/native";
+import { usePrefStore } from "@/store/usePrefStore";
 
 import { useMaterial3Theme } from "@pchmn/expo-material3-theme";
 import { MD3DarkTheme, MD3LightTheme } from "react-native-paper";
@@ -21,12 +22,17 @@ export const unstable_settings = {
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
+  const { themeMode } = usePrefStore();
+  const { theme } = useMaterial3Theme({
+    fallbackSourceColor: "#E91E63",
+  });
 
-  const { theme } = useMaterial3Theme();
-  const paperTheme =
-    colorScheme === "dark"
-      ? { ...MD3DarkTheme, colors: theme.dark }
-      : { ...MD3LightTheme, colors: theme.light };
+  const isDark =
+    themeMode === "system" ? colorScheme === "dark" : themeMode === "dark";
+
+  const paperTheme = isDark
+    ? { ...MD3DarkTheme, colors: theme.dark }
+    : { ...MD3LightTheme, colors: theme.light };
 
   return (
     <PaperProvider theme={paperTheme}>
@@ -37,7 +43,7 @@ export default function RootLayout() {
           <Stack.Screen name="route" options={{ headerShown: false }} />
           <Stack.Screen name="listpage" options={{ headerShown: false }} />
         </Stack>
-        <StatusBar style="auto" />
+        <StatusBar style={isDark ? "light" : "dark"} />
       </GestureHandlerRootView>
     </PaperProvider>
   );

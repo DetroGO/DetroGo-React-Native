@@ -7,11 +7,12 @@ import {
   SafeAreaView,
 } from "react-native";
 import { useState } from "react";
-
+import strings from "@/constants/strings";
 import {
   Button,
   Text,
   Icon,
+  IconButton,
   Card,
   FAB,
   Portal,
@@ -21,7 +22,6 @@ import { useAppTheme } from "@/hooks/useAppTheme";
 import SearchBar from "@/components/ui/searchbar";
 
 import { router } from "expo-router";
-import { push } from "expo-router/build/global-state/routing";
 
 interface Trip {
   start: string;
@@ -390,10 +390,11 @@ export default function HomeScreen() {
         </View>
 
         {/* Search */}
+
         <View style={styles.searchWrapper}>
           <SearchBar
             onPress={() => router.push("/planner")}
-            hint="Search Route"
+            hint={strings.home.searchbar}
           />
         </View>
 
@@ -415,7 +416,7 @@ export default function HomeScreen() {
                 size={24}
                 color={theme.colors.onSurfaceVariant}
               />
-              <Text style={{ marginLeft: 6 }}>Saved Routes</Text>
+              <Text style={{ marginLeft: 6 }}>{strings.home.savedRoutes}</Text>
             </View>
             <Button
               style={{ width: "auto", marginRight: 12 }}
@@ -427,7 +428,7 @@ export default function HomeScreen() {
               }
             >
               <Text style={{ fontSize: 12, color: theme.colors.secondary }}>
-                View All
+                {strings.common.viewall}
               </Text>
             </Button>
           </View>
@@ -460,7 +461,7 @@ export default function HomeScreen() {
                 size={24}
                 color={theme.colors.onSurfaceVariant}
               />
-              <Text style={{ marginLeft: 5 }}>Recent Trips</Text>
+              <Text style={{ marginLeft: 5 }}>{strings.home.recentTrips}</Text>
             </View>
             <Button
               style={{ width: "auto", marginRight: 0 }}
@@ -472,7 +473,7 @@ export default function HomeScreen() {
               }
             >
               <Text style={{ fontSize: 12, color: theme.colors.secondary }}>
-                View All
+                {strings.common.viewall}
               </Text>
             </Button>
           </View>
@@ -503,7 +504,7 @@ export default function HomeScreen() {
           onDismiss={hideDialog}
         >
           <Dialog.Title style={{ textAlign: "center" }}>
-            Select a Metro System
+            {strings.home.selectnet}
           </Dialog.Title>
           <Dialog.Content>
             {SYSTEMS.map((item, index) => (
@@ -516,7 +517,7 @@ export default function HomeScreen() {
               mode="contained-tonal"
               onPress={hideDialog}
             >
-              Done
+              {strings.common.done}
             </Button>
           </Dialog.Actions>
         </Dialog>

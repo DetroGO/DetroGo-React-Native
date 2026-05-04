@@ -3,11 +3,12 @@ import { BottomNavigation } from "react-native-paper";
 import { useAppTheme } from "@/hooks/useAppTheme";
 
 import HomeScreen from "./index";
-
+import SettingsScreen from "./settings";
 import MapScreen from "./map";
 
 const HomeRoute = () => <HomeScreen />;
 const MapRoute = () => <MapScreen />;
+const SettingsRoute = () => <SettingsScreen />;
 
 export default function TabLayout() {
   const theme = useAppTheme();
@@ -26,11 +27,18 @@ export default function TabLayout() {
       focusedIcon: "map",
       unfocusedIcon: "map-outline",
     },
+    {
+      key: "settings",
+      title: "Settings",
+      focusedIcon: "cog",
+      unfocusedIcon: "cog-outline",
+    },
   ]);
 
   const renderScene = BottomNavigation.SceneMap({
     home: HomeRoute,
     map: MapRoute,
+    settings: SettingsRoute,
   });
 
   return (

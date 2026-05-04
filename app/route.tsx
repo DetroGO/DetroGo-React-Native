@@ -16,6 +16,7 @@ import { router } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
 import { useAppTheme } from "@/hooks/useAppTheme";
 import { WebView } from "react-native-webview";
+import strings from "@/constants/strings";
 
 import { calculateRoute } from "../utils/metroRouting";
 import { useLocalSearchParams } from "expo-router";
@@ -168,8 +169,8 @@ export default function RoutePlanScreen() {
   const [routeData, setRouteData] = useState(null);
 
   const { start, end } = useLocalSearchParams<{ start: string; end: string }>();
-  const [fromStation, setFromStation] = useState(start ?? "Preet Vihar");
-  const [toStation, setToStation] = useState(end ?? "Mandi House");
+  const [fromStation, setFromStation] = useState(start);
+  const [toStation, setToStation] = useState(end);
 
   // Swap button spring
   const swapSpring = useSpringPress();
@@ -323,11 +324,11 @@ export default function RoutePlanScreen() {
             />
 
             <View style={{ flex: 1, alignItems: "center" }}>
-              <Text
+              {/*<Text
                 style={{ maxWidth: 400 }}
                 numberOfLines={1}
                 variant="bodyLarge"
-              ></Text>
+              ></Text>*/}
             </View>
             <IconButton
               icon="bookmark-outline"
@@ -481,7 +482,7 @@ export default function RoutePlanScreen() {
                       </Text>
                     </View>
 
-                    <Text variant="bodySmall">Stations</Text>
+                    <Text variant="bodySmall">{strings.common.stations}</Text>
                   </View>
 
                   <View
@@ -518,14 +519,14 @@ export default function RoutePlanScreen() {
                       </Text>
                     </View>
 
-                    <Text variant="bodySmall">Transfers</Text>
+                    <Text variant="bodySmall">{strings.common.transfers}</Text>
                   </View>
                 </View>
               </Card.Content>
             </Card>
           ) : (
             <View style={{ marginTop: 24, margin: 15 }}>
-              <Text variant="headlineSmall">No Route Found</Text>
+              <Text variant="headlineSmall">{strings.route.noRouteFound}</Text>
             </View>
           )}
           {/* Display React Native UI based on the calculation */}

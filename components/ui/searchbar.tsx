@@ -60,6 +60,7 @@ export default function SearchBar({ onPress, hint }: Props) {
 const styles = StyleSheet.create({
   content: {
     flexDirection: "row",
+
     alignItems: "center",
     justifyContent: "center",
     paddingHorizontal: 16,

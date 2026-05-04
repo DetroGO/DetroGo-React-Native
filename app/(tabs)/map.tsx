@@ -1,15 +1,12 @@
 import React from "react";
-
 import { StyleSheet, View } from "react-native";
 import WebView from "react-native-webview";
+import { Map } from "@maplibre/maplibre-react-native";
 
 export default function App() {
   return (
     <View style={styles.container}>
-      <WebView
-        source={{ uri: "https://detroweb.vercel.app/map" }}
-        style={styles.map}
-      />
+      <Map mapStyle="https://basemaps.cartocdn.com/gl/dark-matter-nolabels-gl-style/style.json" />
     </View>
   );
 }
