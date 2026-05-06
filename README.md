@@ -1,50 +1,81 @@
-# Welcome to your Expo app 👋
+<div align="center">
+    <img src="https://github.com/user-attachments/assets/ce987cc5-7b49-497e-abba-f4a32c1c54f9"
+        title="Detro" alt="DetroGO logo" width="120" />
+   <h1>DetroGO</h1>
+   <h3>(React Native)</h3>
+  <p>
+        A Material 3 transit app for Delhi-NCR.
+    <br>
+    Minimal, Clean and Native Experience.
+    <br>
+    built for everyday riders by everyday riders
+   </p>
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+<a href="https://detrogo.vercel.app/">detrogo.vercel.app</a>
+</div>
 
-## Get started
+<br/>
 
-1. Install dependencies
+## Features
 
+- [x] **Intelligent Pathfinding:** Custom routing engine utilizing Dijkstra's Algorithm.
+- [x] **Interactive Map:** High-contrast dark mode map with vibrant, color-coded lines.
+- [x] **Material 3 UI:** Fluid animations and `BottomSheetBehavior` for modern navigation.
+- [x] **Real-Time Data:** Instant fare calculation and time estimations.
+- [x] **Dynamic Colors:** Full support for Android's Material You (Monet) theme.
+- [x] **Route History:** Local persistence using Shared Preferences.
+
+## 📱 Screenshots
+
+### Dark Mode
+<p align="center">
+  <img width="23%" alt="Map Dark" src="https://github.com/user-attachments/assets/ccdcb0d1-dfab-4b24-b70a-54aed73cfa4a" />
+  <img width="23%" alt="Search Dark" src="https://github.com/user-attachments/assets/a6ca50f7-f84d-49b2-a47c-ff566db62c28" />
+  <img width="23%" alt="Detail Dark" src="https://github.com/user-attachments/assets/e0f41795-2260-41fd-ac42-0cbc52b69636" />
+  <img width="23%" alt="Settings Dark" src="https://github.com/user-attachments/assets/48322bd0-f309-4ea7-84a1-eb9ab5e55eb7" />
+</p>
+
+### Light Mode
+<p align="center">
+  <img width="23%" alt="Map Light" src="https://github.com/user-attachments/assets/eaa00263-a089-4217-8f8e-ecfee011aa5c" />
+  <img width="23%" alt="Search Light" src="https://github.com/user-attachments/assets/09c7967f-c84a-4712-8ea7-9456518633ec" />
+  <img width="23%" alt="Detail Light" src="https://github.com/user-attachments/assets/8c6b9cbe-6884-4ede-93e2-d7fe116bb705" />
+  <img width="23%" alt="Settings Light" src="https://i.ibb.co/4R68fVJt/Screenshot-20260308-103844.png" />
+</p>
+
+### Live Preview
+
+<table style="width: 100%; border-collapse: collapse; border: none;">
+  <tr style="border: none;">
+    <td style="width: 50%; border: none; padding: 5px;">
+      <p align="center"><b>Dark Mode</b></p>
+      <video src="https://github.com/user-attachments/assets/8d9e6e48-3255-4460-82cd-2a50c8b2c863" width="100%" controls muted autoplay loop style="border-radius: 10px;">
+      </video>
+    </td>
+    <td style="width: 50%; border: none; padding: 5px;">
+      <p align="center"><b>Light Mode</b></p>
+      <video src="https://github.com/user-attachments/assets/62c2f7e6-e54a-40de-ad56-573d0e4c78b7" width="100%" controls muted autoplay loop style="border-radius: 10px;">
+      </video>
+    </td>
+  </tr>
+</table>
+
+
+
+
+---
+
+## 🛠️ Setup & Installation
+
+1. **Clone the repository:**
    ```bash
-   npm install
-   ```
+   git clone [https://github.com/simplystudios/DetroGo.git](https://github.com/simplystudios/DetroGo.git)
 
-2. Start the app
+## 🤝 Contributors
+<a href = "https://github.com/madushadhanushka/simple-sqlite/graphs/contributors">
+  <img src = "https://contrib.rocks/image?repo=simplystudios/DetroGo"/>
+</a>
 
-   ```bash
-   npx expo start
-   ```
 
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
-
-```bash
-npm run reset-project
-```
-
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
-
-## Learn more
-
-To learn more about developing your project with Expo, look at the following resources:
-
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+### Free & Open Source Under MIT Licence
+##### Made with ❤️ in Delhi
