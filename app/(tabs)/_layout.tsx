@@ -46,7 +46,11 @@ export default function TabLayout() {
       navigationState={{ index, routes }}
       onIndexChange={setIndex}
       renderScene={renderScene}
-      barStyle={{ backgroundColor: theme.colors.surface }}
+      barStyle={{
+        backgroundColor: theme.colors.surface,
+        borderTopWidth: 1,
+        borderTopColor: theme.colors.inverseOnSurface,
+      }}
       theme={theme} // this is all you need — pulls everything from Material3 dynamic theme
     />
   );

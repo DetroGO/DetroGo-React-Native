@@ -22,8 +22,10 @@ export const unstable_settings = {
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
-  const { themeMode } = usePrefStore();
+  const { themeMode, sourceColor } = usePrefStore();
+
   const { theme } = useMaterial3Theme({
+    sourceColor: sourceColor === "system" ? undefined : sourceColor,
     fallbackSourceColor: "#E91E63",
   });
 
@@ -41,7 +43,7 @@ export default function RootLayout() {
           ? { ...MD3DarkTheme, colors: theme.dark }
           : { ...MD3LightTheme, colors: theme.light };
   return (
-    <PaperProvider theme={paperTheme}>
+    <PaperProvider key={sourceColor} theme={paperTheme}>
       <GestureHandlerRootView style={{ flex: 1 }}>
         <Stack>
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
