@@ -1,5 +1,13 @@
 import { View, Animated, Pressable, Image } from "react-native";
-import { Text, Icon, Card, Portal, Dialog, Button } from "react-native-paper";
+import {
+  Text,
+  Icon,
+  Card,
+  Portal,
+  Dialog,
+  Button,
+  Switch,
+} from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { ScrollView } from "react-native-gesture-handler";
 import strings from "@/constants/strings";
@@ -37,7 +45,7 @@ const THEME_OPTIONS = [
   { label: "System", value: "system", icon: "theme-light-dark" },
   { label: "Light", value: "light", icon: "white-balance-sunny" },
   { label: "Dark", value: "dark", icon: "weather-night" },
-  { label: "AMOLED", value: "amoled", icon: "circle-slice-8" }, // or "brightness-1"
+  { label: "Amoled (Black)", value: "amoled", icon: "circle-slice-8" },
 ];
 
 function ThemeOptionCard({
@@ -165,8 +173,8 @@ function AboutOptionCard({
 
   const borderRadius = {
     first: {
-      borderTopLeftRadius: 24,
-      borderTopRightRadius: 24,
+      borderTopLeftRadius: 6,
+      borderTopRightRadius: 6,
       borderBottomLeftRadius: 6,
       borderBottomRightRadius: 6,
     },
@@ -248,26 +256,49 @@ function AboutOptionCard({
     </Animated.View>
   );
 }
+const GENERAL_ROWS = [
+  { label: "Language", subtitle: "English", icon: "translate" },
+  { label: "Notifications", subtitle: "Off", icon: "bell" },
+  { label: "Home Station", subtitle: "Not set", icon: "home" },
+  { label: "Work Station", subtitle: "Not set", icon: "briefcase-variant" },
+];
+
+const TRAVEL_ROWS = [
+  { label: "Accessibility", subtitle: "Off", icon: "wheelchair-accessibility" },
+  { label: "Avoid Interchange", subtitle: "Off", icon: "swap-horizontal-bold" },
+];
+
+const ACCOUNT_ROWS = [];
 
 const ABOUT_ROWS: { label: string; subtitle: string; icon: string }[] = [
-  { label: "Version", subtitle: "1.0.0-alpha", icon: "information-outline" },
-  { label: "GitHub", subtitle: "View source code", icon: "github" },
+  { label: "Version", subtitle: "ALPHA", icon: "information-outline" },
+  { label: "Source Code", subtitle: "Github", icon: "code-tags" },
   {
-    label: "Licenses",
-    subtitle: "Open source libraries",
+    label: "License",
+    subtitle: "GNU GPL v3.0",
     icon: "file-document-outline",
   },
 ];
 
 export default function Settings() {
-  const { themeMode, setThemeMode } = usePrefStore();
   const theme = useAppTheme();
   const [visible, setVisible] = useState(false);
+  const [visibleScheme, setVisibleScheme] = useState(false);
+  const [visibleTheme, setVisibleTheme] = useState(false);
   const showDialog = () => setVisible(true);
 
   const hideDialog = () => setVisible(false);
+  const hideDialogScheme = () => setVisibleScheme(false);
+  const hideDialogTheme = () => setVisibleTheme(false);
+  const spring = useSpringPress();
+  const springtheme = useSpringPress();
+  const radius = spring.scale.interpolate({
+    inputRange: [0.88, 1],
+    outputRange: [14, 28],
+  });
 
-  const { sourceColor, setSourceColor } = usePrefStore();
+  const { themeMode, setThemeMode, sourceColor, setSourceColor } =
+    usePrefStore();
   return (
     <SafeAreaView
       style={{
@@ -305,7 +336,7 @@ export default function Settings() {
           >
             APPEARANCE
           </Text>
-          {THEME_OPTIONS.map((option, i) => (
+          {/*{THEME_OPTIONS.map((option, i) => (
             <ThemeOptionCard
               key={option.value}
               option={option}
@@ -319,9 +350,225 @@ export default function Settings() {
                     : "middle"
               }
             />
-          ))}
+          ))}*/}
+          {/* Theme */}
+          <Animated.View
+            style={{
+              transform: [{ scale: springtheme.scale }],
+              marginBottom: 2.8,
+            }}
+          >
+            <Pressable
+              onPressIn={springtheme.onPressIn}
+              onPressOut={springtheme.onPressOut}
+              onPress={() => setVisibleTheme(true)}
+              android_ripple={{
+                color: theme.colors.onSecondaryContainer + "33",
+                borderless: false,
+              }}
+            >
+              <Animated.View
+                style={{
+                  backgroundColor: theme.colors.elevation.level1,
+                  borderTopLeftRadius: 24,
+                  borderTopRightRadius: 24,
+                  borderBottomLeftRadius: 6,
+                  borderBottomRightRadius: 6,
+                  paddingHorizontal: 14,
+                  paddingVertical: 14,
+                  flexDirection: "row",
+                  alignItems: "center",
+                  gap: 14,
+                }}
+              >
+                <View
+                  style={{
+                    width: 50,
+                    height: 50,
+                    backgroundColor: theme.colors.surfaceVariant,
+                    alignItems: "center",
+                    justifyContent: "center",
+                    borderRadius: 17,
+                  }}
+                >
+                  <Icon
+                    source="brightness-auto"
+                    size={26}
+                    color={theme.colors.onSurfaceVariant}
+                  />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text
+                    variant="bodyMedium"
+                    style={{ color: theme.colors.onSurface }}
+                  >
+                    Theme
+                  </Text>
+                  <Text
+                    variant="labelSmall"
+                    style={{ color: theme.colors.onSurfaceVariant }}
+                  >
+                    {themeMode === "system"
+                      ? "System Default"
+                      : themeMode === "amoled"
+                        ? "Amoled"
+                        : themeMode}
+                  </Text>
+                </View>
+                <Icon
+                  source="chevron-right"
+                  size={20}
+                  color={theme.colors.onSurfaceVariant}
+                />
+              </Animated.View>
+            </Pressable>
+          </Animated.View>
+          {/* Color Scheme */}
+          <Animated.View
+            style={{ transform: [{ scale: spring.scale }], marginBottom: 2.8 }}
+          >
+            <Pressable
+              onPressIn={themeMode !== "amoled" ? spring.onPressIn : null}
+              onPressOut={themeMode !== "amoled" ? spring.onPressOut : null}
+              onPress={() => {
+                if (themeMode !== "amoled") {
+                  setVisibleScheme(true);
+                }
+              }}
+              android_ripple={{
+                color: theme.colors.onSecondaryContainer + "33",
+                borderless: false,
+              }}
+            >
+              <Animated.View
+                style={{
+                  backgroundColor:
+                    themeMode === "amoled"
+                      ? theme.colors.surfaceContainerLow
+                      : theme.colors.elevation.level1,
+                  borderTopLeftRadius: 6,
+                  borderTopRightRadius: 6,
+                  borderBottomLeftRadius: 24,
+                  borderBottomRightRadius: 24,
+                  paddingHorizontal: 14,
+                  paddingVertical: 14,
+                  flexDirection: "row",
+                  alignItems: "center",
+                  gap: 14,
+                }}
+              >
+                <View
+                  style={{
+                    width: 50,
+                    height: 50,
+                    backgroundColor: theme.colors.surfaceVariant,
+                    alignItems: "center",
+                    justifyContent: "center",
+                    borderRadius: 17,
+                  }}
+                >
+                  <Icon
+                    source="palette"
+                    size={26}
+                    color={theme.colors.onSurfaceVariant}
+                  />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text
+                    variant="bodyMedium"
+                    style={{ color: theme.colors.onSurface }}
+                  >
+                    Color Scheme
+                  </Text>
+                  <Text
+                    variant="labelSmall"
+                    style={{ color: theme.colors.primary }}
+                  >
+                    {sourceColor === "system"
+                      ? themeMode === "amoled"
+                        ? "Managed by Amoled Mode"
+                        : "Dynamic"
+                      : sourceColor}
+                  </Text>
+                </View>
+                <Icon
+                  source="chevron-right"
+                  size={20}
+                  color={theme.colors.onSurfaceVariant}
+                />
+              </Animated.View>
+            </Pressable>
+          </Animated.View>
+
+          {/* AMOLED */}
+          {/*<Animated.View
+            style={{
+              marginBottom: 2.8,
+              borderTopLeftRadius: 6,
+              borderTopRightRadius: 6,
+              borderBottomLeftRadius: 6,
+              borderBottomRightRadius: 6,
+            }}
+          >
+            <Pressable
+              android_ripple={{
+                color: theme.colors.onSecondaryContainer + "33",
+                borderless: false,
+              }}
+            >
+              <Animated.View
+                style={{
+                  backgroundColor: theme.colors.elevation.level1,
+
+                  paddingHorizontal: 14,
+                  paddingVertical: 14,
+                  flexDirection: "row",
+                  alignItems: "center",
+                  gap: 14,
+                }}
+              >
+                <View
+                  style={{
+                    width: 50,
+                    height: 50,
+                    backgroundColor: theme.colors.surfaceVariant,
+                    alignItems: "center",
+                    justifyContent: "center",
+                    borderRadius: 17,
+                  }}
+                >
+                  <Icon
+                    source="circle-slice-8"
+                    size={26}
+                    color={theme.colors.onSurfaceVariant}
+                  />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text
+                    variant="bodyMedium"
+                    style={{ color: theme.colors.onSurface }}
+                  >
+                    Black Theme
+                  </Text>
+                  <Text
+                    variant="labelSmall"
+                    style={{ color: theme.colors.onSurfaceVariant }}
+                  >
+                    Uses Black Background
+                  </Text>
+                </View>
+                <Switch
+                  value={themeMode === "amoled"}
+                  onValueChange={(value) => {
+                    setThemeMode(value ? "amoled" : "system");
+                  }}
+                />
+              </Animated.View>
+            </Pressable>
+          </Animated.View>*/}
         </View>
 
+        {/* General section */}
         <View style={{ marginHorizontal: 15, marginTop: 24 }}>
           <Text
             variant="labelSmall"
@@ -331,53 +578,52 @@ export default function Settings() {
               marginLeft: 4,
             }}
           >
-            COLOR SCHEME
+            GENERAL
           </Text>
-          <View
+          {GENERAL_ROWS.map((row, i) => (
+            <AboutOptionCard
+              key={row.label}
+              row={row}
+              position={
+                i === 0
+                  ? "first"
+                  : i === GENERAL_ROWS.length - 1
+                    ? "last"
+                    : "middle"
+              }
+              onPress={() => {}}
+            />
+          ))}
+        </View>
+
+        {/* Travel Preferences section */}
+        <View style={{ marginHorizontal: 15, marginTop: 24 }}>
+          <Text
+            variant="labelSmall"
             style={{
-              backgroundColor: theme.colors.elevation.level1,
-              borderRadius: 24,
-              padding: 16,
-              flexDirection: "row",
-              flexWrap: "wrap",
-              gap: 10,
+              color: theme.colors.onSurfaceVariant,
+              marginBottom: 10,
+              marginLeft: 4,
             }}
           >
-            {M3_COLORS.map((c) => {
-              const selected = sourceColor === c.value;
-              const isSystem = c.value === "system";
-              return (
-                <Pressable
-                  key={c.value}
-                  onPress={() => setSourceColor(c.value)}
-                  style={{
-                    width: 44,
-                    height: 44,
-                    borderRadius: 22,
-                    backgroundColor: isSystem
-                      ? theme.colors.surfaceVariant
-                      : c.value,
-                    alignItems: "center",
-                    justifyContent: "center",
-                    borderWidth: selected ? 3 : 0,
-                    borderColor: theme.colors.primary,
-                  }}
-                >
-                  {isSystem && (
-                    <Icon
-                      source="palette-swatch"
-                      size={22}
-                      color={theme.colors.onSurfaceVariant}
-                    />
-                  )}
-                  {selected && !isSystem && (
-                    <Icon source="check" size={20} color="#ffffff" />
-                  )}
-                </Pressable>
-              );
-            })}
-          </View>
+            TRAVEL PREFERENCES
+          </Text>
+          {TRAVEL_ROWS.map((row, i) => (
+            <AboutOptionCard
+              key={row.label}
+              row={row}
+              position={
+                i === 0
+                  ? "first"
+                  : i === TRAVEL_ROWS.length - 1
+                    ? "last"
+                    : "middle"
+              }
+              onPress={() => {}}
+            />
+          ))}
         </View>
+
         {/* About section */}
         <View style={{ marginHorizontal: 15, marginTop: 24 }}>
           <Text
@@ -390,6 +636,63 @@ export default function Settings() {
           >
             ABOUT
           </Text>
+
+          <Animated.View
+            style={{ transform: [{ scale: spring.scale }], marginBottom: 2.8 }}
+          >
+            <Pressable
+              onPressIn={spring.onPressIn}
+              onPressOut={spring.onPressOut}
+              android_ripple={{
+                color: theme.colors.onSecondaryContainer + "33",
+                borderless: false,
+              }}
+            >
+              <Animated.View
+                style={{
+                  backgroundColor: theme.colors.elevation.level1,
+                  borderTopLeftRadius: 24,
+                  borderTopRightRadius: 24,
+                  borderBottomLeftRadius: 6,
+                  borderBottomRightRadius: 6,
+                  paddingHorizontal: 14,
+                  paddingVertical: 14,
+                  flexDirection: "row",
+                  alignItems: "center",
+                  gap: 14,
+                }}
+              >
+                <View style={{ flex: 1 }}>
+                  <View
+                    style={{
+                      alignItems: "center",
+                      marginTop: 14,
+                      marginBottom: 14,
+                    }}
+                  >
+                    <Image
+                      source={require("../../assets/images/detrologo.png")}
+                      style={{
+                        width: 140,
+                        height: 40,
+                        tintColor: theme.colors.secondary,
+                      }}
+                    />
+                    <Text
+                      style={{
+                        color: theme.colors.secondary,
+                        textAlign: "center",
+                        marginTop: 15,
+                      }}
+                    >
+                      Transit Utility app for Metros in India
+                    </Text>
+                  </View>
+                </View>
+              </Animated.View>
+            </Pressable>
+          </Animated.View>
+
           {ABOUT_ROWS.map((row, i) => (
             <AboutOptionCard
               key={row.label}
@@ -519,6 +822,150 @@ export default function Settings() {
               style={{ width: "100%" }}
               mode="contained-tonal"
               onPress={hideDialog}
+            >
+              {strings.common?.done || "Close"}
+            </Button>
+          </Dialog.Actions>
+        </Dialog>
+      </Portal>
+
+      {/* Color Scheme Dialog */}
+      <Portal>
+        <Dialog
+          style={{ backgroundColor: theme.colors.surface, borderRadius: 28 }}
+          visible={visibleScheme}
+          onDismiss={hideDialogScheme}
+        >
+          <Dialog.Title
+            style={{
+              display: "flex",
+              marginBottom: 28,
+              marginTop: 40,
+              textAlign: "center",
+              paddingTop: 0,
+              fontSize: 24,
+            }}
+          >
+            Choose Color Scheme
+          </Dialog.Title>
+
+          <Dialog.Content>
+            <View style={{ marginHorizontal: 15, marginTop: 4 }}>
+              <View
+                style={{
+                  backgroundColor: theme.colors.elevation.level1,
+                  borderRadius: 24,
+                  padding: 16,
+                  flexDirection: "row",
+                  flexWrap: "wrap",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 16,
+                }}
+              >
+                {M3_COLORS.map((c) => {
+                  const selected = sourceColor === c.value;
+                  const isSystem = c.value === "system";
+                  return (
+                    <Pressable
+                      key={c.value}
+                      onPress={() => setSourceColor(c.value)}
+                      style={{
+                        width: 50,
+                        height: 50,
+                        borderRadius: 22,
+                        backgroundColor: isSystem
+                          ? theme.colors.surfaceVariant
+                          : c.value,
+                        alignItems: "center",
+                        justifyContent: "center",
+                        borderWidth: selected ? 3 : 0,
+                        borderColor: theme.colors.primary,
+                      }}
+                    >
+                      {isSystem && (
+                        <Icon
+                          source="palette-swatch"
+                          size={22}
+                          color={theme.colors.onSurfaceVariant}
+                        />
+                      )}
+                      {selected && !isSystem && (
+                        <Icon source="check" size={20} color="#ffffff" />
+                      )}
+                    </Pressable>
+                  );
+                })}
+              </View>
+            </View>
+          </Dialog.Content>
+
+          <Dialog.Actions
+            style={{
+              justifyContent: "center",
+              paddingBottom: 16,
+              paddingHorizontal: 24,
+            }}
+          >
+            <Button
+              style={{ width: "100%" }}
+              mode="contained-tonal"
+              onPress={hideDialogScheme}
+            >
+              {strings.common?.done || "Close"}
+            </Button>
+          </Dialog.Actions>
+        </Dialog>
+      </Portal>
+
+      <Portal>
+        <Dialog
+          style={{ backgroundColor: theme.colors.surface, borderRadius: 28 }}
+          visible={visibleTheme}
+          onDismiss={hideDialogTheme}
+        >
+          <Dialog.Title
+            style={{
+              display: "flex",
+              marginBottom: 28,
+              marginTop: 40,
+              textAlign: "center",
+              paddingTop: 0,
+              fontSize: 24,
+            }}
+          >
+            Choose Color Scheme
+          </Dialog.Title>
+
+          <Dialog.Content>
+            {THEME_OPTIONS.map((option, i) => (
+              <ThemeOptionCard
+                key={option.value}
+                option={option}
+                selected={themeMode === option.value}
+                onSelect={() => setThemeMode(option.value)}
+                position={
+                  i === 0
+                    ? "first"
+                    : i === THEME_OPTIONS.length - 1
+                      ? "last"
+                      : "middle"
+                }
+              />
+            ))}
+          </Dialog.Content>
+
+          <Dialog.Actions
+            style={{
+              justifyContent: "center",
+              paddingBottom: 16,
+              paddingHorizontal: 24,
+            }}
+          >
+            <Button
+              style={{ width: "100%" }}
+              mode="contained-tonal"
+              onPress={hideDialogTheme}
             >
               {strings.common?.done || "Close"}
             </Button>

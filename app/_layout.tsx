@@ -1,29 +1,22 @@
-import {
-  DarkTheme,
-  DefaultTheme,
-  ThemeProvider,
-} from "@react-navigation/native";
 import { usePrefStore } from "@/store/usePrefStore";
-
 import { useMaterial3Theme } from "@pchmn/expo-material3-theme";
 import { MD3DarkTheme, MD3LightTheme } from "react-native-paper";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { amoledColors } from "@/constants/amoled";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import { PaperProvider, useTheme } from "react-native-paper";
+import { PaperProvider } from "react-native-paper";
 import "react-native-reanimated";
-
 import { useColorScheme } from "react-native";
 
 export const unstable_settings = {
   anchor: "(tabs)",
 };
 
-export default function RootLayout() {
+// Inner component — remounts entirely when sourceColor changes
+function ThemedApp() {
   const colorScheme = useColorScheme();
   const { themeMode, sourceColor } = usePrefStore();
-
   const { theme } = useMaterial3Theme({
     sourceColor: sourceColor === "system" ? undefined : sourceColor,
     fallbackSourceColor: "#E91E63",
@@ -42,8 +35,9 @@ export default function RootLayout() {
         : themeMode === "dark"
           ? { ...MD3DarkTheme, colors: theme.dark }
           : { ...MD3LightTheme, colors: theme.light };
+
   return (
-    <PaperProvider key={sourceColor} theme={paperTheme}>
+    <PaperProvider theme={paperTheme}>
       <GestureHandlerRootView style={{ flex: 1 }}>
         <Stack>
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
@@ -55,4 +49,10 @@ export default function RootLayout() {
       </GestureHandlerRootView>
     </PaperProvider>
   );
+}
+
+// Outer shell — only job is to key ThemedApp on sourceColor
+export default function RootLayout() {
+  const { sourceColor } = usePrefStore();
+  return <ThemedApp key={sourceColor} />;
 }
