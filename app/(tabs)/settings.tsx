@@ -17,6 +17,7 @@ import { useCallback, useRef, useState } from "react";
 import { ThemeMode } from "@/types/route";
 
 import { M3_COLORS } from "@/constants/m3Colors";
+import { router } from "expo-router";
 
 // inside Settings(), after themeMode:
 
@@ -57,7 +58,7 @@ function ThemeOptionCard({
   option: (typeof THEME_OPTIONS)[0];
   selected: boolean;
   onSelect: () => void;
-  position: "first" | "middle" | "last";
+  position: "first" | "special" | "middle" | "last";
 }) {
   const theme = useAppTheme();
   const spring = useSpringPress();
@@ -68,6 +69,12 @@ function ThemeOptionCard({
 
   const borderRadius = {
     first: {
+      borderTopLeftRadius: 24,
+      borderTopRightRadius: 24,
+      borderBottomLeftRadius: 6,
+      borderBottomRightRadius: 6,
+    },
+    special: {
       borderTopLeftRadius: 24,
       borderTopRightRadius: 24,
       borderBottomLeftRadius: 6,
@@ -641,6 +648,7 @@ export default function Settings() {
             style={{ transform: [{ scale: spring.scale }], marginBottom: 2.8 }}
           >
             <Pressable
+              onPress={() => router.push({ pathname: "/onboarding" })}
               onPressIn={spring.onPressIn}
               onPressOut={spring.onPressOut}
               android_ripple={{

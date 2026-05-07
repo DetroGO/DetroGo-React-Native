@@ -44,6 +44,7 @@ function ThemedApp() {
           <Stack.Screen name="planner" options={{ headerShown: false }} />
           <Stack.Screen name="route" options={{ headerShown: false }} />
           <Stack.Screen name="listpage" options={{ headerShown: false }} />
+          <Stack.Screen name="onboarding" options={{ headerShown: false }} />
         </Stack>
         <StatusBar style={isDark ? "light" : "dark"} />
       </GestureHandlerRootView>
