@@ -7,8 +7,7 @@
         A Material 3 transit app for Delhi-NCR.
     <br>
     Minimal, Clean and Native Experience.
-    <br>
-    built for everyday riders by everyday riders
+    
    </p>
 
 <a href="https://detrogo.vercel.app/">detrogo.vercel.app</a>
