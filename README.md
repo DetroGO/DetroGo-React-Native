@@ -1,6 +1,6 @@
 <div align="center">
-    <img src="https://github.com/user-attachments/assets/ce987cc5-7b49-497e-abba-f4a32c1c54f9"
-        title="Detro" alt="DetroGO logo" width="120" />
+    <img src="https://github.com/user-attachments/assets/52ffd501-0e53-4b32-97cf-2e27efdb1adc"
+        title="Detro" alt="DetroGO logo" width="140" />
    <h1>DetroGO</h1>
    <h3>(React Native)</h3>
   <p>
@@ -18,52 +18,66 @@
 
 ## Features
 
-- [x] **Intelligent Pathfinding:** Custom routing engine utilizing Dijkstra's Algorithm.
-- [x] **Interactive Map:** High-contrast dark mode map with vibrant, color-coded lines.
-- [x] **Material 3 UI:** Fluid animations and `BottomSheetBehavior` for modern navigation.
-- [x] **Real-Time Data:** Instant fare calculation and time estimations.
-- [x] **Dynamic Colors:** Full support for Android's Material You (Monet) theme.
-- [x] **Route History:** Local persistence using Shared Preferences.
+- [x] **Intelligent Pathfinding:** Custom routing engine utilizing BFS Algorithm.
+- [x] **Interactive Map:** Minimal Easy to Look up schematic map to understand your route.
+- [x] **Inbuilt System Map** Supports Inapp Transit Map for supported regions.
+- [x] **Material 3 UI:** UI follows material 3 guidelines.
+- [x] **Nearest Station:** Gets your nearest station so its easier to find routes.
+- [x] **Dynamic Colors:** Full support for Android's Material You (Monet) themes.
+- [x] **Amoled Mode** Supports Amoled mode to navigate in the dark and save power.
+- [x] **Route History:** Local Storage for Route History and User Pref.
+- [x] **Fully Offline** Full Offline Support for routing aswell as gps.
+- [ ] **I8N Language Support** Local as well as international language support?
+
+## List of Supported Cities
+
+- [x] **Delhi NCR** Supports All Operational Lines with support for system map, route finding, route history
+- [ ] **Mumbai** Intended for Future Release
+- [ ] **Banglore** Intended for Future Release
+- [ ] **Chennai** Intended for Future Release
+- [ ] **Hyderabad** Intended for Future Release
+
+**Updated May 10 2026**
 
 ## 📱 Screenshots
 
 ### Dark Mode
 <p align="center">
-  <img width="23%" alt="Map Dark" src="https://github.com/user-attachments/assets/ccdcb0d1-dfab-4b24-b70a-54aed73cfa4a" />
-  <img width="23%" alt="Search Dark" src="https://github.com/user-attachments/assets/a6ca50f7-f84d-49b2-a47c-ff566db62c28" />
-  <img width="23%" alt="Detail Dark" src="https://github.com/user-attachments/assets/e0f41795-2260-41fd-ac42-0cbc52b69636" />
-  <img width="23%" alt="Settings Dark" src="https://github.com/user-attachments/assets/48322bd0-f309-4ea7-84a1-eb9ab5e55eb7" />
+
+   
+
+
+
+  <img width="23%" alt="Search Dark" src="https://github.com/user-attachments/assets/5dd92218-1615-4f7f-a54a-65184635c411" />
+  <img width="23%" alt="Detail Dark" src="https://github.com/user-attachments/assets/dacd6cd3-53b1-485c-9b97-18bffa8c1274" />
+  <img width="23%" alt="Settings Dark" src="https://github.com/user-attachments/assets/2923023e-0def-419e-9c53-e82f40e1f480" />
+    <img width="23%" alt="Map Dark" src="https://github.com/user-attachments/assets/034ef174-eb5a-4791-876a-c3428b69c966" />
 </p>
+
+
+
 
 ### Light Mode
 <p align="center">
-  <img width="23%" alt="Map Light" src="https://github.com/user-attachments/assets/eaa00263-a089-4217-8f8e-ecfee011aa5c" />
-  <img width="23%" alt="Search Light" src="https://github.com/user-attachments/assets/09c7967f-c84a-4712-8ea7-9456518633ec" />
-  <img width="23%" alt="Detail Light" src="https://github.com/user-attachments/assets/8c6b9cbe-6884-4ede-93e2-d7fe116bb705" />
-  <img width="23%" alt="Settings Light" src="https://i.ibb.co/4R68fVJt/Screenshot-20260308-103844.png" />
+  <img width="23%" alt="Map Light" src="https://github.com/user-attachments/assets/5c44afc8-ae74-49ca-ad6b-e2fefeaa9948" />
+  <img width="23%" alt="Search Light" src="https://github.com/user-attachments/assets/f8227448-4983-4147-9fec-f80f146c4bcd" />
+  <img width="23%" alt="Detail Light" src="https://github.com/user-attachments/assets/76ea5f60-b15a-4575-903f-0af26f5b0c0e" />
+  <img width="23%" alt="Settings Light" src="https://github.com/user-attachments/assets/6ebd220b-b6f1-4bad-b730-1045266f5723" />
 </p>
-
-### Live Preview
-
-<table style="width: 100%; border-collapse: collapse; border: none;">
-  <tr style="border: none;">
-    <td style="width: 50%; border: none; padding: 5px;">
-      <p align="center"><b>Dark Mode</b></p>
-      <video src="https://github.com/user-attachments/assets/8d9e6e48-3255-4460-82cd-2a50c8b2c863" width="100%" controls muted autoplay loop style="border-radius: 10px;">
-      </video>
-    </td>
-    <td style="width: 50%; border: none; padding: 5px;">
-      <p align="center"><b>Light Mode</b></p>
-      <video src="https://github.com/user-attachments/assets/62c2f7e6-e54a-40de-ad56-573d0e4c78b7" width="100%" controls muted autoplay loop style="border-radius: 10px;">
-      </video>
-    </td>
-  </tr>
-</table>
 
 
 
 
 ---
+
+## 🧩 Help add your City to DetroGo
+**You can submit your cities GTFS file or json list of the stations with the coords and basic data like line color etc**
+### This section is still WIP
+
+## 🤝 Contributors
+<a href = "https://github.com/madushadhanushka/simple-sqlite/graphs/contributors">
+  <img src = "https://contrib.rocks/image?repo=simplystudios/DetroGo"/>
+</a>
 
 ## 🛠️ Setup & Installation
 
@@ -71,10 +85,6 @@
    ```bash
    git clone [https://github.com/simplystudios/DetroGo.git](https://github.com/simplystudios/DetroGo.git)
 
-## 🤝 Contributors
-<a href = "https://github.com/madushadhanushka/simple-sqlite/graphs/contributors">
-  <img src = "https://contrib.rocks/image?repo=simplystudios/DetroGo"/>
-</a>
 
 
 ### Free & Open Source Under MIT Licence
