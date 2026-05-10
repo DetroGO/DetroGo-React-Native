@@ -40,12 +40,15 @@
 
 ## 📱 Screenshots
 
+
 <p align="center">
-  <img width="23%" alt="Search Dark" src="https://github.com/user-attachments/assets/38121185-27e4-42a7-bad1-69e10f6f6d04" />
-  <img width="23%" alt="Detail Dark" src="https://github.com/user-attachments/assets/6880f498-2c75-43eb-9a60-71afc999bb04" />
-  <img width="23%" alt="Settings Dark" src="https://github.com/user-attachments/assets/b240e9a6-b637-4e18-9bd9-db98bc75ffe3" />
-    <img width="23%" alt="Map Dark" src="https://github.com/user-attachments/assets/7e50573c-18b2-46e5-86e2-cdfede6511ca" />
+  <img width="18%" alt="Search Dark" src="https://github.com/user-attachments/assets/504d4fb1-2da7-4d7d-8c33-8e14caa7d8f7" />
+  <img width="18%" alt="Detail Dark" src="https://github.com/user-attachments/assets/6880f498-2c75-43eb-9a60-71afc999bb04" />
+  <img width="18%" alt="Settings Dark" src="https://github.com/user-attachments/assets/b240e9a6-b637-4e18-9bd9-db98bc75ffe3" />
+    <img width="18%" alt="Map Dark" src="https://github.com/user-attachments/assets/7e50573c-18b2-46e5-86e2-cdfede6511ca" />
+    <img width="18%" alt="Map Dark" src="https://github.com/user-attachments/assets/b884a540-d080-46de-ac3a-1816e2bd686e" />
 </p>
+
 
 ### Dark Mode
 <p align="center">
