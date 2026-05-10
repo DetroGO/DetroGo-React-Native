@@ -1,5 +1,5 @@
 <div align="center">
-    <img src="https://github.com/user-attachments/assets/52ffd501-0e53-4b32-97cf-2e27efdb1adc"
+<img src="https://github.com/user-attachments/assets/0a21b0a5-07d3-4d07-a618-f864b543f359"
         title="Detro" alt="DetroGO logo" width="140" />
    <h1>DetroGO</h1>
    <h3>(React Native)</h3>
@@ -40,13 +40,15 @@
 
 ## 📱 Screenshots
 
+<p align="center">
+  <img width="23%" alt="Search Dark" src="https://github.com/user-attachments/assets/38121185-27e4-42a7-bad1-69e10f6f6d04" />
+  <img width="23%" alt="Detail Dark" src="https://github.com/user-attachments/assets/6880f498-2c75-43eb-9a60-71afc999bb04" />
+  <img width="23%" alt="Settings Dark" src="https://github.com/user-attachments/assets/b240e9a6-b637-4e18-9bd9-db98bc75ffe3" />
+    <img width="23%" alt="Map Dark" src="https://github.com/user-attachments/assets/7e50573c-18b2-46e5-86e2-cdfede6511ca" />
+</p>
+
 ### Dark Mode
 <p align="center">
-
-   
-
-
-
   <img width="23%" alt="Search Dark" src="https://github.com/user-attachments/assets/5dd92218-1615-4f7f-a54a-65184635c411" />
   <img width="23%" alt="Detail Dark" src="https://github.com/user-attachments/assets/dacd6cd3-53b1-485c-9b97-18bffa8c1274" />
   <img width="23%" alt="Settings Dark" src="https://github.com/user-attachments/assets/2923023e-0def-419e-9c53-e82f40e1f480" />
