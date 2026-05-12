@@ -2,9 +2,14 @@ const strings = {
   home: {
     searchbar: "Search Route",
     recentTrips: "Recent Trips",
-    noRecentTrips: "No recent trips yet",
+    noRecentTrips: "No Recent Trips Yet",
     savedRoutes: "Saved Routes",
+    noSavedRoutes: "No Saved Routes Yet",
+    noSavedRoutesdesc: "Search for a journey and save it here for quick access",
     selectnet: "Select a Metro System",
+    startbysearch:
+      "Hi There! New Here? Press the Button Bellow to Learn how to get started",
+    try: "Welcome to DetroGo",
   },
   planner: {
     placeholder: "Search line or station",
@@ -31,6 +36,7 @@ const strings = {
     error: "Something went wrong",
     home: "Home",
     work: "Work",
+    getstarted: "Get Started",
     viewall: "View All",
     go: "GO",
     locationPermission: "Location Permission Required",
@@ -38,6 +44,9 @@ const strings = {
     stations: "Stations",
     route: "Route",
     transfers: "Transfers",
+    takeTour: "Take the Tour",
+    planTrip: "Open Planner",
+    skip: "Skip",
   },
 } as const;
 

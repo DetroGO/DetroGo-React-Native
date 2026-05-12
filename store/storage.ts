@@ -1,8 +1,6 @@
 import { MMKV } from "react-native-mmkv";
-import { createJSONStorage as createZustandStorage } from "zustand/middleware";
-import { Platform } from "react-native";
+import { StateStorage, createJSONStorage } from "zustand/middleware";
 
-// MMKV requires a native build — falls back to a no-op in Expo Go
 let mmkv: MMKV | null = null;
 try {
   mmkv = new MMKV({ id: "detrogo-storage" });
@@ -12,7 +10,8 @@ try {
 
 export const storage = mmkv;
 
-export const zustandStorage = createZustandStorage(() => ({
+// ✅ Correct — pass the StateStorage object directly
+const mmkvStorage: StateStorage = {
   setItem: (name, value) => {
     mmkv?.set(name, value);
   },
@@ -22,6 +21,7 @@ export const zustandStorage = createZustandStorage(() => ({
   removeItem: (name) => {
     mmkv?.delete(name);
   },
-}));
+};
 
+export const zustandStorage = createJSONStorage(() => mmkvStorage);
 export default zustandStorage;

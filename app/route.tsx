@@ -1,8 +1,10 @@
 import { StyleSheet, View, Pressable, Animated } from "react-native";
+import { useRecentTripsStore } from "@/store/recentTrips";
+import { useBookmarksStore } from "@/store/savedRoutes";
 import { ScrollView } from "react-native-gesture-handler";
-
+import { Asset } from "expo-asset";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import {
   Text,
   Button,
@@ -161,9 +163,12 @@ function StationNavigator({
 }
 
 export default function RoutePlanScreen() {
+  const [htmlUri, setHtmlUri] = useState<string | null>(null);
   const webviewRef = useRef(null);
+  const { addTrip } = useRecentTripsStore();
+  const { addBookmark, removeBookmark, isBookmarked } = useBookmarksStore();
   const theme = useAppTheme();
-
+  const isDark = theme.dark;
   const [isMapReady, setIsMapReady] = useState(false);
   const [currentStation, setCurrentStation] = useState("");
   const [routeData, setRouteData] = useState(null);
@@ -179,6 +184,50 @@ export default function RoutePlanScreen() {
     outputRange: [14, 28],
   });
 
+  useEffect(() => {
+    Asset.fromModule(require("../assets/routemap/index.html"))
+      .downloadAsync()
+      .then((asset) => setHtmlUri(asset.localUri));
+  }, []);
+
+  // Add this inside your RoutePlanScreen component
+  useEffect(() => {
+    if (isMapReady && routeData) {
+      const payload = {
+        type: "SYNC_STATE",
+        payload: {
+          route: routeData,
+          theme: theme.dark ? "dark" : "light",
+        },
+      };
+
+      // Convert to string and inject
+      const jsonString = JSON.stringify(payload);
+      const run = `window.updateScene(${jsonString}); true;`;
+      webviewRef.current?.injectJavaScript(run);
+    }
+  }, [theme.dark, isMapReady, routeData]);
+
+  const handleBookmark = () => {
+    if (isBookmarked(fromStation, toStation)) {
+      const bookmark = bookmarks.find(
+        (b) => b.from === fromStation && b.to === toStation,
+      );
+      if (bookmark) removeBookmark(bookmark.id);
+    } else {
+      if (!routeData) return;
+      addBookmark({
+        id: `${fromStation}__${toStation}__${Date.now()}`,
+        from: fromStation,
+        to: toStation,
+        stops: routeData.stops,
+        transfers: routeData.transferStations.length,
+        savedAt: Date.now(),
+        routeData: routeData,
+      });
+    }
+  };
+
   const handleFindRoute = (from = fromStation, to = toStation) => {
     const result = calculateRoute(from, to);
     if (result.error) {
@@ -192,8 +241,6 @@ export default function RoutePlanScreen() {
   };
 
   const handleWebViewMessage = (event) => {
-    const stationName = event.nativeEvent.data;
-    setCurrentStation(stationName);
     const message = event.nativeEvent.data;
     if (message === "READY") {
       setIsMapReady(true);
@@ -201,7 +248,18 @@ export default function RoutePlanScreen() {
       if (!initialRoute.error) {
         setRouteData(initialRoute);
         webviewRef.current?.postMessage(JSON.stringify(initialRoute));
+        addTrip({
+          id: `${fromStation}__${toStation}__${Date.now()}`,
+          from: fromStation,
+          to: toStation,
+          stops: initialRoute.stops,
+          transfers: initialRoute.transferStations.length,
+          viewedAt: Date.now(),
+          routeData: initialRoute,
+        });
       }
+    } else {
+      setCurrentStation(message);
     }
   };
 
@@ -335,23 +393,24 @@ export default function RoutePlanScreen() {
               mode="contained"
               containerColor="transparent"
               style={{ marginRight: 20 }}
-              onPress={() => router.back()}
+              onPress={() => handleBookmark(fromStation, toStation)}
             />
           </View>
-
-          <WebView
-            ref={webviewRef}
-            source={require("../assets/routemap/index.html")}
-            javaScriptEnabled={true}
-            startInLoadingState={true}
-            onMessage={handleWebViewMessage}
-            style={{ backgroundColor: "transparent" }}
-            originWhitelist={["*"]}
-            allowFileAccess={true}
-            scrollEnabled={false}
-            overScrollMode="never"
-            bounces={false}
-          />
+          {htmlUri && (
+            <WebView
+              ref={webviewRef}
+              source={{ uri: htmlUri }}
+              javaScriptEnabled={true}
+              startInLoadingState={true}
+              onMessage={handleWebViewMessage}
+              style={{ backgroundColor: "transparent" }}
+              originWhitelist={["*"]}
+              allowFileAccess={true}
+              scrollEnabled={false}
+              overScrollMode="never"
+              bounces={false}
+            />
+          )}
         </View>
 
         {/* --- FOREGROUND UI (Bottom Sheet style) --- */}
@@ -371,8 +430,8 @@ export default function RoutePlanScreen() {
             <Card
               mode="elevated"
               style={{
-                marginLeft: 15,
-                marginRight: 15,
+                marginLeft: 16,
+                marginRight: 16,
                 borderRadius: 24,
                 padding: 30,
                 paddingTop: 5,
@@ -386,7 +445,7 @@ export default function RoutePlanScreen() {
                     alignItems: "center",
                     justifyContent: "center",
                     gap: 15,
-                    marginBottom: 16,
+                    marginBottom: 18,
                     paddingTop: 16,
                     paddingHorizontal: 16,
                     paddingBottom: 14,
@@ -461,7 +520,7 @@ export default function RoutePlanScreen() {
                         flexDirection: "row",
                         alignItems: "center",
                         justifyContent: "center",
-                        marginBottom: 10,
+                        marginBottom: 18,
                         gap: 8,
                       }}
                     >
@@ -499,7 +558,7 @@ export default function RoutePlanScreen() {
                         flexDirection: "row",
                         alignItems: "center",
                         justifyContent: "center",
-                        marginBottom: 10,
+                        marginBottom: 18,
                         gap: 8,
                       }}
                     >
@@ -530,8 +589,15 @@ export default function RoutePlanScreen() {
             </View>
           )}
           {/* Display React Native UI based on the calculation */}
+
           {routeData && (
             <View style={{ marginTop: 24, margin: 15 }}>
+              <Text
+                style={{ marginBottom: 22, marginLeft: 8 }}
+                variant="labelMedium"
+              >
+                Stations List
+              </Text>
               {routeData.route.map((step: any, index: number) => (
                 <StationCard index={index} item={step} data={routeData.stops} />
               ))}

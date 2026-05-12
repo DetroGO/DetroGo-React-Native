@@ -9,6 +9,8 @@ import {
   View,
 } from "react-native";
 
+import { useOnboardingStore } from "@/store/onboarding";
+
 import strings from "@/constants/strings";
 
 import { Text } from "react-native-paper";
@@ -1237,7 +1239,7 @@ function SlideUI({
 
 export default function OnboardingScreen() {
   const theme = useAppTheme();
-
+  const setHasSeenTutorial = useOnboardingStore((state) => state.setHasSeenTutorial);
   const [activeIndex, setActiveIndex] = useState(0);
 
   const flatListRef = useRef<FlatList>(null);
@@ -1268,7 +1270,9 @@ export default function OnboardingScreen() {
 
       setActiveIndex((i) => i + 1);
     } else {
-      router.replace("/(tabs)");
+      console.log("setting hasSeenTutorial true"); // ← add this
+      setHasSeenTutorial(true);
+      router.push("/planner");
     }
   }, [activeIndex]);
 
@@ -1341,7 +1345,7 @@ export default function OnboardingScreen() {
         <View style={styles.btnRow}>
           {/* Skip button — hidden on last slide */}
 
-          {!isLast && (
+          {/*{!isLast && (
             <Animated.View style={{ transform: [{ scale: skipSpring.scale }] }}>
               <Pressable
                 onPressIn={skipSpring.onPressIn}
@@ -1373,7 +1377,7 @@ export default function OnboardingScreen() {
                 </Animated.View>
               </Pressable>
             </Animated.View>
-          )}
+          )}*/}
 
           {/* Next / Get Started button */}
 
@@ -1407,6 +1411,7 @@ export default function OnboardingScreen() {
               >
                 <Text
                   variant="labelLarge"
+
                   style={{ color: theme.colors.onPrimary }}
                 >
                   {isLast ? "Get Started" : "Next →"}

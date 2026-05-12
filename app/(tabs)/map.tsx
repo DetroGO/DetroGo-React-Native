@@ -1,5 +1,6 @@
 import React, { useRef, useState } from "react";
 import { Animated, Pressable, StyleSheet, View } from "react-native";
+
 import { IconButton, Text } from "react-native-paper";
 import {
   Camera,
@@ -10,7 +11,8 @@ import {
 } from "@maplibre/maplibre-react-native";
 import { useAppTheme } from "@/hooks/useAppTheme";
 import SearchBar from "@/components/ui/searchbar";
-
+import mapLightStyle from "@/constants/maplight";
+import mapDarkStyle from "@/constants/mapdark";
 // ─── Lines GeoJSON ────────────────────────────────────────────────────────────
 // All GeometryCollections pre-flattened → plain LineStrings.
 // Each feature has a "stroke" property consumed by the Layer paint expression.
@@ -4206,9 +4208,10 @@ export default function MapScreen() {
       {/* Map */}
       <Map
         style={styles.map}
-        mapStyle="https://basemaps.cartocdn.com/gl/dark-matter-nolabels-gl-style/style.json"
+        mapStyle={theme.dark ? mapDarkStyle : mapLightStyle}
         logoEnabled={false}
         attributionEnabled={false}
+        compassPosition={{ top: 623, right: 18 }}
         onRegionWillChange={() => {
           // Stop tracking when user manually moves map
           if (tracking) {

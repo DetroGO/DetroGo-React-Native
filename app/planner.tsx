@@ -379,7 +379,9 @@ export default function ModalScreen() {
                 {editingMode === "start" && nearest && (
                   <Card
                     style={{
-                      backgroundColor: theme.colors.primaryContainer,
+                      backgroundColor: theme.dark
+                        ? theme.colors.primaryContainer
+                        : theme.colors.primaryContainer,
                       flex: 1,
                       marginTop: 12,
                       paddingLeft: 5,
@@ -405,7 +407,11 @@ export default function ModalScreen() {
                         />
                       ) : (
                         <Icon
-                          color={theme.colors.onPrimaryContainer}
+                          color={
+                            theme.dark
+                              ? theme.colors.onPrimaryContainer
+                              : theme.colors.primary
+                          }
                           source="crosshairs-gps"
                           size={26}
                         />
@@ -414,7 +420,11 @@ export default function ModalScreen() {
                       <View style={{ flex: 1 }}>
                         <Text
                           variant="labelSmall"
-                          style={{ color: theme.colors.onPrimaryContainer }}
+                          style={{
+                            color: theme.dark
+                              ? theme.colors.onPrimaryContainer
+                              : theme.colors.primary,
+                          }}
                         >
                           {isLoading
                             ? strings.common.loading
@@ -435,7 +445,11 @@ export default function ModalScreen() {
                         ) : (
                           <Text
                             variant="titleMedium"
-                            style={{ color: theme.colors.onPrimaryContainer }}
+                            style={{
+                              color: theme.dark
+                                ? theme.colors.onPrimaryContainer
+                                : theme.colors.primary,
+                            }}
                           >
                             {nearest.nearestStation.stop_name}
                           </Text>
@@ -457,10 +471,9 @@ export default function ModalScreen() {
               >
                 <Card
                   style={{
-                    backgroundColor:
-                      editingMode === "start"
-                        ? theme.colors.primaryContainer
-                        : theme.colors.primaryContainer,
+                    backgroundColor: theme.dark
+                      ? theme.colors.primaryContainer
+                      : theme.colors.secondaryContainer,
                     flex: 1,
                     alignItems: "center",
                     borderTopLeftRadius: 18,
@@ -479,12 +492,20 @@ export default function ModalScreen() {
                     }}
                   >
                     <Icon
-                      color={theme.colors.onPrimaryContainer}
+                      color={
+                        theme.dark
+                          ? theme.colors.onPrimaryContainer
+                          : theme.colors.primary
+                      }
                       source="home"
                       size={24}
                     />
                     <Text
-                      style={{ color: theme.colors.onPrimaryContainer }}
+                      style={{
+                        color: theme.dark
+                          ? theme.colors.onPrimaryContainer
+                          : theme.colors.primary,
+                      }}
                       variant="titleMedium"
                     >
                       {strings.common.home}
@@ -493,10 +514,9 @@ export default function ModalScreen() {
                 </Card>
                 <Card
                   style={{
-                    backgroundColor:
-                      editingMode === "start"
-                        ? theme.colors.primaryContainer
-                        : theme.colors.primaryContainer,
+                    backgroundColor: theme.dark
+                      ? theme.colors.primaryContainer
+                      : theme.colors.secondaryContainer,
                     flex: 1,
                     alignItems: "center",
                     borderTopLeftRadius: 6,
@@ -515,12 +535,20 @@ export default function ModalScreen() {
                     }}
                   >
                     <Icon
-                      color={theme.colors.onPrimaryContainer}
+                      color={
+                        theme.dark
+                          ? theme.colors.onPrimaryContainer
+                          : theme.colors.primary
+                      }
                       source="briefcase-variant"
                       size={24}
                     />
                     <Text
-                      style={{ color: theme.colors.onPrimaryContainer }}
+                      style={{
+                        color: theme.dark
+                          ? theme.colors.onPrimaryContainer
+                          : theme.colors.primary,
+                      }}
                       variant="titleMedium"
                     >
                       {strings.common.work}

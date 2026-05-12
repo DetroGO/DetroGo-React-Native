@@ -5,6 +5,9 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { ScrollView } from "react-native-gesture-handler";
 import { useAppTheme } from "@/hooks/useAppTheme";
 import { useLocalSearchParams, router } from "expo-router";
+import { useRecentTripsStore } from "@/store/recentTrips";
+import { useBookmarksStore } from "@/store/savedRoutes";
+import { RecentTrip, SavedRoute } from "@/types/route";
 
 // ─── Spring hook ────────────────────────────────────────────────────────────
 function useSpringPress() {
@@ -29,12 +32,6 @@ function useSpringPress() {
 }
 
 // ─── Mock data ───────────────────────────────────────────────────────────────
-const MOCK_ROUTES = [
-  { from: "Rajiv Chowk", to: "Preet Vihar", stops: 5, transfers: 1 },
-  { from: "Kashmere Gate", to: "Botanical Garden", stops: 12, transfers: 2 },
-  { from: "Dwarka Sec 21", to: "Noida Sector 62", stops: 18, transfers: 1 },
-  { from: "Huda City Centre", to: "Samaypur Badli", stops: 26, transfers: 0 },
-];
 
 // ─── RouteCard ───────────────────────────────────────────────────────────────
 function RouteCard({
@@ -43,7 +40,7 @@ function RouteCard({
   total,
   theme,
 }: {
-  item: (typeof MOCK_ROUTES)[0];
+  item: RecentTrip | SavedRoute;
   index: number;
   total: number;
   theme: ReturnType<typeof useAppTheme>;
@@ -180,6 +177,11 @@ export default function ListPage() {
   const { type } = useLocalSearchParams<{ type: string }>();
   const isSaved = type === "saved";
 
+  const recentTrips = useRecentTripsStore((state) => state.recentTrips);
+  const bookmarks = useBookmarksStore((state) => state.bookmarks);
+
+  const data = isSaved ? bookmarks : recentTrips;
+
   return (
     <SafeAreaView
       style={{
@@ -240,15 +242,28 @@ export default function ListPage() {
         <View
           style={{ paddingHorizontal: 15, paddingTop: 8, paddingBottom: 32 }}
         >
-          {MOCK_ROUTES.map((item, index) => (
-            <RouteCard
-              key={index}
-              item={item}
-              index={index}
-              total={MOCK_ROUTES.length}
-              theme={theme}
-            />
-          ))}
+          {data.length === 0 ? (
+            <Text
+              variant="bodyMedium"
+              style={{
+                color: theme.colors.onSurfaceVariant,
+                textAlign: "center",
+                marginTop: 40,
+              }}
+            >
+              {isSaved ? "No saved routes yet" : "No recent trips yet"}
+            </Text>
+          ) : (
+            data.map((item, index) => (
+              <RouteCard
+                key={item.id}
+                item={item}
+                index={index}
+                total={data.length}
+                theme={theme}
+              />
+            ))
+          )}
         </View>
       </ScrollView>
     </SafeAreaView>
