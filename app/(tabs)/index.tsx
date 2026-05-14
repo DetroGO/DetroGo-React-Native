@@ -700,7 +700,7 @@ export default function HomeScreen() {
                 </View>
                 {recentTrips.length > 0 ? (
                   recentTrips.map((trip, index) => (
-                    <RecentCard index={index} item={trip} key={trip.id} />
+                    <RecentCard total={recentTrips.length} index={index} item={trip} key={trip.id} />
                   ))
                 ) : (
                   <View
