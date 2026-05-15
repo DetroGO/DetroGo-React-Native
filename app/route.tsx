@@ -1,4 +1,10 @@
-import { StyleSheet, View, Pressable, Animated } from "react-native";
+import {
+  StyleSheet,
+  View,
+  Pressable,
+  Animated,
+  Dimensions,
+} from "react-native";
 import { useRecentTripsStore } from "@/store/recentTrips";
 import { useBookmarksStore } from "@/store/savedRoutes";
 import { ScrollView } from "react-native-gesture-handler";
@@ -22,7 +28,6 @@ import strings from "@/constants/strings";
 
 import { calculateRoute } from "../utils/metroRouting";
 import { useLocalSearchParams } from "expo-router";
-import { transparent } from "react-native-paper/lib/typescript/styles/themes/v2/colors";
 
 // ─── M3 Expressive spring hook ─────────────────────────────────────────────
 function useSpringPress() {
@@ -172,7 +177,7 @@ export default function RoutePlanScreen() {
   const [isMapReady, setIsMapReady] = useState(false);
   const [currentStation, setCurrentStation] = useState("");
   const [routeData, setRouteData] = useState(null);
-
+  const screenWidth = Dimensions.get("window").width;
   const { start, end } = useLocalSearchParams<{ start: string; end: string }>();
   const [fromStation, setFromStation] = useState(start);
   const [toStation, setToStation] = useState(end);
@@ -191,6 +196,8 @@ export default function RoutePlanScreen() {
   }, []);
 
   // Add this inside your RoutePlanScreen component
+  //
+
   useEffect(() => {
     if (isMapReady && routeData) {
       const payload = {
@@ -291,17 +298,35 @@ export default function RoutePlanScreen() {
 
   const StationCard = ({ index, item, data }) => {
     const theme = useAppTheme();
-    console.log(index);
+
+    // Instead of useState, derive the value directly.
+    // We check if the station name exists in the transferStations array.
+    // (This handles whether transferStations is an array of strings or objects)
+    const isTransfer = data.transferStations.some(
+      (transfer) =>
+        transfer === item.station || transfer.station === item.station,
+    );
+
+    const nextStation = data.route[index + 1];
+
+    // 3. Determine if we are changing lines at this exact step
+    let switchingToLine = null;
+    if (isTransfer && nextStation && nextStation.line !== item.line) {
+      switchingToLine = nextStation.line;
+    }
+
     return (
       <Card
         mode="contained"
         style={{
-          backgroundColor: theme.colors.elevation.level1,
+          backgroundColor: isTransfer
+            ? theme.colors.surfaceContainerHigh
+            : theme.colors.elevation.level1,
           marginBottom: 2.8,
           borderTopLeftRadius: index === 0 ? 24 : 6,
           borderTopRightRadius: index === 0 ? 24 : 6,
-          borderBottomLeftRadius: index === routeData.stops ? 24 : 6,
-          borderBottomRightRadius: index === routeData.stops ? 24 : 6,
+          borderBottomLeftRadius: index === data.stops ? 24 : 6,
+          borderBottomRightRadius: index === data.stops ? 24 : 6,
         }}
         onPress={() => {}}
       >
@@ -316,39 +341,37 @@ export default function RoutePlanScreen() {
         >
           <View
             style={{
-              width: 50,
-              height: 50,
-              backgroundColor: theme.colors.surfaceVariant,
+              width: 57,
+              height: 57,
+              backgroundColor: isTransfer
+                ? theme.colors.surfaceContainerHigh
+                : theme.colors.surfaceVariant,
               alignItems: "center",
               justifyContent: "center",
-              borderRadius: 17,
+              borderRadius: isTransfer ? 80 : 20,
             }}
           >
             <Icon
-              source="source-commit"
-              size={30}
+              source={isTransfer ? "transit-transfer" : "source-commit"}
+              size={33}
               color={theme.colors.onSurfaceVariant}
             />
           </View>
           <View style={{ flex: 1 }}>
-            <Text
-              variant="bodyMedium"
-              style={{ color: theme.colors.onSurface }}
-            >
+            <Text variant="bodyLarge" style={{ color: theme.colors.onSurface }}>
               {item.station}
             </Text>
             <Text
               variant="labelSmall"
               style={{ color: theme.colors.onSurfaceVariant, marginTop: 1 }}
             >
-              {item.line}
+              {isTransfer ? "Change to " + switchingToLine : item.line}
             </Text>
           </View>
         </Card.Content>
       </Card>
     );
   };
-
   return (
     <SafeAreaView
       style={{
@@ -360,13 +383,18 @@ export default function RoutePlanScreen() {
       <ScrollView
         showsVerticalScrollIndicator={false}
         nestedScrollEnabled={true}
-        style={{ padding: 0 }}
       >
-        <View style={{ height: 400 }}>
+        <View
+          style={{
+            height: 400,
+            width: screenWidth + 2,
+            marginLeft: -1,
+          }}
+        >
           <View
             style={{
               position: "absolute",
-              top: 35,
+              top: 38,
               left: 10,
               zIndex: 1000,
               alignItems: "center",
@@ -599,7 +627,7 @@ export default function RoutePlanScreen() {
                 Stations List
               </Text>
               {routeData.route.map((step: any, index: number) => (
-                <StationCard index={index} item={step} data={routeData.stops} />
+                <StationCard index={index} item={step} data={routeData} />
               ))}
             </View>
           )}

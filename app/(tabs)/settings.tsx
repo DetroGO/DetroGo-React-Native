@@ -599,7 +599,7 @@ export default function Settings() {
                 textAlign: "center",
               }}
             >
-              Version: Alpha
+              Version: Preview
             </Text>
             <Text
               variant="bodySmall"
@@ -609,7 +609,18 @@ export default function Settings() {
                 marginTop: 16,
               }}
             >
-              A transit navigation utility for the Delhi-NCR metro network.
+              This is a preview build of DetroGo. Its may contain bugs and
+              incomplete features. and is only intended for alpha testers
+            </Text>
+            <Text
+              variant="bodySmall"
+              style={{
+                color: theme.colors.outline,
+                textAlign: "center",
+                marginTop: 8,
+              }}
+            >
+              Thank you for testing DetroGo!
             </Text>
             <Text
               variant="bodySmall"
@@ -621,15 +632,26 @@ export default function Settings() {
             >
               Open Source · GNU GPL v3.0
             </Text>
+
             <Text
               variant="bodySmall"
               style={{
                 color: theme.colors.secondary,
                 textAlign: "center",
+                marginTop: 18,
+              }}
+            >
+              Report Bugs & Feedback on
+            </Text>
+            <Text
+              variant="bodySmall"
+              style={{
+                color: theme.colors.primary,
+                textAlign: "center",
                 marginTop: 8,
               }}
             >
-              Ansh Wadhwa
+              Discord | GitHub
             </Text>
           </Dialog.Content>
           <Dialog.Actions

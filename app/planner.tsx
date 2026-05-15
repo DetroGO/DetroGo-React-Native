@@ -1,6 +1,8 @@
 import { router } from "expo-router";
 import { useEffect } from "react";
 import * as Location from "expo-location";
+import * as Haptics from "expo-haptics";
+import { ToastAndroid } from "react-native";
 import metroLines from "../constants/metrolines.json";
 import stations from "../constants/stationsdata.json";
 import { useAppTheme } from "@/hooks/useAppTheme";
@@ -22,8 +24,14 @@ import Animated, {
 } from "react-native-reanimated";
 import strings from "@/constants/strings";
 
-import { StyleSheet, View, SectionList, ActivityIndicator } from "react-native";
-import { useState } from "react";
+import {
+  StyleSheet,
+  View,
+  SectionList,
+  ActivityIndicator,
+  BackHandler,
+} from "react-native";
+import { useState, useCallback } from "react";
 import { useRouter } from "expo-router";
 import { useRef } from "react";
 type TransitLines = Record<string, string[]>;
@@ -107,25 +115,37 @@ export default function ModalScreen() {
   }));
 
   const handleGo = () => {
-    router.push({
-      pathname: "/route",
-      params: { start: startStation, end: finalStation },
-    });
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    if (startStation !== finalStation) {
+      router.push({
+        pathname: "/route",
+        params: { start: startStation, end: finalStation },
+      });
+    } else {
+      ToastAndroid.show(
+        "Start Station and Final Station cannot be the same",
+        ToastAndroid.SHORT,
+      );
+    }
   };
 
   const handleStationSelect = (item: string) => {
     if (editingMode === "start") {
+      Haptics.selectionAsync();
       setStartStation(item);
       setStartsel(true);
       setEditingMode(null);
       setSearchv("none");
       setPlannerv("block");
     } else if (editingMode === "final") {
+      Haptics.selectionAsync();
       setFinalStation(item);
       setFinalsel(true);
       setEditingMode(null);
       setSearchv("none");
       setPlannerv("block");
+    } else {
+      ToastAndroid.show("First pick a endpoint to change", ToastAndroid.SHORT);
     }
   };
 
@@ -136,21 +156,23 @@ export default function ModalScreen() {
     setPlannerv("block");
   };
 
-  const startStationsel = (item: string) => {
+  const startStationsel = () => {
+    Haptics.selectionAsync();
     setEditingMode("start");
     setPlannerv("none");
     setSearchv("block");
     setPhrase("");
     setFilteredSections(initialSections);
   };
-  const finalStationsel = (item: string) => {
+
+  const finalStationsel = () => {
+    Haptics.selectionAsync();
     setEditingMode("final");
     setPlannerv("none");
     setSearchv("block");
     setPhrase("");
     setFilteredSections(initialSections);
   };
-
   const searchData = (text: string) => {
     setPhrase(text); // Update search phrase state
 
@@ -179,6 +201,34 @@ export default function ModalScreen() {
     setFilteredSections(filtered as typeof initialSections); // Update the state with filtered sections
   };
 
+  const cancelSearch = useCallback(() => {
+    // Only cancel if we have something to go back to
+    if (startsel || finalsel) {
+      setSearchv("none");
+      setPlannerv("block");
+      setEditingMode(null);
+      setPhrase("");
+      setFilteredSections(initialSections);
+      return true; // consume the back press
+    }
+    return false; // let system handle it (exit/back)
+  }, [startsel, finalsel]);
+
+  useEffect(() => {
+    // Only intercept the back button if we are in an active editing/search mode
+    if (editingMode !== null) {
+      const subscription = BackHandler.addEventListener(
+        "hardwareBackPress",
+        cancelSearch,
+      );
+
+      // Cleanup the listener when the mode changes or component unmounts
+      return () => subscription.remove();
+    }
+    // If editingMode is null, we do nothing.
+    // Expo Router will naturally handle the back press and close the Modal.
+  }, [editingMode, cancelSearch]); // Make sure editingMode is in the dependency array
+
   useEffect(() => {
     (async () => {
       try {
@@ -206,6 +256,7 @@ export default function ModalScreen() {
         }
       } catch (error) {
         setErrorMsg(strings.common.error + error.message);
+        ToastAndroid.show(errorMsg, ToastAndroid.SHORT);
       } finally {
         setIsLoading(false);
       }

@@ -7,6 +7,7 @@ import {
   SafeAreaView,
   Animated,
 } from "react-native";
+import * as Haptics from "expo-haptics";
 import { useRef, useCallback } from "react";
 import { useOnboardingStore } from "@/store/onboarding";
 import { RecentTrip, SavedRoute } from "@/types/route";
@@ -341,10 +342,20 @@ const SystemCards = ({ index, item }: { index: number; item: Cities }) => {
 function useSpringPress() {
   const scale = useRef(new Animated.Value(1)).current;
   const onPressIn = useCallback(() => {
-    Animated.spring(scale, { toValue: 0.88, useNativeDriver: true, tension: 300, friction: 20 }).start();
+    Animated.spring(scale, {
+      toValue: 0.88,
+      useNativeDriver: true,
+      tension: 300,
+      friction: 20,
+    }).start();
   }, [scale]);
   const onPressOut = useCallback(() => {
-    Animated.spring(scale, { toValue: 1, useNativeDriver: true, tension: 300, friction: 15 }).start();
+    Animated.spring(scale, {
+      toValue: 1,
+      useNativeDriver: true,
+      tension: 300,
+      friction: 15,
+    }).start();
   }, [scale]);
   return { scale, onPressIn, onPressOut };
 }
@@ -378,7 +389,7 @@ function EmptyRoutesState({
         alignItems: "center",
         justifyContent: "center",
         paddingHorizontal: 32,
-        marginTop:40,
+        marginTop: 40,
         gap: 4,
       }}
     >
@@ -409,7 +420,10 @@ function EmptyRoutesState({
       </View>
 
       {/* Headline */}
-      <Text variant="titleLarge" style={{ color: theme.colors.onSurface, textAlign: "center" }}>
+      <Text
+        variant="titleLarge"
+        style={{ color: theme.colors.onSurface, textAlign: "center" }}
+      >
         {strings.home.try}
       </Text>
 
@@ -430,14 +444,22 @@ function EmptyRoutesState({
 
       {/* Buttons row */}
       <View style={{ flexDirection: "column", gap: 12 }}>
-
         {/* Take the Tour — secondary tonal */}
         <Animated.View style={{ transform: [{ scale: tourSpring.scale }] }}>
           <Pressable
-            onPressIn={tourSpring.onPressIn}
-            onPressOut={tourSpring.onPressOut}
+            onPressIn={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Soft);
+              tourSpring.onPressIn();
+            }}
+            onPressOut={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Rigid);
+              tourSpring.onPressOut();
+            }}
             onPress={onTakeTour}
-            android_ripple={{ color: theme.colors.onSurfaceVariant + "22", borderless: false }}
+            android_ripple={{
+              color: theme.colors.onSurfaceVariant + "22",
+              borderless: false,
+            }}
           >
             <Animated.View
               style={{
@@ -452,8 +474,15 @@ function EmptyRoutesState({
                 borderRadius: tourRadius,
               }}
             >
-              <Icon source="compass-outline" size={18} color={theme.colors.onPrimaryContainer} />
-              <Text variant="labelLarge" style={{ color: theme.colors.onPrimaryContainer }}>
+              <Icon
+                source="compass-outline"
+                size={18}
+                color={theme.colors.onPrimaryContainer}
+              />
+              <Text
+                variant="labelLarge"
+                style={{ color: theme.colors.onPrimaryContainer }}
+              >
                 {strings.common.takeTour}
               </Text>
             </Animated.View>
@@ -466,7 +495,10 @@ function EmptyRoutesState({
             onPressIn={planSpring.onPressIn}
             onPressOut={planSpring.onPressOut}
             onPress={onPlanTrip}
-            android_ripple={{ color: theme.colors.onSecondaryContainer + "33", borderless: false }}
+            android_ripple={{
+              color: theme.colors.onSecondaryContainer + "33",
+              borderless: false,
+            }}
           >
             <Animated.View
               style={{
@@ -476,19 +508,26 @@ function EmptyRoutesState({
                 justifyContent: "center",
                 flexDirection: "row",
                 gap: 0,
-                backgroundColor: hasSeenTutorial ? theme.colors.primaryContainer: "transparent",
+                backgroundColor: hasSeenTutorial
+                  ? theme.colors.primaryContainer
+                  : "transparent",
                 borderRadius: planRadius,
               }}
             >
               {/*<Icon source="calendar" size={18} color={theme.colors.onSurfaceVariant} />*/}
-              <Text variant="labelMedium" style={{ color: hasSeenTutorial ? theme.colors.onPrimaryContainer : theme.colors.secondary }}>
-
+              <Text
+                variant="labelMedium"
+                style={{
+                  color: hasSeenTutorial
+                    ? theme.colors.onPrimaryContainer
+                    : theme.colors.secondary,
+                }}
+              >
                 {strings.common.planTrip}
               </Text>
             </Animated.View>
           </Pressable>
         </Animated.View>
-
       </View>
     </View>
   );
@@ -506,15 +545,19 @@ export default function HomeScreen() {
   return (
     <SafeAreaView style={{ flex: 1 }}>
       {bookmarks.length === 0 && recentTrips.length === 0 ? (
-        <View style={{ flex: 1 }} >
+        <View style={{ flex: 1 }}>
           <EmptyRoutesState
-              theme={theme}
-              onTakeTour={() => router.push("/onboarding")}
-              onPlanTrip={() => router.push("/planner")}
-            />
+            theme={theme}
+            onTakeTour={() => {
+              Haptics.selectionAsync();
+              router.push("/onboarding");
+            }}
+            onPlanTrip={() => {
+              Haptics.selectionAsync();
+              router.push("/planner");
+            }}
+          />
         </View>
-
-
       ) : (
         <View style={{ flex: 1 }}>
           <ScrollView
@@ -561,7 +604,9 @@ export default function HomeScreen() {
                   Where to?
                 </Text>*/}
                 </View>
-                <View style={{ alignItems: "center", justifyContent: "center" }}>
+                <View
+                  style={{ alignItems: "center", justifyContent: "center" }}
+                >
                   {/*<Button
                   icon="crosshairs-gps"
                   mode="outlined"
@@ -586,27 +631,38 @@ export default function HomeScreen() {
             {/* Bookmarks */}
 
             <View>
-              <View style={{ marginTop: 16, paddingTop: 15, gap: 10 }}>
+              <View style={{ marginTop: 10, paddingTop: 15, gap: 10 }}>
                 <View
                   style={{
                     marginLeft: 20,
+                    display: bookmarks.length > 0 ? "flex" : "none",
+
                     marginBottom: 10,
                     flexDirection: "row",
                     alignItems: "center",
                   }}
                 >
                   <View
-                    style={{ flex: 1, flexDirection: "row", alignItems: "center" }}
+                    style={{
+                      flex: 1,
+                      flexDirection: "row",
+                      alignItems: "center",
+                    }}
                   >
                     <Icon
                       source="bookmark-box-multiple"
                       size={24}
                       color={theme.colors.onSurfaceVariant}
                     />
-                    <Text style={{ marginLeft: 6 }}>{strings.home.savedRoutes}</Text>
+                    <Text style={{ marginLeft: 6 }}>
+                      {strings.home.savedRoutes}
+                    </Text>
                   </View>
                   <Button
-                    style={{ width: "auto", marginRight: 12 }}
+                    style={{
+                      width: "auto",
+                      marginRight: 12,
+                    }}
                     onPress={() =>
                       router.push({
                         pathname: "/listpage",
@@ -614,53 +670,72 @@ export default function HomeScreen() {
                       })
                     }
                   >
-                    <Text style={{ fontSize: 12, color: theme.colors.secondary }}>
+                    <Text
+                      style={{ fontSize: 12, color: theme.colors.secondary }}
+                    >
                       {strings.common.viewall}
                     </Text>
                   </Button>
                 </View>
                 {bookmarks.length > 0 ? (
-                <ScrollView
-                  horizontal
-                  showsHorizontalScrollIndicator={false}
-                  contentContainerStyle={{ paddingHorizontal: 16, gap: 10 }}
-                >
-
-
-
-                  bookmarks.map((route, index) => (
-                    <BookmarkCard key={route.id} item={route} />
-                  ))
-
+                  <ScrollView
+                    horizontal
+                    showsHorizontalScrollIndicator={false}
+                    contentContainerStyle={{ paddingHorizontal: 16, gap: 10 }}
+                  >
+                    {bookmarks.map((route, index) => (
+                      <BookmarkCard key={route.id} item={route} />
+                    ))}
                   </ScrollView>
-
                 ) : (
                   <View
                     style={{
                       display: "flex",
-                        alignItems: "center",
-                        padding: 15,
+                      alignItems: "center",
+                      padding: 15,
 
                       justifyContent: "center",
                       flex: 1,
                     }}
+                  >
+                    <View
+                      style={{
+                        flexDirection: "row",
+                        alignItems: "center",
+                        backgroundColor: theme.colors.surfaceContainerLow,
+                        padding: 16,
+                        margin: 2,
+                        borderRadius: 24,
+                      }}
                     >
-                      <View style={{ flexDirection: "row", alignItems: "center", backgroundColor: theme.colors.surfaceContainerLow, padding: 16, margin: 2, borderRadius:24, }}>
-                        <Icon
-                          source="bookmark"
-                          size={34}
-                          color={theme.colors.outlineVariant}
-                        />
-                      </View>
-                        <Text variant="labelLarge" style={{ marginLeft: 5, marginTop:8, color: theme.colors.outlineVariant }}>
-                          {strings.home.noSavedRoutes}
-                      </Text>
-                      <Text variant="labelSmall" style={{ textAlign: "center", marginTop:2, color: theme.colors.outlineVariant,width:250 }}>
-                        {strings.home.noSavedRoutesdesc}
-                      </Text>
-
-
+                      <Icon
+                        source="bookmark"
+                        size={34}
+                        color={theme.colors.outlineVariant}
+                      />
                     </View>
+                    <Text
+                      variant="labelLarge"
+                      style={{
+                        marginLeft: 5,
+                        marginTop: 8,
+                        color: theme.colors.outlineVariant,
+                      }}
+                    >
+                      {strings.home.noSavedRoutes}
+                    </Text>
+                    <Text
+                      variant="labelSmall"
+                      style={{
+                        textAlign: "center",
+                        marginTop: 2,
+                        color: theme.colors.outlineVariant,
+                        width: 250,
+                      }}
+                    >
+                      {strings.home.noSavedRoutesdesc}
+                    </Text>
+                  </View>
                 )}
               </View>
 
@@ -675,14 +750,20 @@ export default function HomeScreen() {
                   }}
                 >
                   <View
-                    style={{ flex: 1, flexDirection: "row", alignItems: "center" }}
+                    style={{
+                      flex: 1,
+                      flexDirection: "row",
+                      alignItems: "center",
+                    }}
                   >
                     <Icon
                       source="history"
                       size={24}
                       color={theme.colors.onSurfaceVariant}
                     />
-                    <Text style={{ marginLeft: 5 }}>{strings.home.recentTrips}</Text>
+                    <Text style={{ marginLeft: 5 }}>
+                      {strings.home.recentTrips}
+                    </Text>
                   </View>
                   <Button
                     style={{ width: "auto", marginRight: 0 }}
@@ -693,14 +774,21 @@ export default function HomeScreen() {
                       })
                     }
                   >
-                    <Text style={{ fontSize: 12, color: theme.colors.secondary }}>
+                    <Text
+                      style={{ fontSize: 12, color: theme.colors.secondary }}
+                    >
                       {strings.common.viewall}
                     </Text>
                   </Button>
                 </View>
                 {recentTrips.length > 0 ? (
                   recentTrips.map((trip, index) => (
-                    <RecentCard total={recentTrips.length} index={index} item={trip} key={trip.id} />
+                    <RecentCard
+                      total={recentTrips.length}
+                      index={index}
+                      item={trip}
+                      key={trip.id}
+                    />
                   ))
                 ) : (
                   <View
@@ -743,8 +831,6 @@ export default function HomeScreen() {
                 )}
               </View>
             </View>
-
-
           </ScrollView>
 
           <FAB
@@ -763,7 +849,6 @@ export default function HomeScreen() {
             onPress={showDialog}
           />
         </View>
-
       )}
       <Portal>
         <Dialog
@@ -795,7 +880,7 @@ export default function HomeScreen() {
 }
 
 const styles = StyleSheet.create({
-  scroll: { paddingBottom: 40, flexGrow: 1, },
+  scroll: { paddingBottom: 40, flexGrow: 1 },
   header: { paddingHorizontal: 20, paddingTop: 45, paddingBottom: 8 },
   searchWrapper: { paddingHorizontal: 16, paddingVertical: 12 },
   bookmarkCard: { width: 220, borderRadius: 20, padding: 16 },

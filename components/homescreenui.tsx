@@ -81,6 +81,7 @@ export default function HomeScreenShimmer() {
       style={[
         styles.root,
         {
+          marginTop: 10,
           backgroundColor: theme.colors.surface,
         },
       ]}
@@ -155,7 +156,7 @@ export default function HomeScreenShimmer() {
           </View>
 
           {/* Trip cards */}
-          {[0, 1, 2, 3].map((i, _, arr) => (
+          {[0, 1].map((i, _, arr) => (
             <View
               key={i}
               style={[
