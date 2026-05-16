@@ -8,8 +8,20 @@ const strings = {
     noSavedRoutesdesc: "Search for a journey and save it here for quick access",
     selectnet: "Select a Metro System",
     startbysearch:
-      "Hi There! New Here? Press the Button Bellow to Learn how to get started",
+      "Hey there! New to the app? Click below to learn how to get started.",
     try: "Welcome to DetroGo",
+  },
+  navigation: {
+    home: "Home",
+    map: "Map",
+    settings: "Settings",
+  },
+  listpage: {
+    title: "List Page",
+    savedRoutes: "Saved Routes",
+    noSavedRoutes: "No Saved Routes Yet",
+    recentRoutes: "Recent Routes",
+    noRecentRoutes: "No Recent Routes Yet",
   },
   planner: {
     placeholder: "Search line or station",
@@ -27,14 +39,27 @@ const strings = {
     mumbai: "Mumbai",
     chennai: "Chennai",
   },
+  settings: {
+    settings: "Settings",
+    theme: "Theme",
+    aboutdesc: "Transit utility app for Indian Transit",
+    colorScheme: "Color Scheme",
+    general: "General",
+    travelPreferences: "Travel Preferences",
+    about: "About",
+  },
   common: {
     back: "Back",
     cancel: "Cancel",
+    systemDefault: "System Default",
     confirm: "Confirm",
+    colorsAmoled: "Managed by Amoled Mode",
+    dynamicColors: "Dynamic Colors",
     loading: "Loading…",
     done: "Done",
     error: "Something went wrong",
     home: "Home",
+    amoled: "Amoled",
     work: "Work",
     getstarted: "Get Started",
     viewall: "View All",
@@ -47,6 +72,9 @@ const strings = {
     takeTour: "Take the Tour",
     planTrip: "Open Planner",
     skip: "Skip",
+    version: "Version",
+    seenTutorial:
+      "Get Started By Searching your First Route if you've not seen the tutorial you can take the tour through the settings",
   },
 } as const;
 

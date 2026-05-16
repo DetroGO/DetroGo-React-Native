@@ -1632,19 +1632,26 @@ const LINES: GeoJSON.FeatureCollection = {
           [77.2902668, 28.7093339, 0],
           [77.2906342, 28.7099644, 0],
           [77.2908032, 28.7103831, 0],
+
           [77.2908488, 28.7108183, 0],
           [77.2908193, 28.71111, 0],
           [77.2906986, 28.7115193, 0],
           [77.2903821, 28.7122956, 0],
           [77.2901557, 28.7128868, 0],
           [77.290024, 28.7135742, 0],
+
           [77.2899395, 28.7142599, 0],
           [77.289843, 28.7153643, 0],
           [77.2896445, 28.7185458, 0],
           [77.2894834, 28.7214306, 0],
+
           [77.2892784, 28.7248467, 0],
+
+          // --- Jump to Loni Border (Shiv Vihar) ---
+          // (Note: If your data cut off early in East Delhi, this jumps to Loni)
         ],
       },
+
       properties: {
         name: "Delhi Metro Pink Line",
         open: 1,
@@ -4264,8 +4271,8 @@ export default function MapScreen() {
                 "interpolate",
                 ["linear"],
                 ["zoom"],
-                8,
-                1.2,
+                6,
+                3.5,
                 11,
                 2.5,
                 14,
@@ -4292,8 +4299,8 @@ export default function MapScreen() {
                 "interpolate",
                 ["linear"],
                 ["zoom"],
-                8,
-                3,
+                6,
+                3.5,
                 11,
                 5,
                 14,
@@ -4310,6 +4317,7 @@ export default function MapScreen() {
             id="regular-layer"
             type="circle"
             filter={["==", ["get", "interchange"], 0]}
+            minZoomLevel={10}
             paint={{
               "circle-radius": [
                 "interpolate",

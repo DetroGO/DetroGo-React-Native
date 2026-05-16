@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { BottomNavigation } from "react-native-paper";
 import { useAppTheme } from "@/hooks/useAppTheme";
+import strings from "@/constants/strings";
 
 import HomeScreen from "./index";
 import SettingsScreen from "./settings";
@@ -17,19 +18,19 @@ export default function TabLayout() {
   const [routes] = useState([
     {
       key: "home",
-      title: "Home",
+      title: strings.navigation.home,
       focusedIcon: "home",
       unfocusedIcon: "home-outline",
     },
     {
       key: "map",
-      title: "Map",
+      title: strings.navigation.map,
       focusedIcon: "map",
       unfocusedIcon: "map-outline",
     },
     {
       key: "settings",
-      title: "Settings",
+      title: strings.navigation.settings,
       focusedIcon: "cog",
       unfocusedIcon: "cog-outline",
     },

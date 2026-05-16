@@ -53,7 +53,7 @@ const SLIDES = [
     title: "Find your\nroute instantly.",
     highlight: "route instantly.",
     description:
-      "Tap the search bar and type any Delhi Metro station — Detro finds the fastest path across all lines in seconds.",
+      "Tap the search bar and type any Delhi Metro station. Detro finds the fastest path across all lines in seconds.",
     icon: "magnify",
   },
   {
@@ -71,7 +71,7 @@ const SLIDES = [
     title: "Review, then\npress Go.",
     highlight: "press Go.",
     description:
-      "Check your from and to stations, hit Go, and get a full step-by-step route with line changes and fares.",
+      "Check your from and to stations, hit Go, and get a full step-by-step route with line changes and navigation",
     icon: "check-decagram",
   },
 ];
@@ -257,7 +257,7 @@ function Slide2UI({ theme }: { theme: ReturnType<typeof useAppTheme> }) {
     <View
       style={[
         styles.slideUI,
-        { backgroundColor: theme.colors.surface, marginBottom: 18 },
+        { backgroundColor: theme.colors.surface, marginBottom: 80 },
       ]}
     >
       <Card

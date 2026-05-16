@@ -8,6 +8,7 @@ import { useLocalSearchParams, router } from "expo-router";
 import { useRecentTripsStore } from "@/store/recentTrips";
 import { useBookmarksStore } from "@/store/savedRoutes";
 import { RecentTrip, SavedRoute } from "@/types/route";
+import strings from "@/constants/strings";
 
 // ─── Spring hook ────────────────────────────────────────────────────────────
 function useSpringPress() {
@@ -231,7 +232,9 @@ export default function ListPage() {
               variant="titleLarge"
               style={{ color: theme.colors.onSurface }}
             >
-              {isSaved ? "Saved Routes" : "Recent Trips"}
+              {isSaved
+                ? strings.listpage.savedRoutes
+                : strings.listpage.recentRoutes}
             </Text>
           </View>
           {/* Right slot — keeps title centred */}
@@ -251,7 +254,9 @@ export default function ListPage() {
                 marginTop: 40,
               }}
             >
-              {isSaved ? "No saved routes yet" : "No recent trips yet"}
+              {isSaved
+                ? strings.listpage.noSavedRoutes
+                : strings.listpage.noRecentRoutes}
             </Text>
           ) : (
             data.map((item, index) => (

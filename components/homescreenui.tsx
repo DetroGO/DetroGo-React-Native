@@ -82,6 +82,7 @@ export default function HomeScreenShimmer() {
         styles.root,
         {
           marginTop: 10,
+
           backgroundColor: theme.colors.surface,
         },
       ]}

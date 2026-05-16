@@ -4,9 +4,11 @@ import {
   ScrollView,
   Pressable,
   Image,
+  RefreshControl,
   SafeAreaView,
   Animated,
 } from "react-native";
+import React from "react";
 import * as Haptics from "expo-haptics";
 import { useRef, useCallback } from "react";
 import { useOnboardingStore } from "@/store/onboarding";
@@ -439,7 +441,9 @@ function EmptyRoutesState({
           marginBottom: 28,
         }}
       >
-        {strings.home.startbysearch}
+        {hasSeenTutorial
+          ? strings.common.seenTutorial
+          : strings.home.startbysearch}
       </Text>
 
       {/* Buttons row */}
@@ -502,7 +506,7 @@ function EmptyRoutesState({
           >
             <Animated.View
               style={{
-                height: 25,
+                height: hasSeenTutorial ? 50 : 25,
                 paddingHorizontal: hasSeenTutorial ? 100 : 0,
                 alignItems: "center",
                 justifyContent: "center",
@@ -541,6 +545,14 @@ export default function HomeScreen() {
   const showDialog = () => setVisible(true);
 
   const hideDialog = () => setVisible(false);
+  const [refreshing, setRefreshing] = React.useState(false);
+
+  const onRefresh = React.useCallback(() => {
+    setRefreshing(true);
+    setTimeout(() => {
+      setRefreshing(false);
+    }, 2000);
+  }, []);
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
@@ -568,6 +580,9 @@ export default function HomeScreen() {
             }}
             contentContainerStyle={styles.scroll}
             showsVerticalScrollIndicator={false}
+            refreshControl={
+              <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+            }
           >
             {/* Header */}
 

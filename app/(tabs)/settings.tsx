@@ -309,7 +309,7 @@ export default function Settings() {
             variant="headlineSmall"
             style={{ color: theme.colors.onSurface }}
           >
-            Settings
+            {strings.settings.settings}
           </Text>
         </View>
 
@@ -368,16 +368,16 @@ export default function Settings() {
                     variant="bodyMedium"
                     style={{ color: theme.colors.onSurface }}
                   >
-                    Theme
+                    {strings.settings.theme}
                   </Text>
                   <Text
                     variant="labelSmall"
                     style={{ color: theme.colors.onSurfaceVariant }}
                   >
                     {themeMode === "system"
-                      ? "System Default"
+                      ? strings.common.systemDefault
                       : themeMode === "amoled"
-                        ? "Amoled"
+                        ? strings.common.amoled
                         : themeMode}
                   </Text>
                 </View>
@@ -448,7 +448,7 @@ export default function Settings() {
                     variant="bodyMedium"
                     style={{ color: theme.colors.onSurface }}
                   >
-                    Color Scheme
+                    {strings.settings.colorScheme}
                   </Text>
                   <Text
                     variant="labelSmall"
@@ -456,8 +456,8 @@ export default function Settings() {
                   >
                     {sourceColor === "system"
                       ? themeMode === "amoled"
-                        ? "Managed by Amoled Mode"
-                        : "Dynamic"
+                        ? strings.common.colorsAmoled
+                        : strings.common.dynamicColors
                       : sourceColor}
                   </Text>
                 </View>
@@ -473,7 +473,7 @@ export default function Settings() {
 
         {/* ── GENERAL ── */}
         <View style={{ marginHorizontal: 15, marginTop: 24 }}>
-          <SectionLabel label="GENERAL" />
+          <SectionLabel label={strings.settings.general} />
           {GENERAL_ROWS.map((row, i) => (
             <SettingsRow
               key={row.label}
@@ -492,7 +492,7 @@ export default function Settings() {
 
         {/* ── TRAVEL PREFERENCES ── */}
         <View style={{ marginHorizontal: 15, marginTop: 24 }}>
-          <SectionLabel label="TRAVEL PREFERENCES" />
+          <SectionLabel label={strings.settings.travelPreferences} />
           {TRAVEL_ROWS.map((row, i) => (
             <SettingsRow
               key={row.label}
@@ -511,7 +511,7 @@ export default function Settings() {
 
         {/* ── ABOUT ── */}
         <View style={{ marginHorizontal: 15, marginTop: 24 }}>
-          <SectionLabel label="ABOUT" />
+          <SectionLabel label={strings.settings.about} />
 
           {/* App banner card */}
           <Pressable onPress={() => router.push({ pathname: "/onboarding" })}>
@@ -543,7 +543,7 @@ export default function Settings() {
                 }}
                 variant="bodySmall"
               >
-                Transit utility app for Metros in India
+                {strings.settings.aboutdesc}
               </Text>
             </View>
           </Pressable>
@@ -599,7 +599,7 @@ export default function Settings() {
                 textAlign: "center",
               }}
             >
-              Version: Preview
+              {strings.common.version}: Preview
             </Text>
             <Text
               variant="bodySmall"
