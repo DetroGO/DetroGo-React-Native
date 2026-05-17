@@ -8,6 +8,7 @@ import {
 import { useRecentTripsStore } from "@/store/recentTrips";
 import { useBookmarksStore } from "@/store/savedRoutes";
 import { ScrollView } from "react-native-gesture-handler";
+import { LINE_DISPLAY_NAMES } from "@/cities/delhi/lineMeta";
 import { Asset } from "expo-asset";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useState, useRef, useCallback, useEffect } from "react";
@@ -314,7 +315,7 @@ export default function RoutePlanScreen() {
     if (isTransfer && nextStation && nextStation.line !== item.line) {
       switchingToLine = nextStation.line;
     }
-
+    const lineLabel = LINE_DISPLAY_NAMES[switchingToLine] ?? switchingToLine;
     return (
       <Card
         mode="contained"
@@ -365,13 +366,14 @@ export default function RoutePlanScreen() {
               variant="labelSmall"
               style={{ color: theme.colors.onSurfaceVariant, marginTop: 1 }}
             >
-              {isTransfer ? "Change to " + switchingToLine : item.line}
+              {isTransfer ? "Change to " + lineLabel : item.line}
             </Text>
           </View>
         </Card.Content>
       </Card>
     );
   };
+
   return (
     <SafeAreaView
       style={{

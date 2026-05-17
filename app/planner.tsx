@@ -3,8 +3,8 @@ import { useEffect } from "react";
 import * as Location from "expo-location";
 import * as Haptics from "expo-haptics";
 import { ToastAndroid } from "react-native";
-import metroLines from "../constants/metrolines.json";
-import stations from "../constants/stationsdata.json";
+import metroLines from "@/cities/delhi/metrolines.json";
+import stations from "@/cities/delhi/stationsdata.json";
 import { useAppTheme } from "@/hooks/useAppTheme";
 import {
   Text,

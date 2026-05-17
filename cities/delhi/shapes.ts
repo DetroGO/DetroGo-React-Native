@@ -1,11 +1,11 @@
-{
-  "type": "FeatureCollection",
-  "features": [
+export const LINES: GeoJSON.FeatureCollection = {
+  type: "FeatureCollection",
+  features: [
     {
-      "type": "Feature",
-      "geometry": {
-        "type": "LineString",
-        "coordinates": [
+      type: "Feature",
+      geometry: {
+        type: "LineString",
+        coordinates: [
           [77.0682554, 28.4543798, 0],
           [77.0688315, 28.4550194, 0],
           [77.0696648, 28.4559322, 0],
@@ -310,25 +310,25 @@
           [77.1350139, 28.7485907, 0],
           [77.1347693, 28.7488757, 0],
           [77.1337179, 28.750003, 0],
-          [77.132586, 28.7512111, 0]
-        ]
+          [77.132586, 28.7512111, 0],
+        ],
       },
-      "properties": {
-        "name": "Delhi Metro Yellow Line",
-        "open": 1,
-        "styleUrl": "#stylemap_id7",
+      properties: {
+        name: "Delhi Metro Yellow Line",
+        open: 1,
+        styleUrl: "#stylemap_id7",
         "fill-opacity": 0,
         "stroke-opacity": 1,
-        "stroke": "#FFD700",
-        "osm_id": -59847,
-        "z_order": 0
-      }
+        stroke: "#FFD700",
+        osm_id: -59847,
+        z_order: 0,
+      },
     },
     {
-      "type": "Feature",
-      "geometry": {
-        "type": "LineString",
-        "coordinates": [
+      type: "Feature",
+      geometry: {
+        type: "LineString",
+        coordinates: [
           [77.226845, 28.6706737, 0],
           [77.2272058, 28.6700912, 0],
           [77.2276604, 28.6693522, 0],
@@ -675,28 +675,28 @@
           [77.3167231, 28.3417968, 0],
           [77.3166159, 28.3409304, 0],
           [77.3164522, 28.33993419999999, 0],
-          [77.3163262, 28.3393086, 0]
-        ]
+          [77.3163262, 28.3393086, 0],
+        ],
       },
-      "properties": {
-        "name": "Delhi Metro Violet Line",
-        "open": 1,
-        "styleUrl": "#stylemap_id6",
+      properties: {
+        name: "Delhi Metro Violet Line",
+        open: 1,
+        styleUrl: "#stylemap_id6",
         "fill-opacity": 0,
         "stroke-opacity": 1,
-        "stroke": "#9370DB",
-        "osm_id": -57923,
-        "z_order": 0
-      }
+        stroke: "#9370DB",
+        osm_id: -57923,
+        z_order: 0,
+      },
     },
     {
-      "type": "Feature",
-      "geometry": {
-        "type": "GeometryCollection",
-        "geometries": [
+      type: "Feature",
+      geometry: {
+        type: "GeometryCollection",
+        geometries: [
           {
-            "type": "LineString",
-            "coordinates": [
+            type: "LineString",
+            coordinates: [
               [77.2946739, 28.67394639999999, 0],
               [77.2951033, 28.6739413, 0],
               [77.2953189, 28.6739292, 0],
@@ -706,12 +706,12 @@
               [77.2964978, 28.67377129999999, 0],
               [77.2968796, 28.6738112, 0],
               [77.2971644, 28.6738945, 0],
-              [77.2974512, 28.6740003, 0]
-            ]
+              [77.2974512, 28.6740003, 0],
+            ],
           },
           {
-            "type": "LineString",
-            "coordinates": [
+            type: "LineString",
+            coordinates: [
               [77.2946739, 28.67394639999999, 0],
               [77.296037, 28.6740656, 0],
               [77.2969142, 28.67431150000001, 0],
@@ -775,12 +775,12 @@
               [77.4172711, 28.6698817, 0],
               [77.4182437, 28.66941660000001, 0],
               [77.4187764, 28.6690883, 0],
-              [77.4197298, 28.6684147, 0]
-            ]
+              [77.4197298, 28.6684147, 0],
+            ],
           },
           {
-            "type": "LineString",
-            "coordinates": [
+            type: "LineString",
+            coordinates: [
               [77.1023777, 28.7244399, 0],
               [77.105494, 28.7223238, 0],
               [77.1059453, 28.7220051, 0],
@@ -963,27 +963,27 @@
               [77.2890302, 28.6733029, 0],
               [77.291185, 28.6735804, 0],
               [77.293363, 28.6738126, 0],
-              [77.2946739, 28.67394639999999, 0]
-            ]
-          }
-        ]
+              [77.2946739, 28.67394639999999, 0],
+            ],
+          },
+        ],
       },
-      "properties": {
-        "name": "Delhi Metro Red Line",
-        "open": 1,
-        "styleUrl": "#stylemap_id5",
+      properties: {
+        name: "Delhi Metro Red Line",
+        open: 1,
+        styleUrl: "#stylemap_id5",
         "fill-opacity": 0,
         "stroke-opacity": 1,
-        "stroke": "#E53935",
-        "osm_id": -57702,
-        "z_order": 0
-      }
+        stroke: "#E53935",
+        osm_id: -57702,
+        z_order: 0,
+      },
     },
     {
-      "type": "Feature",
-      "geometry": {
-        "type": "LineString",
-        "coordinates": [
+      type: "Feature",
+      geometry: {
+        type: "LineString",
+        coordinates: [
           [77.1052636, 28.4279407, 0],
           [77.1052685, 28.428366, 0],
           [77.1052845, 28.4299464, 0],
@@ -1095,25 +1095,25 @@
           [77.0896066, 28.4894857, 0],
           [77.0904931, 28.4890461, 0],
           [77.0917685, 28.4882952, 0],
-          [77.0919994, 28.4881508, 0]
-        ]
+          [77.0919994, 28.4881508, 0],
+        ],
       },
-      "properties": {
-        "name": "Rapid Metro Line",
-        "open": 1,
-        "styleUrl": "#stylemap_id4",
+      properties: {
+        name: "Rapid Metro Line",
+        open: 1,
+        styleUrl: "#stylemap_id4",
         "fill-opacity": 0,
         "stroke-opacity": 1,
-        "stroke": "#015b97",
-        "osm_id": -58195,
-        "z_order": 0
-      }
+        stroke: "#015b97",
+        osm_id: -58195,
+        z_order: 0,
+      },
     },
     {
-      "type": "Feature",
-      "geometry": {
-        "type": "LineString",
-        "coordinates": [
+      type: "Feature",
+      geometry: {
+        type: "LineString",
+        coordinates: [
           [77.1827124, 28.7298914, 0],
           [77.1826695, 28.7298067, 0],
           [77.1825166, 28.7294609, 0],
@@ -1613,35 +1613,42 @@
           [77.2902668, 28.7093339, 0],
           [77.2906342, 28.7099644, 0],
           [77.2908032, 28.7103831, 0],
+
           [77.2908488, 28.7108183, 0],
           [77.2908193, 28.71111, 0],
           [77.2906986, 28.7115193, 0],
           [77.2903821, 28.7122956, 0],
           [77.2901557, 28.7128868, 0],
           [77.290024, 28.7135742, 0],
+
           [77.2899395, 28.7142599, 0],
           [77.289843, 28.7153643, 0],
           [77.2896445, 28.7185458, 0],
           [77.2894834, 28.7214306, 0],
-          [77.2892784, 28.7248467, 0]
-        ]
+
+          [77.2892784, 28.7248467, 0],
+
+          // --- Jump to Loni Border (Shiv Vihar) ---
+          // (Note: If your data cut off early in East Delhi, this jumps to Loni)
+        ],
       },
-      "properties": {
-        "name": "Delhi Metro Pink Line",
-        "open": 1,
-        "styleUrl": "#stylemap_id3",
+
+      properties: {
+        name: "Delhi Metro Pink Line",
+        open: 1,
+        styleUrl: "#stylemap_id3",
         "fill-opacity": 0,
         "stroke-opacity": 1,
-        "stroke": "#F06292",
-        "osm_id": -59421,
-        "z_order": 0
-      }
+        stroke: "#F06292",
+        osm_id: -59421,
+        z_order: 0,
+      },
     },
     {
-      "type": "Feature",
-      "geometry": {
-        "type": "LineString",
-        "coordinates": [
+      type: "Feature",
+      geometry: {
+        type: "LineString",
+        coordinates: [
           [77.0778437, 28.6291405, 0],
           [77.0779235, 28.6289502, 0],
           [77.0781081, 28.6286367, 0],
@@ -1859,28 +1866,28 @@
           [77.3351687, 28.562023, 0],
           [77.3347061, 28.562745, 0],
           [77.333819, 28.5638972, 0],
-          [77.3332938, 28.564511, 0]
-        ]
+          [77.3332938, 28.564511, 0],
+        ],
       },
-      "properties": {
-        "name": "Delhi Metro Magenta Line",
-        "open": 1,
-        "styleUrl": "#stylemap_id2",
+      properties: {
+        name: "Delhi Metro Magenta Line",
+        open: 1,
+        styleUrl: "#stylemap_id2",
         "fill-opacity": 0,
         "stroke-opacity": 1,
-        "stroke": "#ff1aff",
-        "osm_id": -58626,
-        "z_order": 0
-      }
+        stroke: "#ff1aff",
+        osm_id: -58626,
+        z_order: 0,
+      },
     },
     {
-      "type": "Feature",
-      "geometry": {
-        "type": "GeometryCollection",
-        "geometries": [
+      type: "Feature",
+      geometry: {
+        type: "GeometryCollection",
+        geometries: [
           {
-            "type": "LineString",
-            "coordinates": [
+            type: "LineString",
+            coordinates: [
               [77.1572061, 28.6712617, 0],
               [77.1576306, 28.6711737, 0],
               [77.1581081, 28.6710784, 0],
@@ -1915,12 +1922,12 @@
               [77.1534247, 28.6573335, 0],
               [77.1523479, 28.655856, 0],
               [77.1513362, 28.6545554, 0],
-              [77.1496422, 28.6524294, 0]
-            ]
+              [77.1496422, 28.6524294, 0],
+            ],
           },
           {
-            "type": "LineString",
-            "coordinates": [
+            type: "LineString",
+            coordinates: [
               [77.1572061, 28.6712617, 0],
               [77.1577085, 28.6712248, 0],
               [77.1582165, 28.6712814, 0],
@@ -1940,12 +1947,12 @@
               [77.1665991, 28.6708958, 0],
               [77.1680062, 28.6717024, 0],
               [77.1691376, 28.6726319, 0],
-              [77.1703226, 28.6735676, 0]
-            ]
+              [77.1703226, 28.6735676, 0],
+            ],
           },
           {
-            "type": "LineString",
-            "coordinates": [
+            type: "LineString",
+            coordinates: [
               [76.9131152, 28.7006386, 0],
               [76.9146287, 28.6998262, 0],
               [76.9173535, 28.6984021, 0],
@@ -2061,38 +2068,38 @@
               [77.1521768, 28.6720975, 0],
               [77.1539787, 28.671789, 0],
               [77.1552884, 28.671575, 0],
-              [77.1572061, 28.6712617, 0]
-            ]
-          }
-        ]
+              [77.1572061, 28.6712617, 0],
+            ],
+          },
+        ],
       },
-      "properties": {
-        "name": "Delhi Metro Green Line",
-        "open": 1,
-        "styleUrl": "#stylemap_id1",
+      properties: {
+        name: "Delhi Metro Green Line",
+        open: 1,
+        styleUrl: "#stylemap_id1",
         "fill-opacity": 0,
         "stroke-opacity": 1,
-        "stroke": "#43A047",
-        "osm_id": -59599,
-        "z_order": 0
-      }
+        stroke: "#43A047",
+        osm_id: -59599,
+        z_order: 0,
+      },
     },
     {
-      "type": "Feature",
-      "geometry": {
-        "type": "GeometryCollection",
-        "geometries": [
+      type: "Feature",
+      geometry: {
+        type: "GeometryCollection",
+        geometries: [
           {
-            "type": "LineString",
-            "coordinates": [
+            type: "LineString",
+            coordinates: [
               [77.0560823, 28.5491689, 0],
               [77.0584649, 28.551986, 0],
-              [77.0614555, 28.555648, 0]
-            ]
+              [77.0614555, 28.555648, 0],
+            ],
           },
           {
-            "type": "LineString",
-            "coordinates": [
+            type: "LineString",
+            coordinates: [
               [77.0614555, 28.555648, 0],
               [77.0630679, 28.5576224, 0],
               [77.0645316, 28.5595368, 0],
@@ -2144,27 +2151,27 @@
               [77.0218364, 28.6114379, 0],
               [77.021927, 28.6120626, 0],
               [77.0220826, 28.6127314, 0],
-              [77.0224787, 28.614073, 0]
-            ]
+              [77.0224787, 28.614073, 0],
+            ],
           },
           {
-            "type": "LineString",
-            "coordinates": [
+            type: "LineString",
+            coordinates: [
               [77.0617661, 28.5559296, 0],
-              [77.0614555, 28.555648, 0]
-            ]
+              [77.0614555, 28.555648, 0],
+            ],
           },
           {
-            "type": "LineString",
-            "coordinates": [
+            type: "LineString",
+            coordinates: [
               [77.321897, 28.5748051, 0],
               [77.3203277, 28.576108, 0],
-              [77.3196846, 28.5765037, 0]
-            ]
+              [77.3196846, 28.5765037, 0],
+            ],
           },
           {
-            "type": "LineString",
-            "coordinates": [
+            type: "LineString",
+            coordinates: [
               [77.3196846, 28.5765037, 0],
               [77.3220846, 28.5744548, 0],
               [77.3226482, 28.5739846, 0],
@@ -2225,12 +2232,12 @@
               [77.3728996, 28.610185, 0],
               [77.3736106, 28.617095, 0],
               [77.3737005, 28.6178913, 0],
-              [77.3742697, 28.623711, 0]
-            ]
+              [77.3742697, 28.623711, 0],
+            ],
           },
           {
-            "type": "LineString",
-            "coordinates": [
+            type: "LineString",
+            coordinates: [
               [76.9858588, 28.6125753, 0],
               [76.9868271, 28.6125141, 0],
               [76.9874601, 28.6124764, 0],
@@ -2283,12 +2290,12 @@
               [77.0223583, 28.6171552, 0],
               [77.0223797, 28.6163075, 0],
               [77.0223878, 28.6145039, 0],
-              [77.0224787, 28.614073, 0]
-            ]
+              [77.0224787, 28.614073, 0],
+            ],
           },
           {
-            "type": "LineString",
-            "coordinates": [
+            type: "LineString",
+            coordinates: [
               [77.0224787, 28.614073, 0],
               [77.0227861, 28.6149318, 0],
               [77.0232532, 28.6166733, 0],
@@ -2350,33 +2357,33 @@
               [77.0757988, 28.6286765, 0],
               [77.075981, 28.6287517, 0],
               [77.0767038, 28.62905019999999, 0],
-              [77.0770667, 28.6291846, 0]
-            ]
+              [77.0770667, 28.6291846, 0],
+            ],
           },
           {
-            "type": "LineString",
-            "coordinates": [
+            type: "LineString",
+            coordinates: [
               [77.268935, 28.6235863, 0],
               [77.27048, 28.624309, 0],
               [77.2708788, 28.6244804, 0],
               [77.271533, 28.6247331, 0],
-              [77.271703124647, 28.6247815497377, 0]
-            ]
+              [77.271703124647, 28.6247815497377, 0],
+            ],
           },
           {
-            "type": "LineString",
-            "coordinates": [
+            type: "LineString",
+            coordinates: [
               [77.268935, 28.6235863, 0],
               [77.2697028, 28.6238573, 0],
               [77.2704489, 28.6241162, 0],
               [77.2711461, 28.6244307, 0],
               [77.2715789, 28.62468399999999, 0],
-              [77.271703124647, 28.6247815497377, 0]
-            ]
+              [77.271703124647, 28.6247815497377, 0],
+            ],
           },
           {
-            "type": "LineString",
-            "coordinates": [
+            type: "LineString",
+            coordinates: [
               [77.271703124647, 28.6247815497377, 0],
               [77.2720892, 28.6248915, 0],
               [77.2726533, 28.6249073, 0],
@@ -2448,12 +2455,12 @@
               [77.315892, 28.5800618, 0],
               [77.3177967, 28.5780994, 0],
               [77.3185018, 28.5774879, 0],
-              [77.3196846, 28.5765037, 0]
-            ]
+              [77.3196846, 28.5765037, 0],
+            ],
           },
           {
-            "type": "LineString",
-            "coordinates": [
+            type: "LineString",
+            coordinates: [
               [77.271703124647, 28.6247815497377, 0],
               [77.2719156, 28.6249484, 0],
               [77.2722474, 28.625241, 0],
@@ -2502,22 +2509,22 @@
               [77.3385351, 28.6490716, 0],
               [77.3395582, 28.6497109, 0],
               [77.3413577, 28.6507764, 0],
-              [77.3419958, 28.6511692, 0]
-            ]
+              [77.3419958, 28.6511692, 0],
+            ],
           },
           {
-            "type": "LineString",
-            "coordinates": [
+            type: "LineString",
+            coordinates: [
               [77.0744712, 28.6280043, 0],
               [77.0760823, 28.6286695, 0],
               [77.0763229, 28.6288022, 0],
               [77.0767615, 28.629023, 0],
-              [77.0770667, 28.6291846, 0]
-            ]
+              [77.0770667, 28.6291846, 0],
+            ],
           },
           {
-            "type": "LineString",
-            "coordinates": [
+            type: "LineString",
+            coordinates: [
               [77.0770667, 28.6291846, 0],
               [77.0780939, 28.6295652, 0],
               [77.0798717, 28.6303394, 0],
@@ -2662,27 +2669,27 @@
               [77.2636385, 28.6216887, 0],
               [77.2653024, 28.6223046, 0],
               [77.2678489, 28.6232061, 0],
-              [77.268935, 28.6235863, 0]
-            ]
-          }
-        ]
+              [77.268935, 28.6235863, 0],
+            ],
+          },
+        ],
       },
-      "properties": {
-        "name": "Delhi Metro Blue Line",
-        "open": 1,
-        "styleUrl": "#stylemap_id0",
+      properties: {
+        name: "Delhi Metro Blue Line",
+        open: 1,
+        styleUrl: "#stylemap_id0",
         "fill-opacity": 0,
         "stroke-opacity": 1,
-        "stroke": "#1E88E5",
-        "osm_id": -57763,
-        "z_order": 0
-      }
+        stroke: "#1E88E5",
+        osm_id: -57763,
+        z_order: 0,
+      },
     },
     {
-      "type": "Feature",
-      "geometry": {
-        "type": "LineString",
-        "coordinates": [
+      type: "Feature",
+      geometry: {
+        type: "LineString",
+        coordinates: [
           [77.0588558911249, 28.5507575651337, 0],
           [77.0691289938565, 28.5610306678653, 0],
           [77.0709267868345, 28.5610306678653, 0],
@@ -2714,77 +2721,77 @@
           [77.2144933975085, 28.6308877664401, 0],
           [77.2183458110328, 28.6355106626693, 0],
           [77.2206572591474, 28.6391062486254, 0],
-          [77.2227118796938, 28.643215489718, 0]
-        ]
+          [77.2227118796938, 28.643215489718, 0],
+        ],
       },
-      "properties": {
-        "name": "Orange Line",
-        "description": "Orange Line",
-        "styleUrl": "#msn_ylw-pushpin",
+      properties: {
+        name: "Orange Line",
+        description: "Orange Line",
+        styleUrl: "#msn_ylw-pushpin",
         "stroke-opacity": 1,
-        "stroke": "#FB8C00"
+        stroke: "#FB8C00",
       },
-      "id": "Delhi_Metro_Lines.9"
+      id: "Delhi_Metro_Lines.9",
     },
     {
-      "type": "Feature",
-      "properties": {
-        "name": "Aqua Line",
-        "description": "Rapid Line",
-        "styleUrl": "#msn_ylw-pushpin",
+      type: "Feature",
+      properties: {
+        name: "Aqua Line",
+        description: "Rapid Line",
+        styleUrl: "#msn_ylw-pushpin",
         "stroke-opacity": 1,
-        "stroke": "#26C6DA"
+        stroke: "#26C6DA",
       },
-      "geometry": {
-        "type": "MultiLineString",
-        "coordinates": [
+      geometry: {
+        type: "MultiLineString",
+        coordinates: [
           [
             [77.3754187, 28.5855476],
-            [77.378339, 28.574623]
+            [77.378339, 28.574623],
           ],
           [
             [77.378339, 28.574623],
-            [77.37956, 28.565467]
+            [77.37956, 28.565467],
           ],
           [
             [77.37956, 28.565467],
             [77.385052, 28.55607],
-            [77.3901, 28.549259]
+            [77.3901, 28.549259],
           ],
           [
             [77.3901, 28.549259],
             [77.394772, 28.532238],
-            [77.396475, 28.522284]
+            [77.396475, 28.522284],
           ],
           [
             [77.396475, 28.522284],
             [77.403628, 28.510812],
             [77.412591, 28.499029],
             [77.4223218, 28.4942484],
-            [77.432971, 28.486371]
+            [77.432971, 28.486371],
           ],
           [
             [77.432971, 28.486371],
             [77.442307, 28.479123],
             [77.4551, 28.468824],
             [77.465991, 28.459425],
-            [77.476689, 28.44802]
+            [77.476689, 28.44802],
           ],
           [
             [77.476689, 28.44802],
             [77.4830319, 28.443849],
             [77.5003, 28.45686],
             [77.5083152, 28.4633186],
-            [77.512715, 28.470879]
+            [77.512715, 28.470879],
           ],
           [
             [77.512715, 28.470879],
             [77.525576, 28.478369],
             [77.536619, 28.484528],
-            [77.544076, 28.488652]
-          ]
-        ]
-      }
-    }
-  ]
-}
+            [77.544076, 28.488652],
+          ],
+        ],
+      },
+    },
+  ],
+};

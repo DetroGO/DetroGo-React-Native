@@ -1,6 +1,4 @@
-// src/utils/metroRouting.ts
-
-import metroLines from "../constants/metrolines.json";
+import metroLines from "../cities/delhi/metrolines.json";
 
 const interchanges = [
   { from: "Noida Sec-52", to: "Noida Sector 51", note: "Walkway transfer" },
