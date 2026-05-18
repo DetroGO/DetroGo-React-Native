@@ -321,7 +321,9 @@ export default function RoutePlanScreen() {
         mode="contained"
         style={{
           backgroundColor: isTransfer
-            ? theme.colors.surfaceContainerHigh
+            ? theme.dark
+              ? theme.colors.elevation.level4
+              : theme.colors.elevation.level3
             : theme.colors.elevation.level1,
           marginBottom: 2.8,
           borderTopLeftRadius: index === 0 ? 24 : 6,
@@ -345,7 +347,9 @@ export default function RoutePlanScreen() {
               width: 57,
               height: 57,
               backgroundColor: isTransfer
-                ? theme.colors.surfaceContainerHigh
+                ? theme.dark
+                  ? theme.colors.elevation.level4
+                  : theme.colors.elevation.level3
                 : theme.colors.surfaceVariant,
               alignItems: "center",
               justifyContent: "center",

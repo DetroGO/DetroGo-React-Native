@@ -31,87 +31,7 @@ import { useAppTheme } from "@/hooks/useAppTheme";
 import SearchBar from "@/components/ui/searchbar";
 
 import { router } from "expo-router";
-
-interface Trip {
-  start: string;
-  end: string;
-  stops: number;
-  transfers: number;
-  price: number;
-}
-
-interface Cities {
-  logo: string;
-  name: string;
-  companies: string;
-  selected: boolean;
-}
-
-const SYSTEMS: Cities[] = [
-  {
-    logo: "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Flogoeps.com%2Fwp-content%2Fuploads%2F2014%2F08%2F50953-delhi-metro-logo-icon-vector-icon-vector-eps.png&f=1&nofb=1&ipt=e8d55169a746a48ca25e75e9301809734e9a0afa6fa32c1e6d26923b4c8479ea",
-    name: "Delhi NCR",
-    companies: "DMRC | NMRC | GMRL",
-    selected: true,
-  },
-  {
-    logo: "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Flatestlogo.com%2Fwp-content%2Fuploads%2F2024%2F09%2Fmaha-mumbai-metro-operation-corporation-limited.png&f=1&nofb=1&ipt=5634b32135888c280bc42a0bb75faf15dd62b6ce61463758524b618c255ac065",
-    name: "Mumbai",
-    companies: "MMRC | MMO",
-    selected: false,
-  },
-  {
-    logo: "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fcdn-icons-png.flaticon.com%2F512%2F50%2F50639.png&f=1&nofb=1&ipt=6f5db3a9d447d2698cb2160fe6876f28027e8334d1f77aaa398f824ac1c63fe1",
-    name: "Bangalore",
-    companies: "CMRL",
-    selected: false,
-  },
-  {
-    logo: "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2F1.bp.blogspot.com%2F-27hT8cQBdQM%2FUQAOzJJps_I%2FAAAAAAAAAP4%2Ftv_eWsw4Wb4%2Fs1600%2FCMRL.png&f=1&nofb=1&ipt=31f5416b49a72a19fdabe19ccbc76fbddee9b8332538b869a47e0a74ad4d7312",
-    name: "Chennai",
-    companies: "CMRL",
-    selected: false,
-  },
-];
-
-const DATA: Trip[] = [
-  {
-    start: "Preet Vihar",
-    end: "Mandi House",
-    stops: 12,
-    transfers: 2,
-    price: 20,
-  },
-  {
-    start: "Rajiv Chowk",
-    end: "Huda City Centre",
-    stops: 18,
-    transfers: 0,
-    price: 30,
-  },
-  {
-    start: "Kashmere Gate",
-    end: "Noida Sec 62",
-    stops: 22,
-    transfers: 1,
-    price: 40,
-  },
-  { start: "New Delhi", end: "IGI Airport", stops: 8, transfers: 0, price: 60 },
-  {
-    start: "Preet Vihar",
-    end: "Mandi House",
-    stops: 12,
-    transfers: 2,
-    price: 20,
-  },
-  {
-    start: "Preet Vihar",
-    end: "Mandi House",
-    stops: 12,
-    transfers: 2,
-    price: 20,
-  },
-];
+import { CITIES, CityConfig } from "@/cities/index";
 
 const RecentCard = ({
   index,
@@ -256,7 +176,7 @@ const BookmarkCard = ({ item }: { item: SavedRoute }) => {
   );
 };
 
-const SystemCards = ({ index, item }: { index: number; item: Cities }) => {
+const SystemCards = ({ index, item }: { index: number; item: CityConfig }) => {
   const theme = useAppTheme();
   return (
     <Card
@@ -269,8 +189,8 @@ const SystemCards = ({ index, item }: { index: number; item: Cities }) => {
           : theme.colors.elevation.level1,
         borderTopLeftRadius: index === 0 ? 24 : 6,
         borderTopRightRadius: index === 0 ? 24 : 6,
-        borderBottomLeftRadius: index === SYSTEMS.length - 1 ? 24 : 6,
-        borderBottomRightRadius: index === SYSTEMS.length - 1 ? 24 : 6,
+        borderBottomLeftRadius: index === CITIES.length - 1 ? 24 : 6,
+        borderBottomRightRadius: index === CITIES.length - 1 ? 24 : 6,
       }}
       onPress={() => {
         item.selected = true;
@@ -875,7 +795,7 @@ export default function HomeScreen() {
             {strings.home.selectnet}
           </Dialog.Title>
           <Dialog.Content>
-            {SYSTEMS.map((item, index) => (
+            {CITIES.map((item, index) => (
               <SystemCards index={index} item={item} />
             ))}
           </Dialog.Content>
