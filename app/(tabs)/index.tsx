@@ -56,7 +56,12 @@ const RecentCard = ({
         borderBottomLeftRadius: index === total - 1 ? 24 : 6,
         borderBottomRightRadius: index === total - 1 ? 24 : 6,
       }}
-      onPress={() => {}}
+      onPress={() =>
+        router.push({
+          pathname: "/route",
+          params: { start: item.from, end: item.to },
+        })
+      }
     >
       <Card.Content
         style={{

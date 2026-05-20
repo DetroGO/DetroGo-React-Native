@@ -196,9 +196,6 @@ export default function RoutePlanScreen() {
       .then((asset) => setHtmlUri(asset.localUri));
   }, []);
 
-  // Add this inside your RoutePlanScreen component
-  //
-
   useEffect(() => {
     if (isMapReady && routeData) {
       const payload = {
@@ -385,6 +382,8 @@ export default function RoutePlanScreen() {
         backgroundColor: theme.colors.background,
       }}
     >
+
+
       {/* --- BACKGROUND MAP --- */}
       <ScrollView
         showsVerticalScrollIndicator={false}
@@ -430,7 +429,8 @@ export default function RoutePlanScreen() {
               onPress={() => handleBookmark(fromStation, toStation)}
             />
           </View>
-          {htmlUri && (
+
+          {htmlUri && routeData ? (
             <WebView
               ref={webviewRef}
               source={{ uri: htmlUri }}
@@ -618,11 +618,10 @@ export default function RoutePlanScreen() {
               </Card.Content>
             </Card>
           ) : (
-            <View style={{ marginTop: 24, margin: 15 }}>
+            <View style={{ flex: 1, marginTop: 24, margin: 15 }}>
               <Text variant="headlineSmall">{strings.route.noRouteFound}</Text>
             </View>
           )}
-          {/* Display React Native UI based on the calculation */}
 
           {routeData && (
             <View style={{ marginTop: 24, margin: 15 }}>
@@ -636,8 +635,9 @@ export default function RoutePlanScreen() {
                 <StationCard index={index} item={step} data={routeData} />
               ))}
             </View>
-          )}
+          ) : null}
         </View>
+
       </ScrollView>
     </SafeAreaView>
   );
