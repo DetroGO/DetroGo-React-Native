@@ -382,8 +382,6 @@ export default function RoutePlanScreen() {
         backgroundColor: theme.colors.background,
       }}
     >
-
-
       {/* --- BACKGROUND MAP --- */}
       <ScrollView
         showsVerticalScrollIndicator={false}
@@ -430,7 +428,7 @@ export default function RoutePlanScreen() {
             />
           </View>
 
-          {htmlUri && routeData ? (
+          {htmlUri && (
             <WebView
               ref={webviewRef}
               source={{ uri: htmlUri }}
@@ -448,196 +446,201 @@ export default function RoutePlanScreen() {
         </View>
 
         {/* --- FOREGROUND UI (Bottom Sheet style) --- */}
-        <View
-          style={{
-            paddingTop: 20,
-          }}
-        >
-          {/* M3 Expressive Station Navigator */}
-          <StationNavigator
-            currentStation={currentStation}
-            onPrev={moveMapBack}
-            onNext={moveMapAhead}
-          />
+        {routeData && (
+          <View
+            style={{
+              paddingTop: 20,
+            }}
+          >
+            {/* M3 Expressive Station Navigator */}
+            <StationNavigator
+              currentStation={currentStation}
+              onPrev={moveMapBack}
+              onNext={moveMapAhead}
+            />
 
-          {routeData ? (
-            <Card
-              mode="elevated"
-              style={{
-                marginLeft: 16,
-                marginRight: 16,
-                borderRadius: 24,
-                padding: 30,
-                paddingTop: 5,
-              }}
-            >
-              <Card.Content>
-                <View
-                  style={{
-                    display: "flex",
-                    flexDirection: "row",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    gap: 15,
-                    marginBottom: 18,
-                    paddingTop: 16,
-                    paddingHorizontal: 16,
-                    paddingBottom: 14,
-                    marginVertical: -4,
-                  }}
-                >
-                  <Text
-                    style={{ flex: 1, flexWrap: "wrap", textAlign: "left" }}
-                    numberOfLines={2}
-                    variant="titleSmall"
+            {routeData ? (
+              <Card
+                mode="elevated"
+                style={{
+                  marginLeft: 16,
+                  marginRight: 16,
+                  borderRadius: 24,
+                  padding: 30,
+                  paddingTop: 5,
+                }}
+              >
+                <Card.Content>
+                  <View
+                    style={{
+                      display: "flex",
+                      flexDirection: "row",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      gap: 15,
+                      marginBottom: 18,
+                      paddingTop: 16,
+                      paddingHorizontal: 16,
+                      paddingBottom: 14,
+                      marginVertical: -4,
+                    }}
                   >
-                    {fromStation}
-                  </Text>
+                    <Text
+                      style={{ flex: 1, flexWrap: "wrap", textAlign: "left" }}
+                      numberOfLines={2}
+                      variant="titleSmall"
+                    >
+                      {fromStation}
+                    </Text>
 
-                  {/* M3 Expressive swap button */}
-                  <Animated.View
-                    style={{ transform: [{ scale: swapSpring.scale }] }}
+                    {/* M3 Expressive swap button */}
+                    <Animated.View
+                      style={{ transform: [{ scale: swapSpring.scale }] }}
+                    >
+                      <Pressable
+                        onPressIn={swapSpring.onPressIn}
+                        onPressOut={swapSpring.onPressOut}
+                        onPress={swapStations}
+                        android_ripple={{
+                          color: theme.colors.onSecondaryContainer + "33",
+                          borderless: false,
+                        }}
+                      >
+                        <Animated.View
+                          style={{
+                            width: 80,
+                            height: 45,
+                            alignItems: "center",
+                            justifyContent: "center",
+                            backgroundColor: theme.colors.secondaryContainer,
+                            borderRadius: swapRadius,
+                          }}
+                        >
+                          <Icon
+                            source="swap-horizontal-hidden"
+                            size={22}
+                            color={theme.colors.onSecondaryContainer}
+                          />
+                        </Animated.View>
+                      </Pressable>
+                    </Animated.View>
+
+                    <Text
+                      style={{ flex: 1, flexWrap: "wrap", textAlign: "right" }}
+                      numberOfLines={2}
+                      variant="titleSmall"
+                    >
+                      {toStation}
+                    </Text>
+                  </View>
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      alignItems: "stretch",
+                    }}
                   >
-                    <Pressable
-                      onPressIn={swapSpring.onPressIn}
-                      onPressOut={swapSpring.onPressOut}
-                      onPress={swapStations}
-                      android_ripple={{
-                        color: theme.colors.onSecondaryContainer + "33",
-                        borderless: false,
+                    <View
+                      style={{
+                        flex: 1,
+                        alignItems: "center",
+                        justifyContent: "center",
+                        gap: 8,
                       }}
                     >
-                      <Animated.View
+                      <View
                         style={{
-                          width: 80,
-                          height: 45,
+                          display: "flex",
+                          flexDirection: "row",
                           alignItems: "center",
                           justifyContent: "center",
-                          backgroundColor: theme.colors.secondaryContainer,
-                          borderRadius: swapRadius,
+                          marginBottom: 18,
+                          gap: 8,
                         }}
                       >
                         <Icon
-                          source="swap-horizontal-hidden"
-                          size={22}
                           color={theme.colors.onSecondaryContainer}
+                          source="subway-variant"
+                          size={28}
                         />
-                      </Animated.View>
-                    </Pressable>
-                  </Animated.View>
+                        <Text
+                          variant="headlineMedium"
+                          style={{
+                            fontWeight: 700,
+                            color: theme.colors.onSecondaryContainer,
+                          }}
+                          numberOfLines={2}
+                        >
+                          {routeData.stops}
+                        </Text>
+                      </View>
 
-                  <Text
-                    style={{ flex: 1, flexWrap: "wrap", textAlign: "right" }}
-                    numberOfLines={2}
-                    variant="titleSmall"
-                  >
-                    {toStation}
-                  </Text>
-                </View>
-                <View
-                  style={{
-                    flexDirection: "row",
-                    alignItems: "stretch",
-                  }}
+                      <Text variant="bodySmall">{strings.common.stations}</Text>
+                    </View>
+
+                    <View
+                      style={{
+                        flex: 1,
+                        gap: 8,
+                        alignItems: "center",
+                        justifyContent: "center",
+                      }}
+                    >
+                      <View
+                        style={{
+                          display: "flex",
+                          flexDirection: "row",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          marginBottom: 18,
+                          gap: 8,
+                        }}
+                      >
+                        <Icon
+                          source="transit-transfer"
+                          color={theme.colors.onSecondaryContainer}
+                          size={28}
+                        />
+                        <Text
+                          variant="headlineMedium"
+                          style={{
+                            fontWeight: 700,
+                            color: theme.colors.onSecondaryContainer,
+                          }}
+                        >
+                          {routeData.transferStations.length}
+                        </Text>
+                      </View>
+
+                      <Text variant="bodySmall">
+                        {strings.common.transfers}
+                      </Text>
+                    </View>
+                  </View>
+                </Card.Content>
+              </Card>
+            ) : (
+              <View style={{ flex: 1, marginTop: 24, margin: 15 }}>
+                <Text variant="headlineSmall">
+                  {strings.route.noRouteFound}
+                </Text>
+              </View>
+            )}
+
+            {routeData && (
+              <View style={{ marginTop: 24, margin: 15 }}>
+                <Text
+                  style={{ marginBottom: 22, marginLeft: 8 }}
+                  variant="labelMedium"
                 >
-                  <View
-                    style={{
-                      flex: 1,
-                      alignItems: "center",
-                      justifyContent: "center",
-                      gap: 8,
-                    }}
-                  >
-                    <View
-                      style={{
-                        display: "flex",
-                        flexDirection: "row",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        marginBottom: 18,
-                        gap: 8,
-                      }}
-                    >
-                      <Icon
-                        color={theme.colors.onSecondaryContainer}
-                        source="subway-variant"
-                        size={28}
-                      />
-                      <Text
-                        variant="headlineMedium"
-                        style={{
-                          fontWeight: 700,
-                          color: theme.colors.onSecondaryContainer,
-                        }}
-                        numberOfLines={2}
-                      >
-                        {routeData.stops}
-                      </Text>
-                    </View>
-
-                    <Text variant="bodySmall">{strings.common.stations}</Text>
-                  </View>
-
-                  <View
-                    style={{
-                      flex: 1,
-                      gap: 8,
-                      alignItems: "center",
-                      justifyContent: "center",
-                    }}
-                  >
-                    <View
-                      style={{
-                        display: "flex",
-                        flexDirection: "row",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        marginBottom: 18,
-                        gap: 8,
-                      }}
-                    >
-                      <Icon
-                        source="transit-transfer"
-                        color={theme.colors.onSecondaryContainer}
-                        size={28}
-                      />
-                      <Text
-                        variant="headlineMedium"
-                        style={{
-                          fontWeight: 700,
-                          color: theme.colors.onSecondaryContainer,
-                        }}
-                      >
-                        {routeData.transferStations.length}
-                      </Text>
-                    </View>
-
-                    <Text variant="bodySmall">{strings.common.transfers}</Text>
-                  </View>
-                </View>
-              </Card.Content>
-            </Card>
-          ) : (
-            <View style={{ flex: 1, marginTop: 24, margin: 15 }}>
-              <Text variant="headlineSmall">{strings.route.noRouteFound}</Text>
-            </View>
-          )}
-
-          {routeData && (
-            <View style={{ marginTop: 24, margin: 15 }}>
-              <Text
-                style={{ marginBottom: 22, marginLeft: 8 }}
-                variant="labelMedium"
-              >
-                Stations List
-              </Text>
-              {routeData.route.map((step: any, index: number) => (
-                <StationCard index={index} item={step} data={routeData} />
-              ))}
-            </View>
-          ) : null}
-        </View>
-
+                  Stations List
+                </Text>
+                {routeData.route.map((step: any, index: number) => (
+                  <StationCard index={index} item={step} data={routeData} />
+                ))}
+              </View>
+            )}
+          </View>
+        )}
       </ScrollView>
     </SafeAreaView>
   );
