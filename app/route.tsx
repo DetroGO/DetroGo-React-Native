@@ -6,6 +6,7 @@ import {
   Dimensions,
 } from "react-native";
 import { useRecentTripsStore } from "@/store/recentTrips";
+import * as Haptics from "expo-haptics";
 import { useBookmarksStore } from "@/store/savedRoutes";
 import { ScrollView } from "react-native-gesture-handler";
 import { LINE_DISPLAY_NAMES } from "@/cities/delhi/lineMeta";
@@ -16,6 +17,8 @@ import {
   Text,
   Button,
   Surface,
+  Portal,
+  Dialog,
   Icon,
   Card,
   IconButton,
@@ -96,7 +99,10 @@ function StationNavigator({
         <Pressable
           onPressIn={prevSpring.onPressIn}
           onPressOut={prevSpring.onPressOut}
-          onPress={onPrev}
+          onPress={() => {
+            onPrev();
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+          }}
           android_ripple={{
             color: theme.colors.onSecondaryContainer + "33",
             borderless: false,
@@ -141,7 +147,10 @@ function StationNavigator({
         <Pressable
           onPressIn={nextSpring.onPressIn}
           onPressOut={nextSpring.onPressOut}
-          onPress={onNext}
+          onPress={() => {
+            onNext();
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+          }}
           android_ripple={{
             color: theme.colors.onSecondaryContainer + "33",
             borderless: false,
@@ -171,6 +180,7 @@ function StationNavigator({
 export default function RoutePlanScreen() {
   const [htmlUri, setHtmlUri] = useState<string | null>(null);
   const webviewRef = useRef(null);
+  const [visibleInfo, setVisibleInfo] = useState(false);
   const { addTrip } = useRecentTripsStore();
   const { addBookmark, removeBookmark, isBookmarked } = useBookmarksStore();
   const theme = useAppTheme();
@@ -316,6 +326,7 @@ export default function RoutePlanScreen() {
     return (
       <Card
         mode="contained"
+        onLongPress={() => setVisibleInfo(true)}
         style={{
           backgroundColor: isTransfer
             ? theme.dark
@@ -500,7 +511,12 @@ export default function RoutePlanScreen() {
                       <Pressable
                         onPressIn={swapSpring.onPressIn}
                         onPressOut={swapSpring.onPressOut}
-                        onPress={swapStations}
+                        onPress={() => {
+                          swapStations();
+                          Haptics.impactAsync(
+                            Haptics.ImpactFeedbackStyle.Light,
+                          );
+                        }}
                         android_ripple={{
                           color: theme.colors.onSecondaryContainer + "33",
                           borderless: false,
@@ -642,6 +658,102 @@ export default function RoutePlanScreen() {
           </View>
         )}
       </ScrollView>
+      <Portal>
+        <Dialog
+          style={{ backgroundColor: theme.colors.surface, borderRadius: 28 }}
+          visible={visibleInfo}
+          onDismiss={() => setVisibleInfo(false)}
+        >
+          <Dialog.Title
+            style={{
+              marginBottom: 4,
+              marginTop: 40,
+              textAlign: "center",
+              fontSize: 24,
+            }}
+          >
+            <Text variant="titleMedium">{}</Text>
+          </Dialog.Title>
+          <Dialog.Content>
+            <Text
+              variant="bodyMedium"
+              style={{
+                color: theme.colors.onSurfaceVariant,
+                textAlign: "center",
+              }}
+            >
+              {strings.common.version}: Preview
+            </Text>
+            <Text
+              variant="bodySmall"
+              style={{
+                color: theme.colors.outline,
+                textAlign: "center",
+                marginTop: 16,
+              }}
+            >
+              This is a preview build of DetroGo. Its may contain bugs and
+              incomplete features. and is only intended for alpha testers
+            </Text>
+            <Text
+              variant="bodySmall"
+              style={{
+                color: theme.colors.outline,
+                textAlign: "center",
+                marginTop: 8,
+              }}
+            >
+              Thank you for testing DetroGo!
+            </Text>
+            <Text
+              variant="bodySmall"
+              style={{
+                color: theme.colors.outline,
+                textAlign: "center",
+                marginTop: 8,
+              }}
+            >
+              Open Source · GNU GPL v3.0
+            </Text>
+
+            <Text
+              variant="bodySmall"
+              style={{
+                color: theme.colors.secondary,
+                textAlign: "center",
+                marginTop: 18,
+              }}
+            >
+              Report Bugs & Feedback on
+            </Text>
+            <Text
+              variant="bodySmall"
+              style={{
+                color: theme.colors.primary,
+                textAlign: "center",
+                marginTop: 8,
+              }}
+            >
+              Discord | GitHub
+            </Text>
+          </Dialog.Content>
+          <Dialog.Actions
+            style={{
+              justifyContent: "center",
+              paddingBottom: 16,
+              paddingHorizontal: 24,
+            }}
+          >
+            <Button
+              style={{ width: "100%" }}
+              mode="contained-tonal"
+              onPress={() => setVisibleInfo(false)}
+            >
+              {strings.common?.done ?? "Close"}
+            </Button>
+          </Dialog.Actions>
+        </Dialog>
+      </Portal>
     </SafeAreaView>
   );
 }
