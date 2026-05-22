@@ -13,8 +13,7 @@ import { useAppTheme } from "@/hooks/useAppTheme";
 import SearchBar from "@/components/ui/searchbar";
 import { LINES } from "@/cities/delhi/shapes";
 import { STATIONS } from "@/cities/delhi/stationshapes";
-import mapLightStyle from "@/constants/maplight";
-import mapDarkStyle from "@/constants/mapdark";
+
 // ─── Lines GeoJSON ────────────────────────────────────────────────────────────
 // All GeometryCollections pre-flattened → plain LineStrings.
 // Each feature has a "stroke" property consumed by the Layer paint expression.
@@ -108,7 +107,11 @@ export default function MapScreen() {
       {/* Map */}
       <Map
         style={styles.map}
-        mapStyle={theme.dark ? mapDarkStyle : mapLightStyle}
+        mapStyle={
+          theme.dark
+            ? "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json"
+            : "https://tiles.openfreemap.org/styles/bright"
+        }
         logoEnabled={false}
         attributionEnabled={false}
         compassPosition={{ top: 623, right: 18 }}

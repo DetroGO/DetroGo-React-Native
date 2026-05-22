@@ -177,6 +177,86 @@ function StationNavigator({
   );
 }
 
+function NotificationCard({
+  title,
+  desc,
+  data,
+}: {
+  title: string;
+  desc: string;
+  data: any;
+}) {
+  const theme = useAppTheme();
+
+  return (
+    <Card
+      mode="elevated"
+      style={{
+        marginLeft: 16,
+        marginRight: 18,
+        marginTop: 5,
+
+        borderRadius: 24,
+        marginBottom: 10,
+        backgroundColor: theme.colors.tertiaryContainer,
+        padding: 12,
+      }}
+    >
+      <Card.Content>
+        <View
+          style={{
+            display: "flex",
+            flexDirection: "row",
+            alignItems: "center",
+            gap: 15,
+          }}
+        >
+          <Icon
+            source="transit-transfer"
+            size={32}
+            color={theme.colors.onTertiaryContainer}
+          />
+          <View style={{ display: "flex", flexDirection: "column", gap: 3 }}>
+            <Text
+              style={{
+                fontWeight: 400,
+                fontSize: 14,
+
+                color: theme.colors.onTertiaryContainer,
+              }}
+            >
+              {title}
+            </Text>
+            <Text
+              style={{
+                fontWeight: 700,
+                fontSize: 12,
+                fontStyle: "bold",
+                color: theme.colors.onTertiaryContainer,
+              }}
+            >
+              {desc}
+            </Text>
+          </View>
+          <View
+            style={{
+              flex: 1,
+              alignItems: "flex-end",
+              justifyContent: "center",
+            }}
+          >
+            <Icon
+              source="close"
+              size={20}
+              color={theme.colors.onTertiaryContainer}
+            />
+          </View>
+        </View>
+      </Card.Content>
+    </Card>
+  );
+}
+
 export default function RoutePlanScreen() {
   const [htmlUri, setHtmlUri] = useState<string | null>(null);
   const webviewRef = useRef(null);
@@ -399,7 +479,7 @@ export default function RoutePlanScreen() {
       >
         <View
           style={{
-            height: 400,
+            height: 440,
             width: screenWidth + 2,
             marginLeft: -1,
           }}
@@ -455,6 +535,13 @@ export default function RoutePlanScreen() {
           )}
         </View>
 
+        {routeData && routeData.transferStations.length > 0 && (
+          <NotificationCard
+            title="Transfer Station Incoming"
+            desc={routeData.transferStations[0]}
+            data={routeData}
+          />
+        )}
         {/* --- FOREGROUND UI (Bottom Sheet style) --- */}
         {routeData && (
           <View
@@ -469,73 +556,7 @@ export default function RoutePlanScreen() {
               onNext={moveMapAhead}
             />
 
-            <Card
-              mode="elevated"
-              style={{
-                marginLeft: 16,
-                marginRight: 18,
-                marginTop: 5,
-
-                borderRadius: 24,
-                marginBottom: 10,
-                backgroundColor: theme.colors.tertiaryContainer,
-                padding: 12,
-              }}
-            >
-              <Card.Content>
-                <View
-                  style={{
-                    display: "flex",
-                    flexDirection: "row",
-                    alignItems: "center",
-                    gap: 15,
-                  }}
-                >
-                  <Icon
-                    source="transit-transfer"
-                    size={32}
-                    color={theme.colors.onTertiaryContainer}
-                  />
-                  <View
-                    style={{ display: "flex", flexDirection: "column", gap: 3 }}
-                  >
-                    <Text
-                      style={{
-                        fontWeight: 400,
-                        fontSize: 14,
-
-                        color: theme.colors.onTertiaryContainer,
-                      }}
-                    >
-                      Transfer Station Incoming
-                    </Text>
-                    <Text
-                      style={{
-                        fontWeight: 700,
-                        fontSize: 12,
-                        fontStyle: "bold",
-                        color: theme.colors.onTertiaryContainer,
-                      }}
-                    >
-                      {routeData.transferStations[0]}
-                    </Text>
-                  </View>
-                  <View
-                    style={{
-                      flex: 1,
-                      alignItems: "flex-end",
-                      justifyContent: "center",
-                    }}
-                  >
-                    <Icon
-                      source="close"
-                      size={20}
-                      color={theme.colors.onTertiaryContainer}
-                    />
-                  </View>
-                </View>
-              </Card.Content>
-            </Card>
+            {/* notification here  */}
 
             {routeData ? (
               <Card
