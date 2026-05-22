@@ -307,7 +307,6 @@ export default function RoutePlanScreen() {
   const StationCard = ({ index, item, data }) => {
     const theme = useAppTheme();
 
-    // Instead of useState, derive the value directly.
     // We check if the station name exists in the transferStations array.
     // (This handles whether transferStations is an array of strings or objects)
     const isTransfer = data.transferStations.some(
@@ -470,12 +469,81 @@ export default function RoutePlanScreen() {
               onNext={moveMapAhead}
             />
 
+            <Card
+              mode="elevated"
+              style={{
+                marginLeft: 16,
+                marginRight: 18,
+                marginTop: 5,
+
+                borderRadius: 24,
+                marginBottom: 10,
+                backgroundColor: theme.colors.tertiaryContainer,
+                padding: 12,
+              }}
+            >
+              <Card.Content>
+                <View
+                  style={{
+                    display: "flex",
+                    flexDirection: "row",
+                    alignItems: "center",
+                    gap: 15,
+                  }}
+                >
+                  <Icon
+                    source="transit-transfer"
+                    size={32}
+                    color={theme.colors.onTertiaryContainer}
+                  />
+                  <View
+                    style={{ display: "flex", flexDirection: "column", gap: 3 }}
+                  >
+                    <Text
+                      style={{
+                        fontWeight: 400,
+                        fontSize: 14,
+
+                        color: theme.colors.onTertiaryContainer,
+                      }}
+                    >
+                      Transfer Station Incoming
+                    </Text>
+                    <Text
+                      style={{
+                        fontWeight: 700,
+                        fontSize: 12,
+                        fontStyle: "bold",
+                        color: theme.colors.onTertiaryContainer,
+                      }}
+                    >
+                      {routeData.transferStations[0]}
+                    </Text>
+                  </View>
+                  <View
+                    style={{
+                      flex: 1,
+                      alignItems: "flex-end",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <Icon
+                      source="close"
+                      size={20}
+                      color={theme.colors.onTertiaryContainer}
+                    />
+                  </View>
+                </View>
+              </Card.Content>
+            </Card>
+
             {routeData ? (
               <Card
                 mode="elevated"
                 style={{
                   marginLeft: 16,
                   marginRight: 16,
+                  marginTop: 5,
                   borderRadius: 24,
                   padding: 30,
                   paddingTop: 5,
@@ -643,9 +711,9 @@ export default function RoutePlanScreen() {
             )}
 
             {routeData && (
-              <View style={{ marginTop: 24, margin: 15 }}>
+              <View style={{ marginTop: 20, margin: 15 }}>
                 <Text
-                  style={{ marginBottom: 22, marginLeft: 8 }}
+                  style={{ marginBottom: 18, marginLeft: 8 }}
                   variant="labelMedium"
                 >
                   Stations List
