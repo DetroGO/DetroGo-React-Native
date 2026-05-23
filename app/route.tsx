@@ -5,8 +5,10 @@ import {
   Animated,
   Dimensions,
 } from "react-native";
+import stations from "@/cities/delhi/stationsdata.json";
 import { useRecentTripsStore } from "@/store/recentTrips";
 import * as Haptics from "expo-haptics";
+import * as Location from "expo-location";
 import { useBookmarksStore } from "@/store/savedRoutes";
 import { ScrollView } from "react-native-gesture-handler";
 import { LINE_DISPLAY_NAMES } from "@/cities/delhi/lineMeta";
@@ -181,10 +183,14 @@ function NotificationCard({
   title,
   desc,
   data,
+  icon,
+  cardbg,
 }: {
   title: string;
   desc: string;
   data: any;
+  icon: string;
+  cardbg: string;
 }) {
   const theme = useAppTheme();
 
@@ -193,35 +199,35 @@ function NotificationCard({
       mode="elevated"
       style={{
         marginLeft: 16,
-        marginRight: 18,
+        marginRight: 16,
         marginTop: 5,
-
         borderRadius: 24,
         marginBottom: 10,
-        backgroundColor: theme.colors.tertiaryContainer,
-        padding: 12,
+        backgroundColor: cardbg,
+        padding: 10,
       }}
     >
       <Card.Content>
         <View
           style={{
-            display: "flex",
             flexDirection: "row",
             alignItems: "center",
             gap: 15,
           }}
         >
-          <Icon
-            source="transit-transfer"
-            size={32}
-            color={theme.colors.onTertiaryContainer}
-          />
-          <View style={{ display: "flex", flexDirection: "column", gap: 3 }}>
+          <View style={{ marginLeft: 3 }}>
+            <Icon
+              source={icon}
+              size={34}
+              color={theme.colors.onTertiaryContainer}
+            />
+          </View>
+
+          <View style={{ flex: 1, flexDirection: "column", gap: 3 }}>
             <Text
               style={{
-                fontWeight: 400,
+                fontWeight: "600",
                 fontSize: 14,
-
                 color: theme.colors.onTertiaryContainer,
               }}
             >
@@ -229,28 +235,23 @@ function NotificationCard({
             </Text>
             <Text
               style={{
-                fontWeight: 700,
                 fontSize: 12,
-                fontStyle: "bold",
+                fontWeight: "400",
                 color: theme.colors.onTertiaryContainer,
+                opacity: 0.8,
               }}
             >
               {desc}
             </Text>
           </View>
-          <View
-            style={{
-              flex: 1,
-              alignItems: "flex-end",
-              justifyContent: "center",
-            }}
-          >
+
+          <Pressable hitSlop={12} style={{ padding: 4 }}>
             <Icon
               source="close"
               size={20}
               color={theme.colors.onTertiaryContainer}
             />
-          </View>
+          </Pressable>
         </View>
       </Card.Content>
     </Card>
@@ -259,7 +260,10 @@ function NotificationCard({
 
 export default function RoutePlanScreen() {
   const [htmlUri, setHtmlUri] = useState<string | null>(null);
+  const [location, setLocation] = useState(null);
   const webviewRef = useRef(null);
+  const [nearest, setNearest] = useState(null);
+  const [errorMsg, setErrorMsg] = useState(false);
   const [visibleInfo, setVisibleInfo] = useState(false);
   const { addTrip } = useRecentTripsStore();
   const { addBookmark, removeBookmark, isBookmarked } = useBookmarksStore();
@@ -302,6 +306,72 @@ export default function RoutePlanScreen() {
       webviewRef.current?.injectJavaScript(run);
     }
   }, [theme.dark, isMapReady, routeData]);
+
+  const haversine = (lat1, lon1, lat2, lon2) => {
+    const toRad = (v) => (v * Math.PI) / 180;
+    const R = 6371;
+    const dLat = toRad(lat2 - lat1);
+    const dLon = toRad(lon2 - lon1);
+
+    const a =
+      Math.sin(dLat / 2) ** 2 +
+      Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) ** 2;
+
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  };
+
+  const findNearestMetroStation = (userLat, userLon, stationList) => {
+    let nearestStation = null;
+    let minDistance = Infinity;
+
+    stationList.forEach((station) => {
+      const d = haversine(
+        userLat,
+        userLon,
+        parseFloat(station.stop_lat),
+        parseFloat(station.stop_lon),
+      );
+      if (d < minDistance) {
+        minDistance = d;
+        nearestStation = station;
+      }
+    });
+
+    return { nearestStation, minDistance };
+  };
+
+  useEffect(() => {
+    (async () => {
+      try {
+        // Request permission from the user
+        let { status } = await Location.requestForegroundPermissionsAsync();
+        if (status !== "granted") {
+          setErrorMsg(true);
+
+          return;
+        }
+
+        // Fetch current position
+        let currentPosition = await Location.getCurrentPositionAsync({});
+        const lat = currentPosition.coords.latitude;
+        const lon = currentPosition.coords.longitude;
+        setLocation({ lat, lon });
+
+        // Run your custom logic
+        const result = findNearestMetroStation(lat, lon, stations);
+        setNearest(result);
+        console.log(nearest);
+
+        // Auto-fill start station if we found one
+        if (result.nearestStation) {
+        }
+      } catch (error) {
+        setErrorMsg(true);
+      } finally {
+        setErrorMsg(false);
+      }
+    })();
+  }, []);
 
   const handleBookmark = () => {
     if (isBookmarked(fromStation, toStation)) {
@@ -538,10 +608,13 @@ export default function RoutePlanScreen() {
         {routeData && routeData.transferStations.length > 0 && (
           <NotificationCard
             title="Transfer Station Incoming"
-            desc={routeData.transferStations[0]}
+            icon="transit-transfer"
+            desc={`Change to ${nearest} at ${routeData.transferStations[0]} `}
             data={routeData}
+            cardbg={theme.colors.tertiaryContainer}
           />
         )}
+
         {/* --- FOREGROUND UI (Bottom Sheet style) --- */}
         {routeData && (
           <View
