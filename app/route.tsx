@@ -182,12 +182,14 @@ function StationNavigator({
 function NotificationCard({
   title,
   desc,
+  desc2,
   data,
   icon,
   cardbg,
 }: {
   title: string;
   desc: string;
+  desc2: string;
   data: any;
   icon: string;
   cardbg: string;
@@ -223,7 +225,7 @@ function NotificationCard({
             />
           </View>
 
-          <View style={{ flex: 1, flexDirection: "column", gap: 3 }}>
+          <View style={{ flex: 1, flexDirection: "column", gap: 1 }}>
             <Text
               style={{
                 fontWeight: "600",
@@ -241,7 +243,7 @@ function NotificationCard({
                 opacity: 0.8,
               }}
             >
-              {desc}
+              {desc} {desc2}
             </Text>
           </View>
 
@@ -260,16 +262,15 @@ function NotificationCard({
 
 export default function RoutePlanScreen() {
   const [htmlUri, setHtmlUri] = useState<string | null>(null);
-  const [location, setLocation] = useState(null);
   const webviewRef = useRef(null);
-  const [nearest, setNearest] = useState(null);
-  const [errorMsg, setErrorMsg] = useState(false);
   const [visibleInfo, setVisibleInfo] = useState(false);
   const { addTrip } = useRecentTripsStore();
   const { addBookmark, removeBookmark, isBookmarked } = useBookmarksStore();
   const theme = useAppTheme();
   const isDark = theme.dark;
   const [isMapReady, setIsMapReady] = useState(false);
+  const [isTransferahead, Transferahead] = useState(false);
+  const [TransferStation, setTransferStation] = useState();
   const [currentStation, setCurrentStation] = useState("");
   const [routeData, setRouteData] = useState(null);
   const screenWidth = Dimensions.get("window").width;
@@ -291,6 +292,29 @@ export default function RoutePlanScreen() {
   }, []);
 
   useEffect(() => {
+    if (!routeData?.transferDetails || !currentStation) return;
+
+    // Find current position in route
+    const currentIndex = routeData.route.findIndex(
+      (s) => s.station === currentStation,
+    );
+    if (currentIndex === -1) return;
+
+    const nextStation = routeData.route[currentIndex + 2];
+    if (!nextStation) return;
+
+    const upcomingTransfer = routeData.transferDetails.find(
+      (t) => t.station === nextStation.station,
+    );
+
+    if (upcomingTransfer) {
+      Transferahead(true);
+      setTransferStation(upcomingTransfer);
+      // show banner, haptic, NotificationCard update, etc.
+    }
+  }, [currentStation]);
+
+  useEffect(() => {
     if (isMapReady && routeData) {
       const payload = {
         type: "SYNC_STATE",
@@ -306,72 +330,6 @@ export default function RoutePlanScreen() {
       webviewRef.current?.injectJavaScript(run);
     }
   }, [theme.dark, isMapReady, routeData]);
-
-  const haversine = (lat1, lon1, lat2, lon2) => {
-    const toRad = (v) => (v * Math.PI) / 180;
-    const R = 6371;
-    const dLat = toRad(lat2 - lat1);
-    const dLon = toRad(lon2 - lon1);
-
-    const a =
-      Math.sin(dLat / 2) ** 2 +
-      Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) ** 2;
-
-    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  };
-
-  const findNearestMetroStation = (userLat, userLon, stationList) => {
-    let nearestStation = null;
-    let minDistance = Infinity;
-
-    stationList.forEach((station) => {
-      const d = haversine(
-        userLat,
-        userLon,
-        parseFloat(station.stop_lat),
-        parseFloat(station.stop_lon),
-      );
-      if (d < minDistance) {
-        minDistance = d;
-        nearestStation = station;
-      }
-    });
-
-    return { nearestStation, minDistance };
-  };
-
-  useEffect(() => {
-    (async () => {
-      try {
-        // Request permission from the user
-        let { status } = await Location.requestForegroundPermissionsAsync();
-        if (status !== "granted") {
-          setErrorMsg(true);
-
-          return;
-        }
-
-        // Fetch current position
-        let currentPosition = await Location.getCurrentPositionAsync({});
-        const lat = currentPosition.coords.latitude;
-        const lon = currentPosition.coords.longitude;
-        setLocation({ lat, lon });
-
-        // Run your custom logic
-        const result = findNearestMetroStation(lat, lon, stations);
-        setNearest(result);
-        console.log(nearest);
-
-        // Auto-fill start station if we found one
-        if (result.nearestStation) {
-        }
-      } catch (error) {
-        setErrorMsg(true);
-      } finally {
-        setErrorMsg(false);
-      }
-    })();
-  }, []);
 
   const handleBookmark = () => {
     if (isBookmarked(fromStation, toStation)) {
@@ -431,7 +389,6 @@ export default function RoutePlanScreen() {
   const moveMapAhead = () => {
     const run = `window.nextStation(); true;`;
     webviewRef.current?.injectJavaScript(run);
-    console.log(routeData.stops);
   };
 
   const moveMapBack = () => {
@@ -601,15 +558,16 @@ export default function RoutePlanScreen() {
               scrollEnabled={false}
               overScrollMode="never"
               bounces={false}
+              s
             />
           )}
         </View>
 
-        {routeData && routeData.transferStations.length > 0 && (
+        {isTransferahead && (
           <NotificationCard
             title="Transfer Station Incoming"
             icon="transit-transfer"
-            desc={`Change to ${nearest} at ${routeData.transferStations[0]} `}
+            desc={`${TransferStation.station} for ${TransferStation.toLine} `}
             data={routeData}
             cardbg={theme.colors.tertiaryContainer}
           />
@@ -625,8 +583,8 @@ export default function RoutePlanScreen() {
             {/* M3 Expressive Station Navigator */}
             <StationNavigator
               currentStation={currentStation}
-              onPrev={moveMapBack}
-              onNext={moveMapAhead}
+              onPrev={() => moveMapBack()}
+              onNext={() => moveMapAhead()}
             />
 
             {/* notification here  */}

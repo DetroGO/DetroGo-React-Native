@@ -102,6 +102,24 @@ function findTransferStations(route, segmentLines) {
   return transfers;
 }
 
+function findTransferDetails(route, segmentLines) {
+  const details = [];
+  for (let i = 1; i < segmentLines.length; i++) {
+    if (
+      segmentLines[i] !== segmentLines[i - 1] &&
+      segmentLines[i] !== "INTERCHANGE"
+    ) {
+      details.push({
+        station: route[i],
+        position: i,
+        fromLine: segmentLines[i - 1],
+        toLine: segmentLines[i],
+      });
+    }
+  }
+  return details;
+}
+
 function buildRouteSteps(route, segmentLines, transferStations) {
   return route.map((station, i) => ({
     station,
@@ -125,6 +143,7 @@ export function calculateRoute(from, to) {
 
   const segmentLines = getRouteLines(route, metroLines);
   const transferStations = findTransferStations(route, segmentLines);
+  const transferDetails = findTransferDetails(route, segmentLines);
   const steps = buildRouteSteps(route, segmentLines, transferStations);
 
   return {
@@ -133,5 +152,6 @@ export function calculateRoute(from, to) {
     stops: route.length - 1,
     route: steps,
     transferStations,
+    transferDetails,
   };
 }
