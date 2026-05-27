@@ -185,6 +185,7 @@ function NotificationCard({
   desc2,
   data,
   icon,
+  cardfg,
   cardbg,
 }: {
   title: string;
@@ -192,6 +193,7 @@ function NotificationCard({
   desc2: string;
   data: any;
   icon: string;
+  cardfg: string;
   cardbg: string;
 }) {
   const theme = useAppTheme();
@@ -218,11 +220,7 @@ function NotificationCard({
           }}
         >
           <View style={{ marginLeft: 3 }}>
-            <Icon
-              source={icon}
-              size={34}
-              color={theme.colors.onTertiaryContainer}
-            />
+            <Icon source={icon} size={34} color={cardfg} />
           </View>
 
           <View style={{ flex: 1, flexDirection: "column", gap: 1 }}>
@@ -230,7 +228,7 @@ function NotificationCard({
               style={{
                 fontWeight: "600",
                 fontSize: 14,
-                color: theme.colors.onTertiaryContainer,
+                color: cardfg,
               }}
             >
               {title}
@@ -239,7 +237,7 @@ function NotificationCard({
               style={{
                 fontSize: 12,
                 fontWeight: "400",
-                color: theme.colors.onTertiaryContainer,
+                color: cardfg,
                 opacity: 0.8,
               }}
             >
@@ -248,11 +246,7 @@ function NotificationCard({
           </View>
 
           <Pressable hitSlop={12} style={{ padding: 4 }}>
-            <Icon
-              source="close"
-              size={20}
-              color={theme.colors.onTertiaryContainer}
-            />
+            <Icon source="close" size={20} color={cardfg} />
           </Pressable>
         </View>
       </Card.Content>
@@ -290,27 +284,28 @@ export default function RoutePlanScreen() {
       .downloadAsync()
       .then((asset) => setHtmlUri(asset.localUri));
   }, []);
-
   useEffect(() => {
     if (!routeData?.transferDetails || !currentStation) return;
 
-    // Find current position in route
     const currentIndex = routeData.route.findIndex(
       (s) => s.station === currentStation,
     );
     if (currentIndex === -1) return;
 
-    const nextStation = routeData.route[currentIndex + 2];
-    if (!nextStation) return;
-
-    const upcomingTransfer = routeData.transferDetails.find(
-      (t) => t.station === nextStation.station,
-    );
+    // Look through all remaining stations for the next transfer
+    const remainingRoute = routeData.route.slice(currentIndex + 1);
+    const upcomingTransfer = remainingRoute
+      .map((s) =>
+        routeData.transferDetails.find((t) => t.station === s.station),
+      )
+      .find(Boolean);
 
     if (upcomingTransfer) {
-      Transferahead(true);
       setTransferStation(upcomingTransfer);
-      // show banner, haptic, NotificationCard update, etc.
+      Transferahead(true);
+    } else {
+      setTransferStation(undefined);
+      Transferahead(false);
     }
   }, [currentStation]);
 
@@ -563,13 +558,23 @@ export default function RoutePlanScreen() {
           )}
         </View>
 
-        {isTransferahead && (
+        {isTransferahead ? (
           <NotificationCard
-            title="Transfer Station Incoming"
+            title="Next Transfer Station"
             icon="transit-transfer"
             desc={`${TransferStation.station} for ${TransferStation.toLine} `}
             data={routeData}
-            cardbg={theme.colors.tertiaryContainer}
+            cardfg={theme.colors.onSecondaryContainer}
+            cardbg={theme.colors.secondaryContainer}
+          />
+        ) : (
+          <NotificationCard
+            title="TEST NOTIFICATION"
+            icon="information"
+            desc="TEST DATA"
+            data={routeData}
+            cardfg={theme.colors.onSurfaceVariant}
+            cardbg={theme.colors.elevation.level2}
           />
         )}
 
