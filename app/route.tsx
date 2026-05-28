@@ -266,6 +266,8 @@ export default function RoutePlanScreen() {
   const [isTransferahead, Transferahead] = useState(false);
   const [TransferStation, setTransferStation] = useState();
   const [currentStation, setCurrentStation] = useState("");
+  const [currentStationIndex, setCurrentStationIndex] = useState();
+  const [totalStops, setTotalStops] = useState();
   const [routeData, setRouteData] = useState(null);
   const screenWidth = Dimensions.get("window").width;
   const { start, end } = useLocalSearchParams<{ start: string; end: string }>();
@@ -290,6 +292,7 @@ export default function RoutePlanScreen() {
     const currentIndex = routeData.route.findIndex(
       (s) => s.station === currentStation,
     );
+    setCurrentStationIndex(currentIndex);
     if (currentIndex === -1) return;
 
     // Look through all remaining stations for the next transfer
@@ -365,6 +368,8 @@ export default function RoutePlanScreen() {
       const initialRoute = calculateRoute(fromStation, toStation);
       if (!initialRoute.error) {
         setRouteData(initialRoute);
+
+        setTotalStops(initialRoute.stops);
         webviewRef.current?.postMessage(JSON.stringify(initialRoute));
         addTrip({
           id: `${fromStation}__${toStation}__${Date.now()}`,
@@ -564,17 +569,30 @@ export default function RoutePlanScreen() {
             icon="transit-transfer"
             desc={`${TransferStation.station} for ${TransferStation.toLine} `}
             data={routeData}
-            cardfg={theme.colors.onSecondaryContainer}
-            cardbg={theme.colors.secondaryContainer}
+            cardfg={theme.colors.onTertiaryContainer}
+            cardbg={theme.colors.tertiaryContainer}
           />
         ) : (
           <NotificationCard
-            title="TEST NOTIFICATION"
-            icon="information"
-            desc="TEST DATA"
+            title={
+              currentStationIndex === totalStops
+                ? "Destination Reached"
+                : `${totalStops - currentStationIndex} stops remaining`
+            }
+            desc={`${toStation}`}
+            icon={
+              currentStationIndex === totalStops
+                ? "flag-checkered"
+                : "map-marker-radius"
+            }
+            desc2="| Have a Nice Day!"
             data={routeData}
-            cardfg={theme.colors.onSurfaceVariant}
-            cardbg={theme.colors.elevation.level2}
+            cardfg={theme.colors.onTertiaryContainer}
+            cardbg={
+              currentStationIndex === totalStops
+                ? theme.colors.errorContainer
+                : theme.colors.tertiaryContainer
+            }
           />
         )}
 
