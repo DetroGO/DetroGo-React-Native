@@ -29,7 +29,7 @@ import {
 } from "react-native-paper";
 import { useAppTheme } from "@/hooks/useAppTheme";
 import SearchBar from "@/components/ui/searchbar";
-
+import { Svg, Path } from "react-native-svg";
 import { router } from "expo-router";
 import { CITIES, CityConfig } from "@/cities/index";
 
@@ -287,6 +287,101 @@ function useSpringPress() {
   return { scale, onPressIn, onPressOut };
 }
 
+function StarburstBadge({
+  color,
+  size = 200,
+  children,
+}: {
+  color: string;
+  size?: number;
+  children: React.ReactNode;
+}) {
+  // Official Material 3 10-point badge path
+  const starburstPath =
+    "M112.67 19.78C116.243 16.64 118.029 15.07 119.671 13.8C143.425 -4.6 176.575 -4.6 200.329 13.8C201.971 15.07 203.757 16.64 207.33 19.78C208.526 20.84 209.124 21.3601 209.724 21.8701C218.136 28.9201 228.171 33.7699 238.92 35.9599C239.688 36.1199 240.471 36.26 242.038 36.54C246.719 37.38 249.059 37.79 251.075 38.29C280.234 45.43 300.902 71.4099 301.364 101.49C301.396 103.57 301.283 105.95 301.057 110.71C300.982 112.31 300.944 113.1 300.925 113.89C300.665 124.88 303.143 135.76 308.136 145.55C308.493 146.25 308.872 146.95 309.63 148.36C311.894 152.55 313.026 154.64 313.897 156.53C326.503 183.83 319.127 216.23 295.949 235.34C294.347 236.67 292.42 238.06 288.566 240.85C287.276 241.79 286.63 242.25 286.007 242.73C277.27 249.38 270.326 258.11 265.803 268.12C265.48 268.84 265.169 269.57 264.547 271.04C262.69 275.43 261.761 277.62 260.832 279.48C247.393 306.38 217.526 320.8 188.162 314.56C186.132 314.12 183.842 313.48 179.262 312.2C177.728 311.78 176.962 311.56 176.203 311.37C165.569 308.67 154.431 308.67 143.797 311.37C143.038 311.56 142.272 311.78 140.738 312.2C136.158 313.48 133.868 314.12 131.838 314.56C102.474 320.8 72.6071 306.38 59.168 279.48C58.2388 277.62 57.3102 275.43 55.453 271.04C54.8311 269.57 54.5202 268.84 54.1975 268.12C49.6741 258.11 42.7297 249.38 33.993 242.73C33.3696 242.25 32.7244 241.79 31.434 240.85C27.5801 238.06 25.6532 236.67 24.0507 235.34C0.872993 216.23 -6.50347 183.83 6.10269 156.53C6.97419 154.64 8.10619 152.55 10.3703 148.36C11.1283 146.95 11.5074 146.25 11.8636 145.55C16.8568 135.76 19.3353 124.88 19.0745 113.89C19.0559 113.1 19.0182 112.31 18.9426 110.71C18.7168 105.95 18.6039 103.57 18.6359 101.49C19.0982 71.4099 39.7665 45.43 68.9252 38.29C70.9411 37.79 73.2814 37.38 77.9618 36.54C79.5289 36.26 80.3125 36.1199 81.0795 35.9599C91.829 33.7699 101.864 28.9201 110.276 21.8701C110.876 21.3601 111.474 20.84 112.67 19.78Z";
+  return (
+    <View
+      style={{
+        width: size,
+        height: size,
+        alignItems: "center",
+        justifyContent: "center",
+      }}
+    >
+      {/* The viewBox "-14 0 128 128" strictly aligns with the mathematical extremes
+        of the path above, ensuring it renders perfectly centered without being cut off.
+      */}
+      <Svg
+        viewBox="-32 -30 380 380"
+        width="110%"
+        height="110%"
+        style={{ position: "absolute" }}
+      >
+        <Path d={starburstPath} fill={color} />
+      </Svg>
+
+      {/* Inner Icon Container */}
+      <View style={{ zIndex: 1 }}>{children}</View>
+    </View>
+  );
+}
+
+function ActionButton({
+  onPress,
+  label,
+  color,
+}: {
+  onPress: () => void;
+  label: string;
+  color: string;
+}) {
+  const theme = useAppTheme();
+  const scale = React.useRef(new Animated.Value(1)).current;
+
+  const handlePressIn = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    Animated.spring(scale, {
+      toValue: 0.95,
+      useNativeDriver: true,
+      tension: 300,
+      friction: 20,
+    }).start();
+  };
+
+  const handlePressOut = () => {
+    Animated.spring(scale, {
+      toValue: 1,
+      useNativeDriver: true,
+      tension: 300,
+      friction: 20,
+    }).start();
+  };
+
+  return (
+    <Animated.View style={{ transform: [{ scale }], width: "100%" }}>
+      <Pressable
+        onPressIn={handlePressIn}
+        onPressOut={handlePressOut}
+        onPress={onPress}
+        style={({ pressed }) => [
+          styles.button,
+          {
+            backgroundColor: color,
+            opacity: pressed ? 0.9 : 1,
+          },
+        ]}
+      >
+        <Text
+          variant="titleMedium"
+          style={{ color: theme.colors.onPrimaryContainer, fontWeight: "600" }}
+        >
+          {label}
+        </Text>
+      </Pressable>
+    </Animated.View>
+  );
+}
+
 function EmptyRoutesState({
   theme,
   onTakeTour,
@@ -309,158 +404,66 @@ function EmptyRoutesState({
     outputRange: [16, 50],
   });
 
+  const handleNext = () => {
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    // Navigate to your main app or next onboarding step
+    router.replace("/map");
+  };
+
   return (
-    <View
-      style={{
-        flex: 1,
-        alignItems: "center",
-        justifyContent: "center",
-        paddingHorizontal: 32,
-        marginTop: 40,
-        gap: 4,
-      }}
-    >
-      {/* Icon */}
-      <View
-        style={{
-          width: 76,
-          height: 76,
-          backgroundColor: theme.colors.secondaryContainer,
-          alignItems: "center",
-          justifyContent: "center",
-          borderRadius: 20,
-          marginBottom: 22,
-        }}
-      >
+    <View style={styles.trah}>
+      <View style={styles.graphicContainer}>
         <Image
-          source={require("../../assets/images/detrologowhite.png")}
-          style={{
-            width: 70,
-            height: 70,
-            transform: [{ rotate: "2deg" }],
-
-            marginLeft: 0,
-
-            tintColor: theme.colors.onSecondaryContainer,
-          }}
+          source={require("../../assets/images/starburst.png")}
+          style={{ width: 210, height: 210 }}
         />
       </View>
+      <View style={styles.puh}>
+        <View style={styles.versionContainer}>
+          <Text
+            variant="displayMedium"
+            style={{
+              color: theme.colors.onSurfaceVariant,
+              fontWeight: "semibold",
 
-      {/* Headline */}
-      <Text
-        variant="titleLarge"
-        style={{ color: theme.colors.onSurface, textAlign: "center" }}
-      >
-        {strings.home.try}
-      </Text>
-
-      {/* Subtitle */}
-      <Text
-        variant="bodySmall"
-        style={{
-          textAlign: "center",
-          color: theme.colors.onSurfaceVariant,
-          lineHeight: 20,
-          width: 280,
-          marginTop: 6,
-          marginBottom: 28,
-        }}
-      >
-        {hasSeenTutorial
-          ? strings.common.seenTutorial
-          : strings.home.startbysearch}
-      </Text>
-
-      {/* Buttons row */}
-      <View style={{ flexDirection: "column", gap: 12 }}>
-        {/* Take the Tour — secondary tonal */}
-        <Animated.View style={{ transform: [{ scale: tourSpring.scale }] }}>
-          <Pressable
-            onPressIn={() => {
-              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Soft);
-              tourSpring.onPressIn();
-            }}
-            onPressOut={() => {
-              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Rigid);
-              tourSpring.onPressOut();
-            }}
-            onPress={onTakeTour}
-            android_ripple={{
-              color: theme.colors.onSurfaceVariant + "22",
-              borderless: false,
+              alignItems: "center",
+              justifyContent: "center",
+              textAlign: "center",
             }}
           >
-            <Animated.View
-              style={{
-                display: hasSeenTutorial ? "none" : "flex",
-                height: 52,
-                paddingHorizontal: 100,
-                alignItems: "center",
-                justifyContent: "center",
-                flexDirection: "row",
-                gap: 8,
-                backgroundColor: theme.colors.primaryContainer,
-                borderRadius: tourRadius,
-              }}
-            >
-              <Icon
-                source="compass-outline"
-                size={18}
-                color={theme.colors.onPrimaryContainer}
-              />
-              <Text
-                variant="labelLarge"
-                style={{ color: theme.colors.onPrimaryContainer }}
-              >
-                {strings.common.takeTour}
-              </Text>
-            </Animated.View>
-          </Pressable>
-        </Animated.View>
+            {strings.home.try}
+          </Text>
+        </View>
+        <Text
+          variant="labelSmall"
+          style={{
+            color: theme.colors.outline,
+            textAlign: "center",
+            width: 260,
+            marginTop: 10,
+          }}
+        >
+          {strings.home.startbysearch}
+        </Text>
+      </View>
 
-        {/* Plan a Trip — primary tonal */}
-        <Animated.View style={{ transform: [{ scale: planSpring.scale }] }}>
-          <Pressable
-            onPressIn={planSpring.onPressIn}
-            onPressOut={planSpring.onPressOut}
-            onPress={onPlanTrip}
-            android_ripple={{
-              color: theme.colors.onSecondaryContainer + "33",
-              borderless: false,
-            }}
-          >
-            <Animated.View
-              style={{
-                height: hasSeenTutorial ? 50 : 25,
-                paddingHorizontal: hasSeenTutorial ? 100 : 0,
-                alignItems: "center",
-                justifyContent: "center",
-                flexDirection: "row",
-                gap: 0,
-                backgroundColor: hasSeenTutorial
-                  ? theme.colors.primaryContainer
-                  : "transparent",
-                borderRadius: planRadius,
-              }}
-            >
-              {/*<Icon source="calendar" size={18} color={theme.colors.onSurfaceVariant} />*/}
-              <Text
-                variant="labelMedium"
-                style={{
-                  color: hasSeenTutorial
-                    ? theme.colors.onPrimaryContainer
-                    : theme.colors.secondary,
-                }}
-              >
-                {strings.common.planTrip}
-              </Text>
-            </Animated.View>
-          </Pressable>
-        </Animated.View>
+      {/* BOTTOM ACTION SECTION */}
+      <View style={styles.footer}>
+        <ActionButton
+          label="Take Tour"
+          color={theme.colors.primaryContainer}
+          onPress={handleNext}
+        />
+        <ActionButton
+          label="Open Planner"
+          color={theme.colors.surfaceContainerLow}
+          onPress={handleNext}
+        />
       </View>
     </View>
   );
 }
+
 export default function HomeScreen() {
   const hasSeenTutorial = useOnboardingStore((state) => state.hasSeenTutorial);
   const theme = useAppTheme();
@@ -833,5 +836,43 @@ const styles = StyleSheet.create({
     margin: 16,
     right: 0,
     bottom: 0,
+  },
+  trah: {
+    flex: 1,
+    paddingHorizontal: 24,
+  },
+  puh: {
+    flex: 1,
+    marginTop: 50,
+    alignItems: "center",
+  },
+  versionContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 12,
+    gap: 12,
+  },
+  versionBadge: {
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12, // completely rounded pill shape
+  },
+  graphicContainer: {
+    marginTop: 100,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  footer: {
+    paddingBottom: 50,
+    alignItems: "center",
+    gap: 20,
+    width: "100%",
+  },
+  button: {
+    height: 64, // Tall, luxurious button height
+    borderRadius: 32, // Fully rounded pill shape
+    width: "100%",
+    alignItems: "center",
+    justifyContent: "center",
   },
 });

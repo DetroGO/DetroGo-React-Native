@@ -9,7 +9,12 @@ const strings = {
     selectnet: "Select a Metro System",
     startbysearch:
       "Hey there! New to the app? Click below to learn how to get started.",
-    try: "Welcome to DetroGo",
+    try: "Let's Plan Your First Ride",
+    readyTitle: "Ready for Your First Ride?",
+    startBySearchSubtitle:
+      "Find routes, plan trips, and navigate with ease. We'll show you how.",
+    seenTutorialSubtitle:
+      "You're all set! Tell us where you want to go, and we'll handle the rest.",
   },
   navigation: {
     home: "Home",
@@ -71,6 +76,9 @@ const strings = {
     transfers: "Transfers",
     takeTour: "Take the Tour",
     planTrip: "Open Planner",
+    startTour: "See How It Works",
+
+    skipAndPlan: "Skip & Plan My Trip",
     skip: "Skip",
     version: "Version",
     seenTutorial:
