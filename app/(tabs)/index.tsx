@@ -76,7 +76,9 @@ const RecentCard = ({
           style={{
             width: 50,
             height: 50,
-            backgroundColor: theme.colors.surfaceVariant,
+            backgroundColor: theme.dark
+              ? theme.colors.surfaceContainerHigh
+              : theme.colors.elevation.level5,
             alignItems: "center",
             justifyContent: "center",
             borderRadius: 17,
@@ -330,13 +332,18 @@ function ActionButton({
   onPress,
   label,
   color,
+  hidden,
+  size,
 }: {
   onPress: () => void;
   label: string;
   color: string;
+  hidden?: boolean;
+  size?: string;
 }) {
   const theme = useAppTheme();
   const scale = React.useRef(new Animated.Value(1)).current;
+  const hasSeenTutorial = useOnboardingStore((state) => state.hasSeenTutorial);
 
   const handlePressIn = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -358,22 +365,46 @@ function ActionButton({
   };
 
   return (
-    <Animated.View style={{ transform: [{ scale }], width: "100%" }}>
+    <Animated.View
+      style={{
+        display: hidden ? "none" : "flex",
+        transform: [{ scale }],
+        width: "100%",
+      }}
+    >
       <Pressable
         onPressIn={handlePressIn}
         onPressOut={handlePressOut}
         onPress={onPress}
         style={({ pressed }) => [
-          styles.button,
           {
+            height: size === "large" ? 64 : size === "small" ? 30 : 56, // Tall, luxurious button height
+            borderRadius: 32, // Fully rounded pill shape
+            width: "100%",
+            alignItems: "center",
+            justifyContent: "center",
             backgroundColor: color,
             opacity: pressed ? 0.9 : 1,
           },
         ]}
       >
         <Text
-          variant="titleMedium"
-          style={{ color: theme.colors.onPrimaryContainer, fontWeight: "600" }}
+          variant={
+            size === "large"
+              ? "titleMedium"
+              : size === "small"
+                ? "bodySmall"
+                : "titleSmall"
+          }
+          style={{
+            color:
+              size === "large"
+                ? theme.colors.onPrimaryContainer
+                : size === "small"
+                  ? theme.colors.secondary
+                  : theme.colors.onPrimaryContainer,
+            fontWeight: "600",
+          }}
         >
           {label}
         </Text>
@@ -412,12 +443,7 @@ function EmptyRoutesState({
 
   return (
     <View style={styles.trah}>
-      <View style={styles.graphicContainer}>
-        <Image
-          source={require("../../assets/images/starburst.png")}
-          style={{ width: 210, height: 210 }}
-        />
-      </View>
+      <View style={styles.graphicContainer}></View>
       <View style={styles.puh}>
         <View style={styles.versionContainer}>
           <Text
@@ -431,7 +457,7 @@ function EmptyRoutesState({
               textAlign: "center",
             }}
           >
-            {strings.home.try}
+            {hasSeenTutorial ? "Get Started" : strings.home.try}
           </Text>
         </View>
         <Text
@@ -443,7 +469,9 @@ function EmptyRoutesState({
             marginTop: 10,
           }}
         >
-          {strings.home.startbysearch}
+          {hasSeenTutorial
+            ? "Get Started by Planning a Trip by clicking the button below"
+            : strings.home.startbysearch}
         </Text>
       </View>
 
@@ -452,12 +480,17 @@ function EmptyRoutesState({
         <ActionButton
           label="Take Tour"
           color={theme.colors.primaryContainer}
-          onPress={handleNext}
+          hidden={hasSeenTutorial}
+          size="large"
+          onPress={onTakeTour}
         />
         <ActionButton
           label="Open Planner"
-          color={theme.colors.surfaceContainerLow}
-          onPress={handleNext}
+          color={
+            hasSeenTutorial ? theme.colors.surfaceBright : theme.colors.surface
+          }
+          size={hasSeenTutorial ? "large" : "small"}
+          onPress={onPlanTrip}
         />
       </View>
     </View>
@@ -842,8 +875,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
   },
   puh: {
-    flex: 1,
-    marginTop: 50,
+    marginTop: "50%",
     alignItems: "center",
   },
   versionContainer: {
@@ -864,6 +896,7 @@ const styles = StyleSheet.create({
   },
   footer: {
     paddingBottom: 50,
+    marginTop: 40,
     alignItems: "center",
     gap: 20,
     width: "100%",

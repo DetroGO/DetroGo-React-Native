@@ -2,7 +2,7 @@
   "expo": {
     "name": "DetroGo",
     "slug": "DetroGo",
-    "version": "alpha 0.0.2",
+    "version": "alpha 0.0.3",
     "orientation": "portrait",
     "assetBundlePatterns": ["assets/routemap/**"],
     "icon": "./assets/icons/icon.png",
@@ -15,7 +15,8 @@
         "light": "./assets/icons/ios-light.png",
         "dark": "./assets/icons/ios-dark.png",
         "tinted": "./assets/icons/ios-tinted.png"
-      }
+      },
+      "bundleIdentifier": "com.anshwadhwa.DetroGo"
     },
     "android": {
       "adaptiveIcon": {
@@ -26,7 +27,13 @@
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
       "usesCleartextTraffic": true,
-      "package": "com.anshwadhwa.DetroGo"
+      "package": "com.anshwadhwa.DetroGo",
+      "permissions": [
+        "android.permission.POST_NOTIFICATIONS",
+        "android.permission.POST_PROMOTED_NOTIFICATIONS",
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.ACCESS_FINE_LOCATION"
+      ]
     },
     "web": {
       "output": "static",
@@ -39,9 +46,23 @@
           "locationAlwaysAndWhenInUsePermission": "Allow $(PRODUCT_NAME) to use your location."
         }
       ],
-
+      [
+        "expo-live-updates",
+        {
+          "channelId": "detro-live",
+          "channelName": "DetroGo Live Updates"
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/icons/icon.png",
+          "color": "#ffffff",
+          "defaultChannel": "default",
+          "enableBackgroundRemoteNotifications": false
+        }
+      ],
       ["@maplibre/maplibre-react-native"],
-
       "expo-router",
       [
         "expo-splash-screen",
