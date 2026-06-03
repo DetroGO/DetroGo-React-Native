@@ -5,6 +5,13 @@ export const LINE_DISPLAY_NAMES: Record<string, string> = {
   "Pink branch": "Pink Line (towards Shiv Vihar)",
 };
 
+export const LINES_TOWARDS: Record<string, string> = {
+  "Blue line main": "Blue Line (towards Dwarka)",
+  "Blue line branch": "Blue Line (towards Vaishali)",
+  "Pink loop": "Pink Line (Loop)",
+  "Pink branch": "Pink Line (towards Shiv Vihar)",
+};
+
 export const LINE_COLORS: Record<string, string> = {
   "Yellow Line": "#FFD700",
   "Blue Line": "#0047AB",
