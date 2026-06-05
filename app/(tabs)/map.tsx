@@ -184,6 +184,7 @@ export default function MapScreen() {
         </GeoJSONSource>
 
         {/* Stations */}
+        {/* Stations */}
         <GeoJSONSource id="stations" data={STATIONS}>
           {/* Interchange */}
           <Layer
@@ -228,6 +229,56 @@ export default function MapScreen() {
               ],
               "circle-color": "#bbbbbb",
               "circle-opacity": 0.8,
+            }}
+          />
+
+          {/* Station name labels - interchange stations */}
+          <Layer
+            id="interchange-labels"
+            type="symbol"
+            filter={["==", ["get", "interchange"], 1]}
+            minZoomLevel={11}
+            layout={{
+              "text-field": ["get", "name"],
+              "text-size": [
+                "interpolate",
+                ["linear"],
+                ["zoom"],
+                11,
+                10,
+                14,
+                13,
+              ],
+              "text-offset": [0, 1.4],
+              "text-anchor": "top",
+              "text-max-width": 8,
+              "text-font": ["Noto Sans Regular"],
+            }}
+            paint={{
+              "text-color": theme.dark ? "#ffffff" : "#111111",
+              "text-halo-color": theme.dark ? "#000000" : "#ffffff",
+              "text-halo-width": 1.5,
+            }}
+          />
+
+          {/* Station name labels - regular stations, only at high zoom */}
+          <Layer
+            id="regular-labels"
+            type="symbol"
+            filter={["==", ["get", "interchange"], 0]}
+            minZoomLevel={13}
+            layout={{
+              "text-field": ["get", "name"],
+              "text-size": ["interpolate", ["linear"], ["zoom"], 13, 9, 15, 12],
+              "text-offset": [0, 1.2],
+              "text-anchor": "top",
+              "text-max-width": 8,
+              "text-font": ["Noto Sans Regular"],
+            }}
+            paint={{
+              "text-color": theme.dark ? "#cccccc" : "#333333",
+              "text-halo-color": theme.dark ? "#000000" : "#ffffff",
+              "text-halo-width": 1.5,
             }}
           />
         </GeoJSONSource>

@@ -22,12 +22,7 @@ export default function TabLayout() {
       focusedIcon: "home",
       unfocusedIcon: "home-outline",
     },
-    {
-      key: "map",
-      title: strings.navigation.map,
-      focusedIcon: "map",
-      unfocusedIcon: "map-outline",
-    },
+
     {
       key: "settings",
       title: strings.navigation.settings,
@@ -48,7 +43,9 @@ export default function TabLayout() {
       onIndexChange={setIndex}
       renderScene={renderScene}
       barStyle={{
-        backgroundColor: theme.colors.surface,
+        backgroundColor: theme.dark
+          ? theme.colors.surfaceDim
+          : theme.colors.surfaceBright,
         borderTopWidth: 1,
         borderTopColor: theme.colors.inverseOnSurface,
       }}

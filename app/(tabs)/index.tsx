@@ -1,13 +1,17 @@
+import { View, StyleSheet } from "react-native";
+import BottomSheet, { BottomSheetScrollView } from "@gorhom/bottom-sheet";
+import * as Location from "expo-location";
+import { useMemo, useEffect } from "react";
+import { useAppTheme } from "@/hooks/useAppTheme";
 import {
-  StyleSheet,
-  View,
-  ScrollView,
   Pressable,
   Image,
   RefreshControl,
   SafeAreaView,
   Animated,
 } from "react-native";
+import { ScrollView } from "react-native-gesture-handler";
+
 import React from "react";
 import * as Haptics from "expo-haptics";
 import { useRef, useCallback } from "react";
@@ -27,11 +31,19 @@ import {
   Portal,
   Dialog,
 } from "react-native-paper";
-import { useAppTheme } from "@/hooks/useAppTheme";
+import {
+  Camera,
+  GeoJSONSource,
+  UserLocation,
+  Layer,
+  Map,
+} from "@maplibre/maplibre-react-native";
 import SearchBar from "@/components/ui/searchbar";
 import { Svg, Path } from "react-native-svg";
 import { router } from "expo-router";
 import { CITIES, CityConfig } from "@/cities/index";
+import { LINES } from "@/cities/delhi/shapes";
+import { STATIONS } from "@/cities/delhi/stationshapes";
 
 const RecentCard = ({
   index,
@@ -122,7 +134,7 @@ const BookmarkCard = ({ item }: { item: SavedRoute }) => {
         style={{
           width: 220,
           padding: 4,
-          backgroundColor: theme.colors.elevation.level1,
+          backgroundColor: theme.colors.elevation.level4,
           borderRadius: 20,
           marginBottom: 4,
         }}
@@ -378,7 +390,14 @@ function ActionButton({
         onPress={onPress}
         style={({ pressed }) => [
           {
-            height: size === "large" ? 64 : size === "small" ? 30 : 56, // Tall, luxurious button height
+            height:
+              size === "large"
+                ? 64
+                : size === "small"
+                  ? 30
+                  : size === "medium"
+                    ? 56
+                    : 56, // Tall, luxurious button height
             borderRadius: 32, // Fully rounded pill shape
             width: "100%",
             alignItems: "center",
@@ -442,9 +461,9 @@ function EmptyRoutesState({
   };
 
   return (
-    <View style={styles.trah}>
+    <View style={styles.cont1}>
       <View style={styles.graphicContainer}></View>
-      <View style={styles.puh}>
+      <View style={styles.cont2}>
         <View style={styles.versionContainer}>
           <Text
             variant="displayMedium"
@@ -486,9 +505,7 @@ function EmptyRoutesState({
         />
         <ActionButton
           label="Open Planner"
-          color={
-            hasSeenTutorial ? theme.colors.surfaceBright : theme.colors.surface
-          }
+          color={hasSeenTutorial ? theme.colors.surfaceBright : "transparent"}
           size={hasSeenTutorial ? "large" : "small"}
           onPress={onPlanTrip}
         />
@@ -497,9 +514,26 @@ function EmptyRoutesState({
   );
 }
 
+const LEGEND = [
+  { label: "Yellow", color: "#FFD700" },
+  { label: "Blue", color: "#1E88E5" },
+  { label: "Red", color: "#E53935" },
+  { label: "Violet", color: "#9370DB" },
+  { label: "Pink", color: "#F06292" },
+  { label: "Magenta", color: "#E040FB" },
+  { label: "Green", color: "#43A047" },
+  { label: "Orange", color: "#FB8C00" },
+  { label: "Aqua", color: "#26C6DA" },
+  { label: "Rapid", color: "#015b97" },
+];
+
+const DELHI_CENTER: [number, number] = [77.2195, 28.6329];
+
 export default function HomeScreen() {
-  const hasSeenTutorial = useOnboardingStore((state) => state.hasSeenTutorial);
   const theme = useAppTheme();
+  const bottomSheetRef = useRef<BottomSheet>(null);
+  const snapPoints = useMemo(() => [240, 420], []);
+  const hasSeenTutorial = useOnboardingStore((state) => state.hasSeenTutorial);
   const [visible, setVisible] = useState(false);
   const recentTrips = useRecentTripsStore((state) => state.recentTrips);
   const bookmarks = useBookmarksStore((state) => state.bookmarks);
@@ -508,374 +542,675 @@ export default function HomeScreen() {
   const hideDialog = () => setVisible(false);
   const [refreshing, setRefreshing] = React.useState(false);
 
+  const cameraRef = useRef<any>(null);
+  const hasFocusedUser = useRef(false);
+  const hasCentered = useRef(false);
+  const [initialCenter, setInitialCenter] =
+    useState<[number, number]>(DELHI_CENTER);
+  const [initialZoom, setInitialZoom] = useState(10.5);
+
+  const [tracking, setTracking] = useState<"default" | undefined>(undefined);
+
+  const [popup, setPopup] = useState<string | null>(null);
+
+  // Spring FAB
+  const fabScale = useRef(new Animated.Value(1)).current;
+
+  const fabRadius = fabScale.interpolate({
+    inputRange: [0.88, 1],
+    outputRange: [14, 28],
+  });
+
+  const onFabIn = () =>
+    Animated.spring(fabScale, {
+      toValue: 0.88,
+      useNativeDriver: false,
+      tension: 300,
+      friction: 20,
+    }).start();
+
+  const onFabOut = () =>
+    Animated.spring(fabScale, {
+      toValue: 1,
+      useNativeDriver: false,
+      tension: 300,
+      friction: 15,
+    }).start();
+
+  // Locate Me
+  const locateMe = () => {
+    setTracking("default");
+
+    cameraRef.current?.flyTo({
+      center: DELHI_CENTER,
+      zoom: 15,
+      duration: 1200,
+      easing: "fly",
+    });
+  };
+
+  useEffect(() => {
+    (async () => {
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== "granted") return; // falls back to Delhi center
+
+      const location = await Location.getCurrentPositionAsync({
+        accuracy: Location.Accuracy.Balanced,
+      });
+      setInitialCenter([location.coords.longitude, location.coords.latitude]);
+      setInitialZoom(14);
+    })();
+  }, []);
+
+  // Station popup
+  const onStationPress = (e: any) => {
+    const name = e?.features?.[0]?.properties?.name;
+
+    if (name) {
+      setPopup(name);
+
+      setTimeout(() => {
+        setPopup(null);
+      }, 3000);
+    }
+  };
+
   const onRefresh = React.useCallback(() => {
     setRefreshing(true);
     setTimeout(() => {
       setRefreshing(false);
     }, 2000);
   }, []);
-
   return (
-    <SafeAreaView style={{ flex: 1 }}>
-      {bookmarks.length === 0 && recentTrips.length === 0 ? (
-        <View style={{ flex: 1 }}>
-          <EmptyRoutesState
-            theme={theme}
-            onTakeTour={() => {
-              Haptics.selectionAsync();
-              router.push("/onboarding");
+    <View style={styles.container}>
+      <View style={styles.searchWrapper}>
+        <SearchBar
+          onPress={() => router.push("/planner")}
+          hint={strings.home.searchbar}
+        />
+      </View>
+      <Map
+        style={styles.map}
+        mapStyle={
+          theme.dark
+            ? "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json"
+            : "https://tiles.openfreemap.org/styles/bright"
+        }
+        logoEnabled={false}
+        attributionEnabled={false}
+        compassPosition={{ top: 420, right: 18 }}
+        onRegionWillChange={() => {
+          // Stop tracking when user manually moves map
+          if (tracking) {
+            setTracking(undefined);
+          }
+        }}
+      >
+        {/* User location */}
+        <UserLocation
+          visible={true}
+          onUpdate={(location) => {
+            const coords: [number, number] = [
+              location.coords.longitude,
+              location.coords.latitude,
+            ];
+
+            // Focus user ONCE when GPS resolves
+            if (!hasFocusedUser.current && cameraRef.current) {
+              hasFocusedUser.current = true;
+
+              cameraRef.current.flyTo({
+                center: coords,
+                zoom: 15,
+                duration: 1800,
+                easing: "fly",
+              });
+            }
+          }}
+        />
+
+        {/* Camera */}
+        <Camera
+          ref={cameraRef}
+          maxZoom={15}
+          trackUserLocation={tracking}
+          initialViewState={{
+            center: DELHI_CENTER,
+            zoom: 10.8,
+          }}
+        />
+
+        {/* Metro lines */}
+        <GeoJSONSource id="lines" data={LINES} onPress={onStationPress}>
+          <Layer
+            id="lines-layer"
+            type="line"
+            paint={{
+              "line-color": ["get", "stroke"],
+              "line-width": [
+                "interpolate",
+                ["linear"],
+                ["zoom"],
+                6,
+                3.5,
+                11,
+                2.5,
+                14,
+                4.5,
+              ],
+              "line-opacity": 0.95,
             }}
-            onPlanTrip={() => {
-              Haptics.selectionAsync();
-              router.push("/planner");
+            layout={{
+              "line-cap": "round",
+              "line-join": "round",
             }}
           />
-        </View>
-      ) : (
-        <View style={{ flex: 1 }}>
-          <ScrollView
-            style={{
-              backgroundColor: theme.dark
-                ? theme.colors.surfaceDim
-                : theme.colors.surface,
+        </GeoJSONSource>
+
+        {/* Stations */}
+        {/* Stations */}
+        <GeoJSONSource id="stations" data={STATIONS}>
+          {/* Interchange */}
+          <Layer
+            id="interchange-layer"
+            type="circle"
+            filter={["==", ["get", "interchange"], 1]}
+            paint={{
+              "circle-radius": [
+                "interpolate",
+                ["linear"],
+                ["zoom"],
+                6,
+                3.5,
+                11,
+                5,
+                14,
+                8,
+              ],
+              "circle-color": "#ffffff",
+              "circle-stroke-width": 1.5,
+              "circle-stroke-color": "#555555",
             }}
-            contentContainerStyle={styles.scroll}
-            showsVerticalScrollIndicator={false}
-            refreshControl={
-              <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-            }
+          />
+
+          {/* Regular */}
+          <Layer
+            id="regular-layer"
+            type="circle"
+            filter={["==", ["get", "interchange"], 0]}
+            minZoomLevel={10}
+            paint={{
+              "circle-radius": [
+                "interpolate",
+                ["linear"],
+                ["zoom"],
+                8,
+                1.5,
+                11,
+                3,
+                14,
+                5,
+              ],
+              "circle-color": "#bbbbbb",
+              "circle-opacity": 0.8,
+            }}
+          />
+
+          {/* Station name labels - interchange stations */}
+          <Layer
+            id="interchange-labels"
+            type="symbol"
+            filter={["==", ["get", "interchange"], 1]}
+            minZoomLevel={11}
+            layout={{
+              "text-field": ["get", "name"],
+              "text-size": [
+                "interpolate",
+                ["linear"],
+                ["zoom"],
+                11,
+                10,
+                14,
+                13,
+              ],
+              "text-offset": [0, 1.4],
+              "text-anchor": "top",
+              "text-max-width": 8,
+              "text-font": ["Noto Sans Regular"],
+            }}
+            paint={{
+              "text-color": theme.dark ? "#ffffff" : "#111111",
+              "text-halo-color": theme.dark ? "#000000" : "#ffffff",
+              "text-halo-width": 1.5,
+            }}
+          />
+
+          {/* Station name labels - regular stations, only at high zoom */}
+          <Layer
+            id="regular-labels"
+            type="symbol"
+            filter={["==", ["get", "interchange"], 0]}
+            minZoomLevel={13}
+            layout={{
+              "text-field": ["get", "name"],
+              "text-size": ["interpolate", ["linear"], ["zoom"], 13, 9, 15, 12],
+              "text-offset": [0, 1.2],
+              "text-anchor": "top",
+              "text-max-width": 8,
+              "text-font": ["Noto Sans Regular"],
+            }}
+            paint={{
+              "text-color": theme.dark ? "#cccccc" : "#333333",
+              "text-halo-color": theme.dark ? "#000000" : "#ffffff",
+              "text-halo-width": 1.5,
+            }}
+          />
+        </GeoJSONSource>
+      </Map>
+
+      <View style={styles.fab}>
+        <Animated.View
+          style={{
+            transform: [{ scale: fabScale }],
+          }}
+        >
+          <Pressable
+            onPressIn={onFabIn}
+            onPressOut={onFabOut}
+            onPress={locateMe}
           >
-            {/* Header */}
+            <Animated.View
+              style={[
+                styles.fabInner,
+                {
+                  backgroundColor: theme.colors.secondaryContainer,
+                  borderRadius: fabRadius,
+                },
+              ]}
+            >
+              <IconButton
+                icon="crosshairs-gps"
+                size={22}
+                iconColor={theme.colors.onSecondaryContainer}
+              />
+            </Animated.View>
+          </Pressable>
+        </Animated.View>
+      </View>
 
-            <View style={styles.header}>
-              <View
-                style={{
-                  flexDirection: "column",
-                  alignItems: "center",
-                  justifyContent: "center",
+      <BottomSheet
+        ref={bottomSheetRef}
+        index={1}
+        snapPoints={snapPoints}
+        style={{ zIndex: 10 }}
+        backgroundStyle={{
+          backgroundColor: theme.dark
+            ? theme.colors.surfaceDim
+            : theme.colors.surface,
+        }}
+        handleIndicatorStyle={{
+          backgroundColor: theme.colors.outlineVariant,
+          width: 40,
+        }}
+      >
+        <BottomSheetScrollView contentContainerStyle={styles.content}>
+          {bookmarks.length === 0 && recentTrips.length === 0 ? (
+            <View style={{ flex: 1 }}>
+              <EmptyRoutesState
+                theme={theme}
+                onTakeTour={() => {
+                  Haptics.selectionAsync();
+                  router.push("/onboarding");
                 }}
-              >
-                <View>
-                  {/*<Image
-                    source={require("../../assets/images/detrologo.png")}
-                    style={{
-                      width: 180,
-                      height: 120,
-                      marginRight: 8,
-
-                      marginLeft: 0,
-                      tintColor: theme.colors.primary,
-                    }}
-                  />*/}
-                  {/*<Text
-                  variant="titleSmall"
-                  style={{ color: theme.colors.onBackground }}
-                >
-                  Good Morning,
-                </Text>
-                <Text
-                  variant="headlineSmall"
-                  style={{ color: theme.colors.onBackground }}
-                >
-                  Where to?
-                </Text>*/}
-                </View>
-                <View
-                  style={{ alignItems: "center", justifyContent: "center" }}
-                >
-                  {/*<Button
-                  icon="crosshairs-gps"
-                  mode="outlined"
-                  onPress={() => console.log("Pressed")}
-                >
-                  Delhi
-                </Button>*/}
-                  );
-                </View>
-              </View>
-            </View>
-
-            {/* Search */}
-
-            <View style={styles.searchWrapper}>
-              <SearchBar
-                onPress={() => router.push("/planner")}
-                hint={strings.home.searchbar}
+                onPlanTrip={() => {
+                  Haptics.selectionAsync();
+                  router.push("/planner");
+                }}
               />
             </View>
+          ) : (
+            <View style={{ flex: 1 }}>
+              <ScrollView
+                style={{
+                  backgroundColor: theme.dark
+                    ? theme.colors.surfaceDim
+                    : theme.colors.surface,
+                }}
+                contentContainerStyle={styles.scroll}
+                showsVerticalScrollIndicator={false}
+                refreshControl={
+                  <RefreshControl
+                    refreshing={refreshing}
+                    onRefresh={onRefresh}
+                  />
+                }
+              >
+                {/* Header */}
 
-            {/* Bookmarks */}
-
-            <View>
-              <View style={{ marginTop: 10, paddingTop: 15, gap: 10 }}>
-                <View
-                  style={{
-                    marginLeft: 20,
-                    display: bookmarks.length > 0 ? "flex" : "none",
-
-                    marginBottom: 10,
-                    flexDirection: "row",
-                    alignItems: "center",
-                  }}
-                >
+                <View style={styles.header}>
                   <View
                     style={{
-                      flex: 1,
-                      flexDirection: "row",
-                      alignItems: "center",
-                    }}
-                  >
-                    <Icon
-                      source="bookmark-box-multiple"
-                      size={24}
-                      color={theme.colors.onSurfaceVariant}
-                    />
-                    <Text style={{ marginLeft: 6 }}>
-                      {strings.home.savedRoutes}
-                    </Text>
-                  </View>
-                  <Button
-                    style={{
-                      width: "auto",
-                      marginRight: 12,
-                    }}
-                    onPress={() =>
-                      router.push({
-                        pathname: "/listpage",
-                        params: { type: "saved" },
-                      })
-                    }
-                  >
-                    <Text
-                      style={{ fontSize: 12, color: theme.colors.secondary }}
-                    >
-                      {strings.common.viewall}
-                    </Text>
-                  </Button>
-                </View>
-                {bookmarks.length > 0 ? (
-                  <ScrollView
-                    horizontal
-                    showsHorizontalScrollIndicator={false}
-                    contentContainerStyle={{ paddingHorizontal: 16, gap: 10 }}
-                  >
-                    {bookmarks.map((route, index) => (
-                      <BookmarkCard key={route.id} item={route} />
-                    ))}
-                  </ScrollView>
-                ) : (
-                  <View
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      padding: 15,
-
-                      justifyContent: "center",
-                      flex: 1,
-                    }}
-                  >
-                    <View
-                      style={{
-                        flexDirection: "row",
-                        alignItems: "center",
-                        backgroundColor: theme.colors.surfaceContainerLow,
-                        padding: 16,
-                        margin: 2,
-                        borderRadius: 24,
-                      }}
-                    >
-                      <Icon
-                        source="bookmark"
-                        size={34}
-                        color={theme.colors.outlineVariant}
-                      />
-                    </View>
-                    <Text
-                      variant="labelLarge"
-                      style={{
-                        marginLeft: 5,
-                        marginTop: 8,
-                        color: theme.colors.outlineVariant,
-                      }}
-                    >
-                      {strings.home.noSavedRoutes}
-                    </Text>
-                    <Text
-                      variant="labelSmall"
-                      style={{
-                        textAlign: "center",
-                        marginTop: 2,
-                        color: theme.colors.outlineVariant,
-                        width: 250,
-                      }}
-                    >
-                      {strings.home.noSavedRoutesdesc}
-                    </Text>
-                  </View>
-                )}
-              </View>
-
-              {/* Recent Trips */}
-              <View style={{ marginTop: 24, paddingHorizontal: 16 }}>
-                <View
-                  style={{
-                    marginLeft: 5,
-                    marginBottom: 10,
-                    flexDirection: "row",
-                    alignItems: "center",
-                  }}
-                >
-                  <View
-                    style={{
-                      flex: 1,
-                      flexDirection: "row",
-                      alignItems: "center",
-                    }}
-                  >
-                    <Icon
-                      source="history"
-                      size={24}
-                      color={theme.colors.onSurfaceVariant}
-                    />
-                    <Text style={{ marginLeft: 5 }}>
-                      {strings.home.recentTrips}
-                    </Text>
-                  </View>
-                  <Button
-                    style={{ width: "auto", marginRight: 0 }}
-                    onPress={() =>
-                      router.push({
-                        pathname: "/listpage",
-                        params: { type: "recent" },
-                      })
-                    }
-                  >
-                    <Text
-                      style={{ fontSize: 12, color: theme.colors.secondary }}
-                    >
-                      {strings.common.viewall}
-                    </Text>
-                  </Button>
-                </View>
-                {recentTrips.length > 0 ? (
-                  recentTrips.map((trip, index) => (
-                    <RecentCard
-                      total={recentTrips.length}
-                      index={index}
-                      item={trip}
-                      key={trip.id}
-                    />
-                  ))
-                ) : (
-                  <View
-                    style={{
-                      alignItems: "center",
-
-                      justifyContent: "center",
-
-                      marginTop: "-35%",
                       flexDirection: "column",
-                      height: "100%",
+                      alignItems: "center",
+                      justifyContent: "center",
                     }}
                   >
+                    <View>
+                      {/*<Image
+                      source={require("../../assets/images/detrologo.png")}
+                      style={{
+                        width: 180,
+                        height: 120,
+                        marginRight: 8,
+
+                        marginLeft: 0,
+                        tintColor: theme.colors.primary,
+                      }}
+                    />*/}
+                      {/*<Text
+                    variant="titleSmall"
+                    style={{ color: theme.colors.onBackground }}
+                  >
+                    Good Morning,
+                  </Text>
+                  <Text
+                    variant="headlineSmall"
+                    style={{ color: theme.colors.onBackground }}
+                  >
+                    Where to?
+                  </Text>*/}
+                    </View>
+                    <View
+                      style={{ alignItems: "center", justifyContent: "center" }}
+                    >
+                      {/*<Button
+                    icon="crosshairs-gps"
+                    mode="outlined"
+                    onPress={() => console.log("Pressed")}
+                  >
+                    Delhi
+                  </Button>*/}
+                      );
+                    </View>
+                  </View>
+                </View>
+
+                {/* Search */}
+
+                {/* Bookmarks */}
+
+                <View>
+                  <View style={{ marginTop: 0, paddingTop: 0, gap: 10 }}>
                     <View
                       style={{
+                        marginLeft: 20,
+                        display: bookmarks.length > 0 ? "flex" : "none",
+
+                        marginBottom: 0,
                         flexDirection: "row",
                         alignItems: "center",
-                        padding: 2,
-                        margin: 3,
-                        borderRadius: 24,
                       }}
                     >
-                      <Icon
-                        source="history"
-                        size={38}
-                        color={theme.colors.outlineVariant}
-                      />
+                      <View
+                        style={{
+                          flex: 1,
+                          flexDirection: "row",
+                          alignItems: "center",
+                        }}
+                      >
+                        <Icon
+                          source="bookmark-box-multiple"
+                          size={24}
+                          color={theme.colors.onSurfaceVariant}
+                        />
+                        <Text style={{ marginLeft: 6 }}>
+                          {strings.home.savedRoutes}
+                        </Text>
+                      </View>
+                      <Button
+                        style={{
+                          width: "auto",
+                          marginRight: 12,
+                        }}
+                        onPress={() =>
+                          router.push({
+                            pathname: "/listpage",
+                            params: { type: "saved" },
+                          })
+                        }
+                      >
+                        <Text
+                          style={{
+                            fontSize: 12,
+                            color: theme.colors.secondary,
+                          }}
+                        >
+                          {strings.common.viewall}
+                        </Text>
+                      </Button>
                     </View>
-                    <Text
-                      variant="labelLarge"
+                    {bookmarks.length > 0 ? (
+                      <ScrollView
+                        horizontal
+                        showsHorizontalScrollIndicator={false}
+                        nestedScrollEnabled
+                        contentContainerStyle={{
+                          paddingHorizontal: 16,
+                          gap: 10,
+                        }}
+                      >
+                        {bookmarks.map((route, index) => (
+                          <BookmarkCard key={route.id} item={route} />
+                        ))}
+                      </ScrollView>
+                    ) : (
+                      <View
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          padding: 15,
+
+                          justifyContent: "center",
+                          flex: 1,
+                        }}
+                      >
+                        <View
+                          style={{
+                            flexDirection: "row",
+                            alignItems: "center",
+                            backgroundColor: theme.colors.surfaceContainerLow,
+                            padding: 16,
+                            margin: 2,
+                            borderRadius: 24,
+                          }}
+                        >
+                          <Icon
+                            source="bookmark"
+                            size={34}
+                            color={theme.colors.outlineVariant}
+                          />
+                        </View>
+                        <Text
+                          variant="labelLarge"
+                          style={{
+                            marginLeft: 5,
+                            marginTop: 8,
+                            color: theme.colors.outlineVariant,
+                          }}
+                        >
+                          {strings.home.noSavedRoutes}
+                        </Text>
+                        <Text
+                          variant="labelSmall"
+                          style={{
+                            textAlign: "center",
+                            marginTop: 2,
+                            color: theme.colors.outlineVariant,
+                            width: 250,
+                          }}
+                        >
+                          {strings.home.noSavedRoutesdesc}
+                        </Text>
+                      </View>
+                    )}
+                  </View>
+
+                  {/* Recent Trips */}
+                  <View style={{ marginTop: 28, paddingHorizontal: 16 }}>
+                    <View
                       style={{
                         marginLeft: 5,
-                        marginTop: 10,
-                        color: theme.colors.outlineVariant,
+                        marginBottom: 10,
+                        flexDirection: "row",
+                        alignItems: "center",
                       }}
                     >
-                      {strings.home.noRecentTrips}
-                    </Text>
+                      <View
+                        style={{
+                          flex: 1,
+                          flexDirection: "row",
+                          alignItems: "center",
+                        }}
+                      >
+                        <Icon
+                          source="history"
+                          size={24}
+                          color={theme.colors.onSurfaceVariant}
+                        />
+                        <Text style={{ marginLeft: 5 }}>
+                          {strings.home.recentTrips}
+                        </Text>
+                      </View>
+                      <Button
+                        style={{ width: "auto", marginRight: 0 }}
+                        onPress={() =>
+                          router.push({
+                            pathname: "/listpage",
+                            params: { type: "recent" },
+                          })
+                        }
+                      >
+                        <Text
+                          style={{
+                            fontSize: 12,
+                            color: theme.colors.secondary,
+                          }}
+                        >
+                          {strings.common.viewall}
+                        </Text>
+                      </Button>
+                    </View>
+                    {recentTrips.length > 0 ? (
+                      recentTrips
+                        .slice(0, 3)
+                        .map((trip, index) => (
+                          <RecentCard
+                            total={recentTrips.slice(0, 3).length}
+                            index={index}
+                            item={trip}
+                            key={trip.id}
+                          />
+                        ))
+                    ) : (
+                      <View
+                        style={{
+                          alignItems: "center",
+
+                          justifyContent: "center",
+
+                          marginTop: "-35%",
+                          flexDirection: "column",
+                          height: "100%",
+                        }}
+                      >
+                        <View
+                          style={{
+                            flexDirection: "row",
+                            alignItems: "center",
+                            padding: 2,
+                            margin: 3,
+                            borderRadius: 24,
+                          }}
+                        >
+                          <Icon
+                            source="history"
+                            size={38}
+                            color={theme.colors.outlineVariant}
+                          />
+                        </View>
+                        <Text
+                          variant="labelLarge"
+                          style={{
+                            marginLeft: 5,
+                            marginTop: 10,
+                            color: theme.colors.outlineVariant,
+                          }}
+                        >
+                          {strings.home.noRecentTrips}
+                        </Text>
+                      </View>
+                    )}
                   </View>
-                )}
-              </View>
+                </View>
+              </ScrollView>
             </View>
-          </ScrollView>
-
-          <FAB
-            icon="crosshairs-gps"
-            style={{
-              position: "absolute",
-              alignContent: "center",
-              justifyContent: "center",
-              margin: 16,
-              right: 0,
-
-              bottom: 0,
-            }}
-            label="Delhi"
-            variant="secondary"
-            onPress={showDialog}
-          />
-        </View>
-      )}
-      <Portal>
-        <Dialog
-          style={{ backgroundColor: theme.colors.surface }}
-          visible={visible}
-          onDismiss={hideDialog}
-        >
-          <Dialog.Title style={{ textAlign: "center" }}>
-            {strings.home.selectnet}
-          </Dialog.Title>
-          <Dialog.Content>
-            {CITIES.map((item, index) => (
-              <SystemCards index={index} item={item} />
-            ))}
-          </Dialog.Content>
-          <Dialog.Actions style={{ justifyContent: "center" }}>
-            <Button
-              style={{ width: "100%" }}
-              mode="contained-tonal"
-              onPress={hideDialog}
+          )}
+          <Portal>
+            <Dialog
+              style={{ backgroundColor: theme.colors.surface }}
+              visible={visible}
+              onDismiss={hideDialog}
             >
-              {strings.common.done}
-            </Button>
-          </Dialog.Actions>
-        </Dialog>
-      </Portal>
-    </SafeAreaView>
+              <Dialog.Title style={{ textAlign: "center" }}>
+                {strings.home.selectnet}
+              </Dialog.Title>
+              <Dialog.Content>
+                {CITIES.map((item, index) => (
+                  <SystemCards index={index} item={item} />
+                ))}
+              </Dialog.Content>
+              <Dialog.Actions style={{ justifyContent: "center" }}>
+                <Button
+                  style={{ width: "100%" }}
+                  mode="contained-tonal"
+                  onPress={hideDialog}
+                >
+                  {strings.common.done}
+                </Button>
+              </Dialog.Actions>
+            </Dialog>
+          </Portal>
+        </BottomSheetScrollView>
+      </BottomSheet>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
+  container: { flex: 1 },
+  content: { paddingBottom: 40, zIndex: 10 },
   scroll: { paddingBottom: 40, flexGrow: 1 },
-  header: { paddingHorizontal: 20, paddingTop: 45, paddingBottom: 8 },
-  searchWrapper: { paddingHorizontal: 16, paddingVertical: 12 },
+  header: { paddingHorizontal: 20, paddingTop: 0, paddingBottom: 8 },
+  searchWrapper: {
+    position: "absolute",
+    top: 0, // Position at the top
+    left: 0,
+    right: 0,
+    height: 70,
+    // width: '100%', // Occupy full width
+    paddingHorizontal: 20, // Add some horizontal padding
+    paddingTop: 50, // Add padding for status bar area
+    zIndex: 5, // Ensure it's above the map
+  },
   bookmarkCard: { width: 220, borderRadius: 20, padding: 16 },
   bookmarkMeta: { flexDirection: "row", gap: 10 },
   metaChip: { flexDirection: "row", alignItems: "center", gap: 4 },
-  fab: {
-    position: "absolute",
-    alignContent: "center",
-    justifyContent: "center",
-    margin: 16,
-    right: 0,
-    bottom: 0,
-  },
-  trah: {
+
+  cont1: {
     flex: 1,
     paddingHorizontal: 24,
   },
-  puh: {
-    marginTop: "50%",
+  cont2: {
     alignItems: "center",
   },
   versionContainer: {
@@ -890,7 +1225,7 @@ const styles = StyleSheet.create({
     borderRadius: 12, // completely rounded pill shape
   },
   graphicContainer: {
-    marginTop: 100,
+    marginTop: 50,
     alignItems: "center",
     justifyContent: "center",
   },
@@ -907,5 +1242,17 @@ const styles = StyleSheet.create({
     width: "100%",
     alignItems: "center",
     justifyContent: "center",
+  },
+  fab: {
+    position: "absolute",
+    bottom: "30%",
+    right: 16,
+  },
+  fabInner: {
+    width: 52,
+    height: 52,
+    alignItems: "center",
+    justifyContent: "center",
+    overflow: "hidden",
   },
 });
