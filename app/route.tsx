@@ -11,6 +11,7 @@ import {
 
 import { ScrollView } from "react-native-gesture-handler";
 import { SafeAreaView } from "react-native-safe-area-context";
+import lines from "@/cities/delhi/metrolines.json";
 
 import {
   Text,
@@ -28,7 +29,11 @@ import * as Haptics from "expo-haptics";
 import { Asset } from "expo-asset";
 
 import stations from "@/cities/delhi/stationsdata.json";
-import { LINE_DISPLAY_NAMES, LINE_COLORS } from "@/cities/delhi/lineMeta";
+import {
+  LINE_DISPLAY_NAMES,
+  LINE_COLORS,
+  LINE_TERMINUS,
+} from "@/cities/delhi/lineMeta";
 import strings from "@/constants/strings";
 
 // Hooks & Stores
@@ -253,6 +258,8 @@ export default function RoutePlanScreen() {
   const [liveNavId, setLiveNavId] = useState<number | string | undefined>(
     undefined,
   );
+
+  const liveNavStartedRef = useRef(false);
   const [htmlUri, setHtmlUri] = useState<string | null>(null);
   const webviewRef = useRef<WebView>(null);
   const currentStationIndexRef = useRef<number>(0);
@@ -267,6 +274,40 @@ export default function RoutePlanScreen() {
   const [currentStationIndex, setCurrentStationIndex] = useState<number>(0);
   const [totalStops, setTotalStops] = useState<number>(0);
   const [routeData, setRouteData] = useState<any>(null);
+  useEffect(() => {
+    if (!routeData || totalStops === 0) return;
+    if (liveNavStartedRef.current) return;
+
+    const firstStation = routeData.route?.[0]?.station;
+    if (!firstStation) return;
+
+    let startedId: number | string | undefined;
+
+    liveNavStartedRef.current = true;
+
+    const startNotification = async () => {
+      startedId = await startLiveNavigation(
+        firstStation,
+        `${totalStops} stops · ${toStation}`,
+        0,
+        getTransferPoints(),
+        [],
+      );
+
+      setLiveNavId(startedId);
+      setCurrentStation(firstStation);
+      setCurrentStationIndex(0);
+      currentStationIndexRef.current = 0;
+    };
+
+    startNotification();
+
+    return () => {
+      if (startedId !== undefined) {
+        stopLiveNavigation(startedId);
+      }
+    };
+  }, [routeData, totalStops, toStation]);
   const [fromStation, setFromStation] = useState<string>(start || "");
   const [toStation, setToStation] = useState<string>(end || "");
 
@@ -356,19 +397,9 @@ export default function RoutePlanScreen() {
 
   useEffect(() => {
     if (liveNavId === undefined || !routeData || totalStops === 0) return;
+    if (!currentStation) return;
 
     const progress = Math.round((currentStationIndex / totalStops) * 100);
-
-    const transferPoints =
-      routeData.transferDetails?.map((t: any) => {
-        const idx = routeData.route.findIndex(
-          (s: any) => s.station === t.station,
-        );
-        return {
-          position: Math.round((idx / totalStops) * 100),
-          color: "#FF6B6B",
-        };
-      }) ?? [];
 
     updateLiveNavigation(
       liveNavId,
@@ -378,7 +409,14 @@ export default function RoutePlanScreen() {
       getTransferPoints(),
       [],
     );
-  }, [currentStationIndex]);
+  }, [
+    liveNavId,
+    currentStation,
+    currentStationIndex,
+    routeData,
+    totalStops,
+    toStation,
+  ]);
 
   const handleBookmark = () => {
     if (isBookmarked(fromStation, toStation)) {
@@ -458,6 +496,32 @@ export default function RoutePlanScreen() {
     }
   };
 
+  function getDirectionalTerminus(line: string, routeSegment: any[]): string {
+    const terminus = LINE_TERMINUS[line as keyof typeof LINE_TERMINUS];
+    if (!terminus) return line;
+
+    // Find first and last station on this line in the route segment
+    const stationsOnLine = routeSegment.filter((s: any) => s.line === line);
+    if (stationsOnLine.length === 0) return terminus[1];
+
+    const firstOnLine = stationsOnLine[0].station;
+    const lastOnLine = stationsOnLine[stationsOnLine.length - 1].station;
+
+    // Get the actual terminus stations for this line
+    const [startTerminus, endTerminus] = terminus;
+
+    // Find positions in the full line data to determine direction
+    const lineData = lines[line as keyof typeof lines] as string[] | undefined;
+    if (!lineData) return endTerminus;
+
+    const firstIdx = lineData.indexOf(firstOnLine);
+    const lastIdx = lineData.indexOf(lastOnLine);
+
+    // If travelling in increasing index direction → towards end terminus
+    // If travelling in decreasing index direction → towards start terminus
+    return firstIdx <= lastIdx ? endTerminus : startTerminus;
+  }
+
   const StationCard = ({
     index,
     item,
@@ -478,7 +542,8 @@ export default function RoutePlanScreen() {
     }
     const lineLabel =
       LINE_DISPLAY_NAMES[switchingToLine as keyof typeof LINE_DISPLAY_NAMES] ??
-      switchingToLine;
+      `${switchingToLine}`;
+    const terminus = `Towards (${getDirectionalTerminus(switchingToLine, data.route)})`;
 
     return (
       <Card
@@ -534,7 +599,9 @@ export default function RoutePlanScreen() {
               variant="labelSmall"
               style={{ color: theme.colors.onSurfaceVariant, marginTop: 1 }}
             >
-              {isTransfer ? "Change to " + lineLabel : item.line}
+              {isTransfer
+                ? "Change to " + lineLabel + (lineLabel ? ` ${terminus}` : "")
+                : item.line}
             </Text>
           </View>
         </Card.Content>
@@ -639,35 +706,15 @@ export default function RoutePlanScreen() {
           />
         )}
 
-        <Button
+        {/*<Button
           mode="elevated"
           style={{ marginLeft: 20, marginRight: 20 }}
-          onPress={async () => {
-            const transferPoints =
-              routeData?.transferDetails?.map((t: any) => {
-                const idx = routeData.route.findIndex(
-                  (s: any) => s.station === t.station,
-                );
-                return {
-                  position: Math.round((idx / totalStops) * 100),
-                  color: "#FF6B6B",
-                };
-              }) ?? [];
-
-            const id = await startLiveNavigation(
-              currentStation,
-              `${totalStops - currentStationIndex} stops · ${toStation}`,
-              Math.round((currentStationIndex / totalStops) * 100),
-              getTransferPoints(),
-              [],
-            );
-            setLiveNavId(id);
-          }}
+          onPress={}
         >
           <Text>Start Live Navigation</Text>
-        </Button>
+        </Button>*/}
 
-        {liveNavId !== undefined && (
+        {/*{liveNavId !== undefined && (
           <Button
             style={{ marginLeft: 20, marginRight: 20, marginTop: 10 }}
             mode="elevated"
@@ -678,7 +725,7 @@ export default function RoutePlanScreen() {
           >
             <Text>Stop Navigation</Text>
           </Button>
-        )}
+        )}*/}
 
         {routeData && (
           <View style={{ paddingTop: 20 }}>

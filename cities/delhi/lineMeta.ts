@@ -6,17 +6,17 @@ export const LINE_DISPLAY_NAMES: Record<string, string> = {
 };
 
 export const LINE_TERMINUS: Record<string, [string, string]> = {
-  "Blue Line": ["Dwarka Sector 21", "Noida Electronic City"],
-  "Blue Line Branch": ["Dwarka Sector 21", "Vaishali"],
-  "Yellow Line": ["HUDA City Centre", "Samaypur Badli"],
-  "Red Line": ["Rithala", "Shaheed Sthal"],
-  "Green Line": ["Inderlok / Brigadier Hoshiyar Singh", "Brig. Hoshiyar Singh"],
-  "Violet Line": ["Kashmere Gate", "Raja Nahar Singh (Ballabhgarh)"],
-  "Orange Line": ["New Delhi", "Dwarka Sector 21"],
-  "Magenta Line": ["Janakpuri West", "Botanical Garden"],
-  "Pink Line": ["Majlis Park", "Shiv Vihar"],
-  "Aqua Line": ["Noida Sector 51", "Depot Station"],
-  "Grey Line": ["Dwarka", "Dhansa Bus Stand"],
+  "Blue line main": ["Dwarka Sector 21", "Noida Electronic City"],
+  "Blue line branch": ["Dwarka Sector 21", "Vaishali"],
+  "Yellow line": ["HUDA City Centre", "Samaypur Badli"],
+  "Red line": ["Rithala", "Shaheed Sthal"],
+  "Green line": ["Inderlok / Brigadier Hoshiyar Singh", "Brig. Hoshiyar Singh"],
+  "Violet line": ["Kashmere Gate", "Raja Nahar Singh (Ballabhgarh)"],
+  "Orange line": ["New Delhi", "Dwarka Sector 21"],
+  "Magenta line": ["Janakpuri West", "Botanical Garden"],
+  "Pink line": ["Majlis Park", "Shiv Vihar"],
+  "Aqua line": ["Noida Sector 51", "Depot Station"],
+  "Grey line": ["Dwarka", "Dhansa Bus Stand"],
   "Rapid Metro": ["Sikanderpur", "Sector 55-56"],
 };
 
