@@ -7,14 +7,14 @@ export const LINE_DISPLAY_NAMES: Record<string, string> = {
 
 export const LINE_TERMINUS: Record<string, [string, string]> = {
   "Blue line main": ["Dwarka Sector 21", "Noida Electronic City"],
-  "Blue line branch": ["Dwarka Sector 21", "Vaishali"],
+  "Blue line branch": ["Yamuna Bank", "Vaishali"],
   "Yellow line": ["HUDA City Centre", "Samaypur Badli"],
   "Red line": ["Rithala", "Shaheed Sthal"],
   "Green line": ["Inderlok / Brigadier Hoshiyar Singh", "Brig. Hoshiyar Singh"],
   "Violet line": ["Kashmere Gate", "Raja Nahar Singh (Ballabhgarh)"],
   "Orange line": ["New Delhi", "Dwarka Sector 21"],
   "Magenta line": ["Janakpuri West", "Botanical Garden"],
-  "Pink line": ["Majlis Park", "Shiv Vihar"],
+  "Pink line": ["Maujpur ", "Shiv Vihar"],
   "Aqua line": ["Noida Sector 51", "Depot Station"],
   "Grey line": ["Dwarka", "Dhansa Bus Stand"],
   "Rapid Metro": ["Sikanderpur", "Sector 55-56"],

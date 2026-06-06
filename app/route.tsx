@@ -599,9 +599,20 @@ export default function RoutePlanScreen() {
               variant="labelSmall"
               style={{ color: theme.colors.onSurfaceVariant, marginTop: 1 }}
             >
-              {isTransfer
-                ? "Change to " + lineLabel + (lineLabel ? ` ${terminus}` : "")
-                : item.line}
+              {isTransfer ? "Change to " + switchingToLine : item.line}
+            </Text>
+            <Text
+              variant="labelSmall"
+              style={{
+                display:
+                  isTransfer && lineLabel && lineLabel !== "Pink line loop"
+                    ? "flex"
+                    : "none",
+                color: theme.colors.onSurfaceVariant,
+                marginTop: 2,
+              }}
+            >
+              {isTransfer && lineLabel ? terminus : null}
             </Text>
           </View>
         </Card.Content>
