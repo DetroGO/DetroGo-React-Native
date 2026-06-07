@@ -193,6 +193,7 @@ function StationNavigator({
 function NotificationCard({
   title,
   desc,
+  descbold = false,
   desc2 = "",
   icon,
   cardfg,
@@ -200,6 +201,7 @@ function NotificationCard({
 }: {
   title: string;
   desc: string;
+  descbold?: boolean;
   desc2?: string;
   data: any;
   icon: string;
@@ -228,16 +230,29 @@ function NotificationCard({
             <Text style={{ fontWeight: "600", fontSize: 14, color: cardfg }}>
               {title}
             </Text>
-            <Text
-              style={{
-                fontSize: 12,
-                fontWeight: "400",
-                color: cardfg,
-                opacity: 0.8,
-              }}
-            >
-              {desc} {desc2}
-            </Text>
+            <View style={{ flexDirection: "row", gap: 3 }}>
+              <Text
+                style={{
+                  fontSize: 12,
+                  fontWeight: "400",
+
+                  color: cardfg,
+                  opacity: descbold ? 0.9 : 0.8,
+                }}
+              >
+                {desc}
+              </Text>
+              <Text
+                style={{
+                  fontSize: 12,
+                  fontWeight: "400",
+                  color: cardfg,
+                  opacity: 0.8,
+                }}
+              >
+                {desc2}
+              </Text>
+            </View>
           </View>
           <Pressable hitSlop={12} style={{ padding: 4 }}>
             <Icon source="close" size={20} color={cardfg} />
@@ -270,10 +285,25 @@ export default function RoutePlanScreen() {
   const [isMapReady, setIsMapReady] = useState<boolean>(false);
   const [isTransferahead, Transferahead] = useState<boolean>(false);
   const [TransferStation, setTransferStation] = useState<any>(undefined);
+  const [isTransferStation, setIsTransferStation] = useState<any>(undefined);
   const [currentStation, setCurrentStation] = useState<string>("");
   const [currentStationIndex, setCurrentStationIndex] = useState<number>(0);
   const [totalStops, setTotalStops] = useState<number>(0);
   const [routeData, setRouteData] = useState<any>(null);
+  const isTransferaheadRef = useRef(false);
+  const TransferStationRef = useRef<any>(undefined);
+  const isTransferStationRef = useRef<any>(undefined);
+
+  useEffect(() => {
+    isTransferaheadRef.current = isTransferahead;
+  }, [isTransferahead]);
+  useEffect(() => {
+    TransferStationRef.current = TransferStation;
+  }, [TransferStation]);
+  useEffect(() => {
+    isTransferStationRef.current = isTransferStation;
+  }, [isTransferStation]);
+
   useEffect(() => {
     if (!routeData || totalStops === 0) return;
     if (liveNavStartedRef.current) return;
@@ -335,32 +365,73 @@ export default function RoutePlanScreen() {
     const currentIndex = routeData.route.findIndex(
       (s: any) => s.station === currentStation,
     );
+    if (currentIndex === -1) return;
     setCurrentStationIndex(currentIndex);
 
-    if (currentIndex === -1) return;
+    const transferAhead = isTransferaheadRef.current;
+    const transferStation = TransferStationRef.current;
 
-    if (isTransferahead && TransferStation) {
+    if (transferAhead && transferStation) {
       const transferIndex = routeData.route.findIndex(
-        (s: any) => s.station === TransferStation.station,
+        (s: any) => s.station === transferStation.station,
       );
-      if (currentIndex >= transferIndex) {
+
+      if (currentIndex === transferIndex) {
+        setIsTransferStation(true);
+        return;
+      }
+
+      if (currentIndex > transferIndex) {
+        Transferahead(false);
+        setTransferStation(undefined);
+        setIsTransferStation(false);
+        return;
+      }
+
+      if (currentIndex < transferIndex) {
+        setIsTransferStation(false);
+        if (currentIndex === transferIndex - 1) {
+          // Still one stop before, keep "Transfer Ahead"
+          return;
+        }
+        // Further back, fall through to lookahead
         Transferahead(false);
         setTransferStation(undefined);
       }
+    }
+
+    // Check if current station itself is a transfer (arrived via backwards nav)
+    const currentIsTransfer = routeData.transferDetails.find(
+      (t: any) => t.station === currentStation,
+    );
+    if (currentIsTransfer) {
+      setIsTransferStation(true);
+      setTransferStation(currentIsTransfer);
+      Transferahead(false);
       return;
     }
 
-    const lookAheadIndex = currentIndex + 1;
-    const nextNextStation = routeData.route[lookAheadIndex];
-    if (!nextNextStation) return;
+    // Lookahead: check if next station is a transfer
+    const nextStation = routeData.route[currentIndex + 1];
+    if (!nextStation) {
+      Transferahead(false);
+      setTransferStation(undefined);
+      setIsTransferStation(false);
+      return;
+    }
 
     const upcomingTransfer = routeData.transferDetails.find(
-      (t: any) => t.station === nextNextStation.station,
+      (t: any) => t.station === nextStation.station,
     );
 
     if (upcomingTransfer) {
       Transferahead(true);
       setTransferStation(upcomingTransfer);
+      setIsTransferStation(false);
+    } else {
+      Transferahead(false);
+      setTransferStation(undefined);
+      setIsTransferStation(false);
     }
   }, [currentStation]);
 
@@ -620,6 +691,9 @@ export default function RoutePlanScreen() {
     );
   };
 
+  const isDestination = currentStationIndex === totalStops;
+  const stopsLeft = totalStops - currentStationIndex;
+
   return (
     <SafeAreaView
       style={{
@@ -681,28 +755,41 @@ export default function RoutePlanScreen() {
           )}
         </View>
 
-        {isTransferahead && TransferStation ? (
+        {isTransferahead && TransferStation && !isTransferStation ? (
           <NotificationCard
-            title="Next Transfer Station"
-            icon="transit-transfer"
-            desc={`${TransferStation.station} for ${TransferStation.toLine}`}
+            title="Transfer Ahead"
+            icon="directions-fork"
+            desc={TransferStation.station}
+            descbold={true}
+            desc2={`for ${TransferStation.toLine}`}
             data={routeData}
             cardfg={theme.colors.secondary}
             cardbg={theme.colors.onPrimary}
           />
+        ) : isTransferStation && TransferStation ? (
+          <NotificationCard
+            title="Transfer Here"
+            icon="transit-transfer"
+            desc={TransferStation.station}
+            descbold={true}
+            desc2={`for ${TransferStation.toLine}`}
+            data={routeData}
+            cardfg={theme.colors.tertiary}
+            cardbg={
+              theme.dark
+                ? theme.colors.onTertiary
+                : theme.colors.tertiaryContainer
+            }
+          />
         ) : (
           <NotificationCard
             title={
-              currentStationIndex === totalStops
+              isDestination
                 ? "Destination Reached"
-                : `${totalStops - currentStationIndex} stops remaining`
+                : `${stopsLeft} stops remaining`
             }
             desc={toStation}
-            icon={
-              currentStationIndex === totalStops
-                ? "flag-checkered"
-                : "map-marker-radius"
-            }
+            icon={isDestination ? "flag-checkered" : "map-marker-radius"}
             data={routeData}
             cardfg={
               currentStationIndex === totalStops
@@ -716,7 +803,6 @@ export default function RoutePlanScreen() {
             }
           />
         )}
-
         {/*<Button
           mode="elevated"
           style={{ marginLeft: 20, marginRight: 20 }}

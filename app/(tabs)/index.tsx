@@ -1,5 +1,6 @@
 import { View, StyleSheet } from "react-native";
 import BottomSheet, { BottomSheetScrollView } from "@gorhom/bottom-sheet";
+
 import * as Location from "expo-location";
 import { useMemo, useEffect } from "react";
 import { useAppTheme } from "@/hooks/useAppTheme";
@@ -38,6 +39,7 @@ import {
   Layer,
   Map,
 } from "@maplibre/maplibre-react-native";
+
 import SearchBar from "@/components/ui/searchbar";
 import { Svg, Path } from "react-native-svg";
 import { router } from "expo-router";
@@ -532,6 +534,7 @@ const DELHI_CENTER: [number, number] = [77.2195, 28.6329];
 export default function HomeScreen() {
   const theme = useAppTheme();
   const bottomSheetRef = useRef<BottomSheet>(null);
+  const lastKnownCoords = useRef<[number, number] | null>(null);
   const snapPoints = useMemo(() => [240, 420], []);
   const hasSeenTutorial = useOnboardingStore((state) => state.hasSeenTutorial);
   const [visible, setVisible] = useState(false);
@@ -580,27 +583,13 @@ export default function HomeScreen() {
   // Locate Me
   const locateMe = () => {
     setTracking("default");
-
+    const target = lastKnownCoords.current ?? DELHI_CENTER;
     cameraRef.current?.flyTo({
-      center: DELHI_CENTER,
+      center: target,
       zoom: 15,
       duration: 1200,
-      easing: "fly",
     });
   };
-
-  useEffect(() => {
-    (async () => {
-      const { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== "granted") return; // falls back to Delhi center
-
-      const location = await Location.getCurrentPositionAsync({
-        accuracy: Location.Accuracy.Balanced,
-      });
-      setInitialCenter([location.coords.longitude, location.coords.latitude]);
-      setInitialZoom(14);
-    })();
-  }, []);
 
   // Station popup
   const onStationPress = (e: any) => {
@@ -649,16 +638,17 @@ export default function HomeScreen() {
         {/* User location */}
         <UserLocation
           visible={true}
+          minDisplacement={20} // ← Only fires callback if user moved 20m (huge battery save)
           onUpdate={(location) => {
             const coords: [number, number] = [
               location.coords.longitude,
               location.coords.latitude,
             ];
 
-            // Focus user ONCE when GPS resolves
+            lastKnownCoords.current = coords; // ← Always cache latest position
+
             if (!hasFocusedUser.current && cameraRef.current) {
               hasFocusedUser.current = true;
-
               cameraRef.current.flyTo({
                 center: coords,
                 zoom: 15,
