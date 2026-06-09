@@ -136,7 +136,7 @@ const BookmarkCard = ({ item }: { item: SavedRoute }) => {
         style={{
           width: 220,
           padding: 4,
-          backgroundColor: theme.colors.elevation.level4,
+          backgroundColor: theme.colors.elevation.level1,
           borderRadius: 20,
           marginBottom: 4,
         }}

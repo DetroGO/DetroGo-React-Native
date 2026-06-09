@@ -281,7 +281,13 @@ export default function RoutePlanScreen() {
   const swapSpring = useSpringPress();
 
   // Strongly Typed State
-  const [visibleInfo, setVisibleInfo] = useState<boolean>(false);
+  const [stationDialog, setStationDialog] = useState<{
+    item: any;
+    index: number;
+    isTransfer: boolean;
+    switchingToLine: string | null;
+    terminus: string | null;
+  } | null>(null);
   const [isMapReady, setIsMapReady] = useState<boolean>(false);
   const [isTransferahead, Transferahead] = useState<boolean>(false);
   const [TransferStation, setTransferStation] = useState<any>(undefined);
@@ -619,7 +625,20 @@ export default function RoutePlanScreen() {
     return (
       <Card
         mode="contained"
-        onLongPress={() => setVisibleInfo(true)}
+        onPress={() => {
+          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+
+          setStationDialog({
+            item,
+            index,
+            isTransfer,
+            switchingToLine,
+            terminus:
+              isTransfer && lineLabel && lineLabel !== "Pink line loop"
+                ? terminus
+                : null,
+          });
+        }}
         style={{
           backgroundColor: isTransfer
             ? theme.dark
@@ -1018,49 +1037,112 @@ export default function RoutePlanScreen() {
           </View>
         )}
       </ScrollView>
-
       <Portal>
         <Dialog
-          style={{ backgroundColor: theme.colors.surface, borderRadius: 28 }}
-          visible={visibleInfo}
-          onDismiss={() => setVisibleInfo(false)}
+          visible={stationDialog !== null}
+          onDismiss={() => setStationDialog(null)}
+          style={{
+            backgroundColor: theme.dark
+              ? theme.colors.surfaceContainerHigh
+              : theme.colors.surfaceContainerLow,
+            borderRadius: 28,
+          }}
         >
-          <Dialog.Content>
-            <Text
-              variant="bodyMedium"
-              style={{
-                color: theme.colors.onSurfaceVariant,
-                textAlign: "center",
-              }}
-            >
-              Easter Egg
-            </Text>
-            <Text
-              variant="bodySmall"
-              style={{
-                color: theme.colors.outline,
-                textAlign: "center",
-                marginTop: 8,
-              }}
-            >
-              HEHE
-            </Text>
-          </Dialog.Content>
-          <Dialog.Actions
-            style={{
-              justifyContent: "center",
-              paddingBottom: 16,
-              paddingHorizontal: 24,
-            }}
-          >
-            <Button
-              style={{ width: "100%" }}
-              mode="contained-tonal"
-              onPress={() => setVisibleInfo(false)}
-            >
-              {strings.common?.done ?? "Close"}
-            </Button>
-          </Dialog.Actions>
+          {stationDialog && (
+            <>
+              <Dialog.Icon
+                icon={stationDialog.isTransfer ? "transit-transfer" : "train"}
+                color={
+                  stationDialog.isTransfer
+                    ? theme.colors.tertiary
+                    : theme.colors.primary
+                }
+              />
+
+              <Dialog.Title
+                style={{
+                  textAlign: "center",
+                  color: theme.colors.onSurface,
+                }}
+              >
+                {stationDialog.item.station}
+              </Dialog.Title>
+
+              <Dialog.Content>
+                <View
+                  style={{
+                    alignItems: "center",
+                    gap: 8,
+                  }}
+                >
+                  <Text
+                    variant="labelLarge"
+                    style={{
+                      color: theme.colors.onSurfaceVariant,
+                      textAlign: "center",
+                    }}
+                  >
+                    Station {stationDialog.index + 1}
+                  </Text>
+
+                  <View
+                    style={{
+                      marginTop: 8,
+                      paddingHorizontal: 16,
+                      paddingVertical: 10,
+                      borderRadius: 999,
+                      backgroundColor: stationDialog.isTransfer
+                        ? theme.colors.tertiaryContainer
+                        : theme.colors.secondaryContainer,
+                    }}
+                  >
+                    <Text
+                      variant="labelMedium"
+                      style={{
+                        color: stationDialog.isTransfer
+                          ? theme.colors.onTertiaryContainer
+                          : theme.colors.onSecondaryContainer,
+                        textAlign: "center",
+                      }}
+                    >
+                      {stationDialog.isTransfer
+                        ? `Change to ${stationDialog.switchingToLine}`
+                        : stationDialog.item.line}
+                    </Text>
+                  </View>
+
+                  {stationDialog.terminus && (
+                    <Text
+                      variant="bodySmall"
+                      style={{
+                        color: theme.colors.onSurfaceVariant,
+                        textAlign: "center",
+                        marginTop: 6,
+                      }}
+                    >
+                      {stationDialog.terminus}
+                    </Text>
+                  )}
+                </View>
+              </Dialog.Content>
+
+              <Dialog.Actions
+                style={{
+                  justifyContent: "center",
+                  paddingHorizontal: 24,
+                  paddingBottom: 20,
+                }}
+              >
+                <Button
+                  mode="contained-tonal"
+                  style={{ width: "100%" }}
+                  onPress={() => setStationDialog(null)}
+                >
+                  {strings.common?.done ?? "Done"}
+                </Button>
+              </Dialog.Actions>
+            </>
+          )}
         </Dialog>
       </Portal>
     </SafeAreaView>
