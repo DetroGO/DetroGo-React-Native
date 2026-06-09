@@ -623,7 +623,7 @@ export default function HomeScreen() {
         mapStyle={
           theme.dark
             ? "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json"
-            : "https://tiles.openfreemap.org/styles/bright"
+            : "https://tiles.basemaps.cartocdn.com/gl/positron-gl-style/style.json"
         }
         logoEnabled={false}
         attributionEnabled={false}

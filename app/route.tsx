@@ -502,7 +502,7 @@ export default function RoutePlanScreen() {
         id: `${fromStation}__${toStation}__${Date.now()}`,
         from: fromStation,
         to: toStation,
-        stops: routeData.stops,
+        stops: routeData.stops + 1,
         transfers: routeData.transferStations.length,
         savedAt: Date.now(),
         routeData: routeData,
@@ -656,11 +656,24 @@ export default function RoutePlanScreen() {
               borderRadius: isTransfer ? 80 : 20,
             }}
           >
-            <Icon
-              source={isTransfer ? "transit-transfer" : "source-commit"}
-              size={33}
-              color={theme.colors.onSurfaceVariant}
-            />
+            {isTransfer ? (
+              <Icon
+                source={"transit-transfer"}
+                size={33}
+                color={theme.colors.onSurfaceVariant}
+              />
+            ) : (
+              <Text
+                variant="titleLarge"
+                style={{
+                  color: theme.colors.onSurface,
+                  textAlign: "center",
+                  fontWeight: "600",
+                }}
+              >
+                {index + 1}
+              </Text>
+            )}
           </View>
           <View style={{ flex: 1 }}>
             <Text variant="bodyLarge" style={{ color: theme.colors.onSurface }}>
@@ -941,7 +954,7 @@ export default function RoutePlanScreen() {
                         }}
                         numberOfLines={2}
                       >
-                        {routeData.stops}
+                        {routeData.stops + 1}
                       </Text>
                     </View>
                     <Text variant="bodySmall">{strings.common.stations}</Text>
