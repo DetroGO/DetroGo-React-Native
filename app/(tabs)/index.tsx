@@ -1046,11 +1046,11 @@ export default function HomeScreen() {
                   </View>
 
                   {/* Recent Trips */}
-                  <View style={{ marginTop: 28, paddingHorizontal: 16 }}>
+                  <View style={{ marginTop: 29, paddingHorizontal: 16 }}>
                     <View
                       style={{
                         marginLeft: 5,
-                        marginBottom: 10,
+                        marginBottom: 14,
                         flexDirection: "row",
                         alignItems: "center",
                       }}
@@ -1071,7 +1071,7 @@ export default function HomeScreen() {
                           {strings.home.recentTrips}
                         </Text>
                       </View>
-                      <Button
+                      {/*<Button
                         style={{ width: "auto", marginRight: 0 }}
                         onPress={() =>
                           router.push({
@@ -1088,7 +1088,7 @@ export default function HomeScreen() {
                         >
                           {strings.common.viewall}
                         </Text>
-                      </Button>
+                      </Button>*/}
                     </View>
                     {recentTrips.length > 0 ? (
                       recentTrips
