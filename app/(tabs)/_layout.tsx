@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { BottomNavigation } from "react-native-paper";
 import { useAppTheme } from "@/hooks/useAppTheme";
-import strings from "@/constants/strings";
+import { useStrings } from "@/constants/strings";
 
 import HomeScreen from "./index";
 import SettingsScreen from "./settings";
@@ -13,23 +13,27 @@ const SettingsRoute = () => <SettingsScreen />;
 
 export default function TabLayout() {
   const theme = useAppTheme();
+  const strings = useStrings();
   const [index, setIndex] = useState(0);
 
-  const [routes] = useState([
-    {
-      key: "home",
-      title: strings.navigation.home,
-      focusedIcon: "home",
-      unfocusedIcon: "home-outline",
-    },
+  const routes = useMemo(
+    () => [
+      {
+        key: "home",
+        title: strings.navigation.home,
+        focusedIcon: "home",
+        unfocusedIcon: "home-outline",
+      },
 
-    {
-      key: "settings",
-      title: strings.navigation.settings,
-      focusedIcon: "cog",
-      unfocusedIcon: "cog-outline",
-    },
-  ]);
+      {
+        key: "settings",
+        title: strings.navigation.settings,
+        focusedIcon: "cog",
+        unfocusedIcon: "cog-outline",
+      },
+    ],
+    [strings],
+  );
 
   const renderScene = BottomNavigation.SceneMap({
     home: HomeRoute,

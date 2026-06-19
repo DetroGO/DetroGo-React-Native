@@ -5,7 +5,6 @@ import {
   Pressable,
   Animated,
   Dimensions,
-  PermissionsAndroid,
   ToastAndroid,
 } from "react-native";
 
@@ -34,12 +33,14 @@ import {
   LINE_COLORS,
   LINE_TERMINUS,
 } from "@/cities/delhi/lineMeta";
+import { RouteData } from "@/types/route";
 import strings from "@/constants/strings";
 
 // Hooks & Stores
 import { useAppTheme } from "@/hooks/useAppTheme";
 import { useRecentTripsStore } from "@/store/recentTrips";
 import { useBookmarksStore } from "@/store/savedRoutes";
+import { usePrefStore } from "@/store/usePrefStore";
 import {
   startLiveNavigation,
   stopLiveNavigation,
@@ -48,6 +49,18 @@ import {
 import { calculateRoute } from "../utils/metroRouting";
 
 // Notifications
+
+type CalculatedRoute = RouteData & {
+  stops: number;
+  transferDetails: any[];
+  error?: undefined;
+};
+
+const isCalculatedRoute = (value: any): value is CalculatedRoute =>
+  !value?.error &&
+  typeof value?.stops === "number" &&
+  Array.isArray(value?.route) &&
+  Array.isArray(value?.transferStations);
 
 // ─── M3 Expressive spring hook ─────────────────────────────────────────────
 function useSpringPress() {
@@ -269,6 +282,9 @@ export default function RoutePlanScreen() {
   const { addTrip } = useRecentTripsStore();
   const { addBookmark, removeBookmark, isBookmarked, bookmarks } =
     useBookmarksStore();
+  const notificationsEnabled = usePrefStore(
+    (state) => state.notificationsEnabled,
+  );
   const screenWidth = Dimensions.get("window").width;
   const [liveNavId, setLiveNavId] = useState<number | string | undefined>(
     undefined,
@@ -296,6 +312,8 @@ export default function RoutePlanScreen() {
   const [currentStationIndex, setCurrentStationIndex] = useState<number>(0);
   const [totalStops, setTotalStops] = useState<number>(0);
   const [routeData, setRouteData] = useState<any>(null);
+  const [fromStation, setFromStation] = useState<string>(start || "");
+  const [toStation, setToStation] = useState<string>(end || "");
   const isTransferaheadRef = useRef(false);
   const TransferStationRef = useRef<any>(undefined);
   const isTransferStationRef = useRef<any>(undefined);
@@ -311,7 +329,15 @@ export default function RoutePlanScreen() {
   }, [isTransferStation]);
 
   useEffect(() => {
-    if (!routeData || totalStops === 0) return;
+    if (notificationsEnabled || liveNavId === undefined) return;
+
+    stopLiveNavigation(liveNavId);
+    setLiveNavId(undefined);
+    liveNavStartedRef.current = false;
+  }, [liveNavId, notificationsEnabled]);
+
+  useEffect(() => {
+    if (!notificationsEnabled || !routeData || totalStops === 0) return;
     if (liveNavStartedRef.current) return;
 
     const firstStation = routeData.route?.[0]?.station;
@@ -343,21 +369,12 @@ export default function RoutePlanScreen() {
         stopLiveNavigation(startedId);
       }
     };
-  }, [routeData, totalStops, toStation]);
-  const [fromStation, setFromStation] = useState<string>(start || "");
-  const [toStation, setToStation] = useState<string>(end || "");
+  }, [notificationsEnabled, routeData, totalStops, toStation]);
 
   const swapRadius = swapSpring.scale.interpolate({
     inputRange: [0.88, 1],
     outputRange: [14, 28],
   });
-
-  useEffect(() => {
-    PermissionsAndroid.requestMultiple([
-      "android.permission.POST_NOTIFICATIONS",
-      "android.permission.POST_PROMOTED_NOTIFICATIONS",
-    ]);
-  }, []);
 
   useEffect(() => {
     Asset.fromModule(require("../assets/routemap/index.html"))
@@ -473,7 +490,13 @@ export default function RoutePlanScreen() {
   };
 
   useEffect(() => {
-    if (liveNavId === undefined || !routeData || totalStops === 0) return;
+    if (
+      !notificationsEnabled ||
+      liveNavId === undefined ||
+      !routeData ||
+      totalStops === 0
+    )
+      return;
     if (!currentStation) return;
 
     const progress = Math.round((currentStationIndex / totalStops) * 100);
@@ -488,6 +511,7 @@ export default function RoutePlanScreen() {
     );
   }, [
     liveNavId,
+    notificationsEnabled,
     currentStation,
     currentStationIndex,
     routeData,
@@ -522,7 +546,7 @@ export default function RoutePlanScreen() {
     if (message === "READY") {
       setIsMapReady(true);
       const initialRoute = calculateRoute(fromStation, toStation);
-      if (!initialRoute.error) {
+      if (isCalculatedRoute(initialRoute)) {
         setRouteData(initialRoute);
         setTotalStops(initialRoute.stops);
         webviewRef.current?.postMessage(JSON.stringify(initialRoute));

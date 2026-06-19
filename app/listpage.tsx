@@ -8,7 +8,7 @@ import { useLocalSearchParams, router } from "expo-router";
 import { useRecentTripsStore } from "@/store/recentTrips";
 import { useBookmarksStore } from "@/store/savedRoutes";
 import { RecentTrip, SavedRoute } from "@/types/route";
-import strings from "@/constants/strings";
+import { useStrings } from "@/constants/strings";
 
 // ─── Spring hook ────────────────────────────────────────────────────────────
 function useSpringPress() {
@@ -62,7 +62,12 @@ function RouteCard({
       <Pressable
         onPressIn={spring.onPressIn}
         onPressOut={spring.onPressOut}
-        onPress={() => {}}
+        onPress={() =>
+          router.push({
+            pathname: "/route",
+            params: { start: item.from, end: item.to },
+          })
+        }
         android_ripple={{
           color: theme.colors.onSurface + "18",
           borderless: false,
@@ -175,6 +180,7 @@ function RouteCard({
 // ─── Screen ──────────────────────────────────────────────────────────────────
 export default function ListPage() {
   const theme = useAppTheme();
+  const strings = useStrings();
   const { type } = useLocalSearchParams<{ type: string }>();
   const isSaved = type === "saved";
 

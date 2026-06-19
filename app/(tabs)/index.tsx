@@ -103,6 +103,9 @@ const RecentCard = ({
             size={30}
             color={theme.colors.onSurfaceVariant}
           />
+          {/*<Text variant="titleLarge" style={{ color: theme.colors.onSurface }}>
+            {item.stops + 1}
+          </Text>*/}
         </View>
         <View style={{ flex: 1 }}>
           <Text variant="bodyMedium" style={{ color: theme.colors.onSurface }}>
@@ -138,7 +141,7 @@ const BookmarkCard = ({ item }: { item: SavedRoute }) => {
           padding: 4,
           backgroundColor: theme.colors.elevation.level1,
           borderRadius: 20,
-          marginBottom: 4,
+          marginBottom: 12,
         }}
       >
         <Card.Content style={{ paddingTop: 16, paddingHorizontal: 16 }}>
@@ -446,6 +449,25 @@ function EmptyRoutesState({
   const tourSpring = useSpringPress();
   const planSpring = useSpringPress();
   const hasSeenTutorial = useOnboardingStore((state) => state.hasSeenTutorial);
+  const [isLoading, setIsLoading] = useState(true);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        // Request permission from the user
+        let { status } = await Location.requestForegroundPermissionsAsync();
+        if (status !== "granted") {
+          setErrorMsg(strings.common.locationPermissionDenied);
+          setIsLoading(false);
+          return;
+        }
+      } catch (error) {
+        setErrorMsg(strings.common.locationPermissionDenied);
+        setIsLoading(false);
+      }
+    })();
+  }, []);
 
   const tourRadius = tourSpring.scale.interpolate({
     inputRange: [0.88, 1],
@@ -920,7 +942,6 @@ export default function HomeScreen() {
                   >
                     Delhi
                   </Button>*/}
-                      );
                     </View>
                   </View>
                 </View>
@@ -1156,7 +1177,7 @@ export default function HomeScreen() {
               </Dialog.Title>
               <Dialog.Content>
                 {CITIES.map((item, index) => (
-                  <SystemCards index={index} item={item} />
+                  <SystemCards key={item.id} index={index} item={item} />
                 ))}
               </Dialog.Content>
               <Dialog.Actions style={{ justifyContent: "center" }}>

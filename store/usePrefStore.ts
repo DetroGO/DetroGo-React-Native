@@ -1,13 +1,21 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import zustandStorage from "./storage";
-import { ThemeMode } from "@/types/route";
+import { LanguageCode, ThemeMode } from "@/types/route";
 
 type PrefStore = {
   themeMode: ThemeMode;
   setThemeMode: (mode: ThemeMode) => void;
   sourceColor: string;
   setSourceColor: (color: string) => void;
+  language: LanguageCode;
+  setLanguage: (language: LanguageCode) => void;
+  notificationsEnabled: boolean;
+  setNotificationsEnabled: (enabled: boolean) => void;
+  homeStation: string | null;
+  setHomeStation: (station: string | null) => void;
+  workStation: string | null;
+  setWorkStation: (station: string | null) => void;
 };
 
 export const usePrefStore = create<PrefStore>()(
@@ -17,6 +25,17 @@ export const usePrefStore = create<PrefStore>()(
       setThemeMode: (mode: ThemeMode) => set({ themeMode: mode }),
       sourceColor: "system",
       setSourceColor: (color: string) => set({ sourceColor: color }),
+      language: "en",
+      setLanguage: (language: LanguageCode) => set({ language }),
+      notificationsEnabled: false,
+      setNotificationsEnabled: (enabled: boolean) =>
+        set({ notificationsEnabled: enabled }),
+      homeStation: null,
+      setHomeStation: (station: string | null) =>
+        set({ homeStation: station }),
+      workStation: null,
+      setWorkStation: (station: string | null) =>
+        set({ workStation: station }),
     }),
     {
       name: "pref",

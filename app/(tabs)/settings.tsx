@@ -1,13 +1,33 @@
-import { View, Animated, Pressable, Image } from "react-native";
-import { Text, Icon, Portal, Dialog, Button } from "react-native-paper";
+import {
+  View,
+  Animated,
+  Pressable,
+  Image,
+  SectionList,
+  ToastAndroid,
+  Platform,
+  Linking,
+} from "react-native";
+
+import {
+  Text,
+  Icon,
+  Portal,
+  Dialog,
+  Button,
+  Searchbar,
+} from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { ScrollView } from "react-native-gesture-handler";
-import strings from "@/constants/strings";
+import { LANGUAGE_OPTIONS, useStrings } from "@/constants/strings";
 import { usePrefStore } from "@/store/usePrefStore";
 import { useAppTheme } from "@/hooks/useAppTheme";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { M3_COLORS } from "@/constants/m3Colors";
 import { router } from "expo-router";
+import metroLines from "@/cities/delhi/metrolines.json";
+import { ensureNotificationPermission } from "@/utils/detroLiveNotif";
+import { LanguageCode, ThemeMode } from "@/types/route";
 
 // ─── Spring hook ──────────────────────────────────────────────────────────────
 
@@ -34,28 +54,22 @@ function useSpringPress() {
 
 // ─── Data ─────────────────────────────────────────────────────────────────────
 
-const THEME_OPTIONS = [
+const THEME_OPTIONS: { label: string; value: ThemeMode; icon: string }[] = [
   { label: "System", value: "system", icon: "theme-light-dark" },
   { label: "Light", value: "light", icon: "white-balance-sunny" },
   { label: "Dark", value: "dark", icon: "weather-night" },
   { label: "Amoled (Black)", value: "amoled", icon: "circle-slice-8" },
 ];
 
-const GENERAL_ROWS = [
-  { label: "Language", subtitle: "English", icon: "translate" },
-  { label: "Notifications", subtitle: "Off", icon: "bell" },
-];
+type TransitLines = Record<string, string[]>;
+type StationTarget = "home" | "work";
 
-const TRAVEL_ROWS = [
-  { label: "Home Station", subtitle: "Not set", icon: "home" },
-  { label: "Work Station", subtitle: "Not set", icon: "briefcase-variant" },
-];
-
-const ABOUT_ROWS = [
-  { label: "Version", subtitle: "ALPHA", icon: "information-outline" },
-  { label: "Source Code", subtitle: "Github", icon: "code-tags" },
-  { label: "License", subtitle: "GNU GPL v3.0", icon: "file-document-outline" },
-];
+const initialStationSections = Object.entries(metroLines as TransitLines).map(
+  ([title, data]) => ({
+    title,
+    data,
+  }),
+);
 
 // ─── ThemeOptionCard ──────────────────────────────────────────────────────────
 
@@ -276,19 +290,299 @@ function SectionLabel({ label }: { label: string }) {
   );
 }
 
+function OptionRow({
+  label,
+  selected,
+  onPress,
+  index,
+  section,
+}: {
+  label: string;
+  selected: boolean;
+  onPress: () => void;
+  index: number;
+  section: { data: string[] };
+}) {
+  const theme = useAppTheme();
+
+  return (
+    <Pressable onPress={onPress}>
+      <View
+        style={{
+          backgroundColor: selected
+            ? theme.colors.secondaryContainer
+            : theme.colors.elevation.level1,
+
+          paddingHorizontal: 18,
+          paddingVertical: 18,
+          borderTopLeftRadius: index === 0 ? 22 : 6,
+          borderTopRightRadius: index === 0 ? 22 : 6,
+          borderBottomLeftRadius: index === section.data.length - 1 ? 22 : 6,
+          borderBottomRightRadius: index === section.data.length - 1 ? 22 : 6,
+          marginBottom: 3,
+          flexDirection: "row",
+          alignItems: "center",
+          gap: 12,
+        }}
+      >
+        <Text
+          variant="bodyMedium"
+          style={{
+            flex: 1,
+            color: selected
+              ? theme.colors.onSecondaryContainer
+              : theme.colors.onSurface,
+          }}
+        >
+          {label}
+        </Text>
+        {selected && (
+          <Icon
+            source="check-circle"
+            size={20}
+            color={theme.colors.onSecondaryContainer}
+          />
+        )}
+      </View>
+    </Pressable>
+  );
+}
+
+function StationPickerDialog({
+  visible,
+  title,
+  selectedStation,
+  searchPhrase,
+  onSearchChange,
+  onDismiss,
+  onSelect,
+}: {
+  visible: boolean;
+  title: string;
+  selectedStation: string | null;
+  searchPhrase: string;
+  onSearchChange: (value: string) => void;
+  onDismiss: () => void;
+  onSelect: (station: string) => void;
+}) {
+  const theme = useAppTheme();
+  const strings = useStrings();
+  const sections = useMemo(() => {
+    const query = searchPhrase.trim().toLowerCase();
+    if (!query) return initialStationSections;
+
+    return initialStationSections
+      .map((section) => ({
+        ...section,
+        data: section.data.filter((station) =>
+          station.toLowerCase().includes(query),
+        ),
+      }))
+      .filter((section) => section.data.length > 0);
+  }, [searchPhrase]);
+
+  return (
+    <Portal>
+      <Dialog
+        style={{ backgroundColor: theme.colors.surface, borderRadius: 28 }}
+        visible={visible}
+        onDismiss={onDismiss}
+      >
+        <Dialog.Title
+          style={{ marginTop: 28, textAlign: "center", fontSize: 22 }}
+        >
+          {title}
+        </Dialog.Title>
+        <Dialog.Content>
+          <Searchbar
+            value={searchPhrase}
+            onChangeText={onSearchChange}
+            mode="bar"
+            placeholder="Search station"
+            style={{
+              marginBottom: 12,
+              backgroundColor: theme.colors.elevation.level1,
+            }}
+          />
+          <SectionList
+            sections={sections}
+            keyExtractor={(item, index) => `${item}-${index}`}
+            style={{ maxHeight: 360 }}
+            keyboardShouldPersistTaps="handled"
+            showsVerticalScrollIndicator={false}
+            renderSectionHeader={({ section }) => (
+              <Text
+                variant="labelSmall"
+                style={{
+                  color: theme.colors.onSurfaceVariant,
+                  marginTop: 10,
+                  marginBottom: 6,
+                }}
+              >
+                {section.title}
+              </Text>
+            )}
+            renderItem={({ item, index, section }) => (
+              <OptionRow
+                index={index}
+                section={section}
+                label={item}
+                selected={selectedStation === item}
+                onPress={() => onSelect(item)}
+              />
+            )}
+          />
+        </Dialog.Content>
+        <Dialog.Actions
+          style={{
+            justifyContent: "center",
+            paddingBottom: 16,
+            paddingHorizontal: 24,
+          }}
+        >
+          <Button
+            style={{ width: "100%" }}
+            mode="contained-tonal"
+            onPress={onDismiss}
+          >
+            {strings.common.done}
+          </Button>
+        </Dialog.Actions>
+      </Dialog>
+    </Portal>
+  );
+}
+
 // ─── Main screen ──────────────────────────────────────────────────────────────
 
 export default function Settings() {
   const theme = useAppTheme();
+  const strings = useStrings();
   const [visibleAbout, setVisibleAbout] = useState(false);
   const [visibleScheme, setVisibleScheme] = useState(false);
   const [visibleTheme, setVisibleTheme] = useState(false);
+  const [visibleLanguage, setVisibleLanguage] = useState(false);
+  const [stationTarget, setStationTarget] = useState<StationTarget | null>(
+    null,
+  );
+  const [stationSearch, setStationSearch] = useState("");
 
   const springTheme = useSpringPress();
   const springScheme = useSpringPress();
 
-  const { themeMode, setThemeMode, sourceColor, setSourceColor } =
-    usePrefStore();
+  const ABOUT_ROWS = [
+    {
+      label: "Version",
+      subtitle: "ALPHA",
+      icon: "information-outline",
+      onPress: () => setVisibleAbout(true),
+    },
+    {
+      label: "Source Code",
+      subtitle: "Github",
+      icon: "code-tags",
+      onPress: () =>
+        Linking.openURL("https://github.com/DetroGO/DetroGo-React-Native"),
+    },
+    {
+      label: "License",
+      subtitle: "GNU GPL v3.0",
+      icon: "file-document-outline",
+      onPress: () =>
+        Linking.openURL(
+          "https://raw.githubusercontent.com/DetroGO/DetroGo-React-Native/refs/heads/main/LICENSE",
+        ),
+    },
+  ];
+
+  const {
+    themeMode,
+    setThemeMode,
+    sourceColor,
+    setSourceColor,
+    language,
+    setLanguage,
+    notificationsEnabled,
+    setNotificationsEnabled,
+    homeStation,
+    setHomeStation,
+    workStation,
+    setWorkStation,
+  } = usePrefStore();
+
+  const languageLabel =
+    LANGUAGE_OPTIONS.find((option) => option.value === language)?.label ??
+    "English";
+  const generalRows: {
+    id: "language" | "notifications";
+    label: string;
+    subtitle: string;
+    icon: string;
+  }[] = [
+    {
+      id: "language",
+      label: strings.settings.language,
+      subtitle: languageLabel,
+      icon: "translate",
+    },
+    {
+      id: "notifications",
+      label: strings.settings.notifications,
+      subtitle: notificationsEnabled
+        ? strings.settings.on
+        : strings.settings.off,
+      icon: notificationsEnabled ? "bell-ring" : "bell-outline",
+    },
+  ];
+  const travelRows: {
+    id: StationTarget;
+    label: string;
+    subtitle: string;
+    icon: string;
+  }[] = [
+    {
+      id: "home",
+      label: strings.settings.homeStation,
+      subtitle: homeStation ?? strings.settings.notSet,
+      icon: "home",
+    },
+    {
+      id: "work",
+      label: strings.settings.workStation,
+      subtitle: workStation ?? strings.settings.notSet,
+      icon: "briefcase-variant",
+    },
+  ];
+
+  const openStationPicker = (target: StationTarget) => {
+    setStationSearch("");
+    setStationTarget(target);
+  };
+
+  const selectStation = (station: string) => {
+    if (stationTarget === "home") {
+      setHomeStation(station);
+    } else if (stationTarget === "work") {
+      setWorkStation(station);
+    }
+
+    setStationTarget(null);
+    setStationSearch("");
+  };
+
+  const toggleNotifications = async () => {
+    if (notificationsEnabled) {
+      setNotificationsEnabled(false);
+      return;
+    }
+
+    const allowed = await ensureNotificationPermission();
+    setNotificationsEnabled(allowed);
+
+    if (!allowed && Platform.OS === "android") {
+      ToastAndroid.show(strings.settings.permissionDenied, ToastAndroid.SHORT);
+    }
+  };
 
   const bgColor = theme.dark
     ? theme.colors.surfaceDim
@@ -378,7 +672,8 @@ export default function Settings() {
                       ? strings.common.systemDefault
                       : themeMode === "amoled"
                         ? strings.common.amoled
-                        : themeMode}
+                        : themeMode.charAt(0).toUpperCase() +
+                          themeMode.slice(1)}
                   </Text>
                 </View>
                 <Icon
@@ -474,18 +769,21 @@ export default function Settings() {
         {/* ── GENERAL ── */}
         <View style={{ marginHorizontal: 15, marginTop: 24 }}>
           <SectionLabel label={strings.settings.general} />
-          {GENERAL_ROWS.map((row, i) => (
+          {generalRows.map((row, i) => (
             <SettingsRow
-              key={row.label}
+              key={row.id}
               row={row}
               position={
                 i === 0
                   ? "first"
-                  : i === GENERAL_ROWS.length - 1
+                  : i === generalRows.length - 1
                     ? "last"
                     : "middle"
               }
-              onPress={() => {}}
+              onPress={() => {
+                if (row.id === "language") setVisibleLanguage(true);
+                if (row.id === "notifications") toggleNotifications();
+              }}
             />
           ))}
         </View>
@@ -493,18 +791,18 @@ export default function Settings() {
         {/* ── TRAVEL PREFERENCES ── */}
         <View style={{ marginHorizontal: 15, marginTop: 24 }}>
           <SectionLabel label={strings.settings.travelPreferences} />
-          {TRAVEL_ROWS.map((row, i) => (
+          {travelRows.map((row, i) => (
             <SettingsRow
-              key={row.label}
+              key={row.id}
               row={row}
               position={
                 i === 0
                   ? "first"
-                  : i === TRAVEL_ROWS.length - 1
+                  : i === travelRows.length - 1
                     ? "last"
                     : "middle"
               }
-              onPress={() => {}}
+              onPress={() => openStationPicker(row.id)}
             />
           ))}
         </View>
@@ -559,7 +857,7 @@ export default function Settings() {
                     ? "last"
                     : "middle"
               }
-              onPress={() => row.label === "Version" && setVisibleAbout(true)}
+              onPress={() => row.onPress()}
             />
           ))}
         </View>
@@ -606,54 +904,27 @@ export default function Settings() {
               style={{
                 color: theme.colors.outline,
                 textAlign: "center",
+                marginHorizontal: 20,
                 marginTop: 16,
               }}
             >
-              This is a preview build of DetroGo. Its may contain bugs and
-              incomplete features. and is only intended for alpha testers
+              This is a preview build of DetroGo. It may contain bugs and
+              incomplete features. If you encounter any issues, please report
+              them it helps us get closer to the launch and and who doesnt love
+              squashing bugs
             </Text>
             <Text
               variant="bodySmall"
               style={{
                 color: theme.colors.outline,
                 textAlign: "center",
-                marginTop: 8,
+                marginTop: 16,
               }}
             >
               Thank you for testing DetroGo!
             </Text>
-            <Text
-              variant="bodySmall"
-              style={{
-                color: theme.colors.outline,
-                textAlign: "center",
-                marginTop: 8,
-              }}
-            >
-              Open Source · GNU GPL v3.0
-            </Text>
-
-            <Text
-              variant="bodySmall"
-              style={{
-                color: theme.colors.secondary,
-                textAlign: "center",
-                marginTop: 18,
-              }}
-            >
-              Report Bugs & Feedback on
-            </Text>
-            <Text
-              variant="bodySmall"
-              style={{
-                color: theme.colors.primary,
-                textAlign: "center",
-                marginTop: 8,
-              }}
-            >
-              Discord | GitHub
-            </Text>
           </Dialog.Content>
+
           <Dialog.Actions
             style={{
               justifyContent: "center",
@@ -671,6 +942,70 @@ export default function Settings() {
           </Dialog.Actions>
         </Dialog>
       </Portal>
+
+      {/* ── Language dialog ── */}
+      <Portal>
+        <Dialog
+          style={{ backgroundColor: theme.colors.surface, borderRadius: 28 }}
+          visible={visibleLanguage}
+          onDismiss={() => setVisibleLanguage(false)}
+        >
+          <Dialog.Title
+            style={{ marginTop: 40, textAlign: "center", fontSize: 24 }}
+          >
+            {strings.settings.chooseLanguage}
+          </Dialog.Title>
+          <Dialog.Content>
+            {LANGUAGE_OPTIONS.map((option, index) => (
+              <OptionRow
+                index={index}
+                section={{
+                  data: LANGUAGE_OPTIONS.map((option) => option.label),
+                }}
+                key={option.value}
+                label={option.label}
+                selected={language === option.value}
+                onPress={() => {
+                  setLanguage(option.value as LanguageCode);
+                  setVisibleLanguage(false);
+                }}
+              />
+            ))}
+          </Dialog.Content>
+          <Dialog.Actions
+            style={{
+              justifyContent: "center",
+              paddingBottom: 16,
+              paddingHorizontal: 24,
+            }}
+          >
+            <Button
+              style={{ width: "100%" }}
+              mode="contained-tonal"
+              onPress={() => setVisibleLanguage(false)}
+            >
+              {strings.common.done}
+            </Button>
+          </Dialog.Actions>
+        </Dialog>
+      </Portal>
+
+      <StationPickerDialog
+        visible={stationTarget !== null}
+        title={
+          stationTarget === "home"
+            ? strings.settings.chooseHomeStation
+            : strings.settings.chooseWorkStation
+        }
+        selectedStation={stationTarget === "home" ? homeStation : workStation}
+        searchPhrase={stationSearch}
+        onSearchChange={setStationSearch}
+        onDismiss={() => {
+          setStationTarget(null);
+          setStationSearch("");
+        }}
+        onSelect={selectStation}
+      />
 
       {/* ── Color scheme dialog ── */}
       <Portal>

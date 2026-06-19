@@ -6,6 +6,7 @@ import { ToastAndroid } from "react-native";
 import metroLines from "@/cities/delhi/metrolines.json";
 import stations from "@/cities/delhi/stationsdata.json";
 import { useAppTheme } from "@/hooks/useAppTheme";
+import { usePrefStore } from "@/store/usePrefStore";
 import {
   Text,
   Surface,
@@ -14,6 +15,8 @@ import {
   Icon,
   ProgressBar,
   Button,
+  Portal,
+  Dialog,
 } from "react-native-paper";
 import Animated, {
   useSharedValue,
@@ -27,14 +30,26 @@ import strings from "@/constants/strings";
 import {
   StyleSheet,
   View,
+  Pressable,
   SectionList,
   ActivityIndicator,
   BackHandler,
 } from "react-native";
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { useRouter } from "expo-router";
 import { useRef } from "react";
 type TransitLines = Record<string, string[]>;
+type DisplayValue = "flex" | "none";
+type StationData = {
+  stop_name: string;
+  stop_lat: string;
+  stop_lon: string;
+};
+type NearestStationResult = {
+  nearestStation: StationData | null;
+  minDistance: number;
+};
+
 const lines: TransitLines = metroLines as TransitLines;
 
 // Original sections data
@@ -43,8 +58,8 @@ const initialSections = Object.entries(lines).map(([title, data]) => ({
   data,
 }));
 
-const haversine = (lat1, lon1, lat2, lon2) => {
-  const toRad = (v) => (v * Math.PI) / 180;
+const haversine = (lat1: number, lon1: number, lat2: number, lon2: number) => {
+  const toRad = (v: number) => (v * Math.PI) / 180;
   const R = 6371;
   const dLat = toRad(lat2 - lat1);
   const dLon = toRad(lon2 - lon1);
@@ -56,8 +71,12 @@ const haversine = (lat1, lon1, lat2, lon2) => {
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 };
 
-const findNearestMetroStation = (userLat, userLon, stationList) => {
-  let nearestStation = null;
+const findNearestMetroStation = (
+  userLat: number,
+  userLon: number,
+  stationList: StationData[],
+): NearestStationResult => {
+  let nearestStation: StationData | null = null;
   let minDistance = Infinity;
 
   stationList.forEach((station) => {
@@ -78,10 +97,10 @@ const findNearestMetroStation = (userLat, userLon, stationList) => {
 
 export default function ModalScreen() {
   const theme = useAppTheme();
+  const { homeStation, setHomeStation, workStation, setWorkStation } =
+    usePrefStore();
   const scale = useSharedValue(1);
   const scale2 = useSharedValue(1);
-  const workstation = "Knowledge Park";
-  const homestation = "Vaishali";
   const animStyle = useAnimatedStyle(() => ({
     transform: [{ scale: scale.value }],
   }));
@@ -89,8 +108,8 @@ export default function ModalScreen() {
     transform: [{ scale: scale2.value }],
   }));
   const [searchPhrase, setPhrase] = useState("");
-  const [searchv, setSearchv] = useState("block");
-  const [plannerv, setPlannerv] = useState("none");
+  const [searchv, setSearchv] = useState<DisplayValue>("flex");
+  const [plannerv, setPlannerv] = useState<DisplayValue>("none");
   const [finalStation, setFinalStation] = useState("");
   const [startStation, setStartStation] = useState("");
   const [finalsel, setFinalsel] = useState(false);
@@ -104,10 +123,16 @@ export default function ModalScreen() {
   const buttonRef = useRef(null);
   const scale3 = useSharedValue(0);
   const [origin, setOrigin] = useState({ x: 0, y: 0 });
-  const [location, setLocation] = useState(null);
-  const [nearest, setNearest] = useState(null);
-  const [errorMsg, setErrorMsg] = useState(null);
+  const [location, setLocation] = useState<{ lat: number; lon: number } | null>(
+    null,
+  );
+  const [nearest, setNearest] = useState<NearestStationResult | null>(null);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [presetPickerTarget, setPresetPickerTarget] = useState<
+    "home" | "work" | null
+  >(null);
+  const [presetSearchPhrase, setPresetSearchPhrase] = useState("");
 
   const animatedCircle = useAnimatedStyle(() => ({
     transform: [{ scale: scale3.value }],
@@ -136,14 +161,14 @@ export default function ModalScreen() {
       setStartsel(true);
       setEditingMode(null);
       setSearchv("none");
-      setPlannerv("block");
+      setPlannerv("flex");
     } else if (editingMode === "final") {
       Haptics.selectionAsync();
       setFinalStation(item);
       setFinalsel(true);
       setEditingMode(null);
       setSearchv("none");
-      setPlannerv("block");
+      setPlannerv("flex");
     } else {
       ToastAndroid.show("First pick a endpoint to change", ToastAndroid.SHORT);
     }
@@ -153,14 +178,53 @@ export default function ModalScreen() {
     setFinalStation(item);
     setFinalsel(true);
     setSearchv("none");
-    setPlannerv("block");
+    setPlannerv("flex");
+  };
+
+  const presetSections = useMemo(() => {
+    const query = presetSearchPhrase.trim().toLowerCase();
+    if (!query) return initialSections;
+
+    return initialSections
+      .map((section) => ({
+        ...section,
+        data: section.data.filter((station) =>
+          station.toLowerCase().includes(query),
+        ),
+      }))
+      .filter((section) => section.data.length > 0);
+  }, [presetSearchPhrase]);
+
+  const handlePresetStationSelect = (
+    target: "home" | "work",
+    station: string | null,
+  ) => {
+    if (!station) {
+      setPresetSearchPhrase("");
+      setPresetPickerTarget(target);
+      return;
+    }
+
+    handleStationSelect(station);
+  };
+
+  const handlePresetStationSave = (station: string) => {
+    if (presetPickerTarget === "home") {
+      setHomeStation(station);
+    } else if (presetPickerTarget === "work") {
+      setWorkStation(station);
+    }
+
+    setPresetPickerTarget(null);
+    setPresetSearchPhrase("");
+    handleStationSelect(station);
   };
 
   const startStationsel = () => {
     Haptics.selectionAsync();
     setEditingMode("start");
     setPlannerv("none");
-    setSearchv("block");
+    setSearchv("flex");
     setPhrase("");
     setFilteredSections(initialSections);
   };
@@ -169,7 +233,7 @@ export default function ModalScreen() {
     Haptics.selectionAsync();
     setEditingMode("final");
     setPlannerv("none");
-    setSearchv("block");
+    setSearchv("flex");
     setPhrase("");
     setFilteredSections(initialSections);
   };
@@ -205,7 +269,7 @@ export default function ModalScreen() {
     // Only cancel if we have something to go back to
     if (startsel || finalsel) {
       setSearchv("none");
-      setPlannerv("block");
+      setPlannerv("flex");
       setEditingMode(null);
       setPhrase("");
       setFilteredSections(initialSections);
@@ -235,7 +299,7 @@ export default function ModalScreen() {
         // Request permission from the user
         let { status } = await Location.requestForegroundPermissionsAsync();
         if (status !== "granted") {
-          setErrorMsg(strings.common.locationpermissiondenied);
+          setErrorMsg(strings.common.locationPermissionDenied);
           setIsLoading(false);
           return;
         }
@@ -255,8 +319,12 @@ export default function ModalScreen() {
           setStartStation(result.nearestStation.stop_name);
         }
       } catch (error) {
-        setErrorMsg(strings.common.error + error.message);
-        ToastAndroid.show(errorMsg, ToastAndroid.SHORT);
+        const message =
+          error instanceof Error
+            ? `${strings.common.error}: ${error.message}`
+            : strings.common.error;
+        setErrorMsg(message);
+        ToastAndroid.show(message, ToastAndroid.SHORT);
       } finally {
         setIsLoading(false);
       }
@@ -269,7 +337,7 @@ export default function ModalScreen() {
       setTimeout(() => {
         setEditingMode("final");
         setPlannerv("none");
-        setSearchv("block");
+        setSearchv("flex");
         setPhrase("");
         setFilteredSections(initialSections);
       }, 50);
@@ -439,10 +507,11 @@ export default function ModalScreen() {
                       borderRadius: 18,
                     }}
                     mode="contained"
-                    onPress={() =>
-                      !isLoading &&
-                      handleStationSelect(nearest.nearestStation.stop_name)
-                    }
+                    onPress={() => {
+                      if (!isLoading && nearest.nearestStation) {
+                        handleStationSelect(nearest.nearestStation.stop_name);
+                      }
+                    }}
                   >
                     <Card.Content
                       style={{
@@ -502,7 +571,8 @@ export default function ModalScreen() {
                                 : theme.colors.primary,
                             }}
                           >
-                            {nearest.nearestStation.stop_name}
+                            {nearest.nearestStation?.stop_name ??
+                              strings.planner.noResults}
                           </Text>
                         )}
                       </View>
@@ -533,7 +603,9 @@ export default function ModalScreen() {
                     borderBottomRightRadius: 6,
                   }}
                   mode="contained"
-                  onPress={() => handleStationSelect(homestation)}
+                  onPress={() =>
+                    handlePresetStationSelect("home", homeStation)
+                  }
                 >
                   <Card.Content
                     style={{
@@ -576,7 +648,9 @@ export default function ModalScreen() {
                     borderBottomRightRadius: 18,
                   }}
                   mode="contained"
-                  onPress={() => handleStationSelect(workstation)}
+                  onPress={() =>
+                    handlePresetStationSelect("work", workStation)
+                  }
                 >
                   <Card.Content
                     style={{
@@ -659,6 +733,122 @@ export default function ModalScreen() {
           initialNumToRender={10}
         />
       </View>
+      <Portal>
+        <Dialog
+          style={{ backgroundColor: theme.colors.surface, borderRadius: 28 }}
+          visible={presetPickerTarget !== null}
+          onDismiss={() => {
+            setPresetPickerTarget(null);
+            setPresetSearchPhrase("");
+          }}
+        >
+          <Dialog.Title
+            style={{ marginTop: 28, textAlign: "center", fontSize: 22 }}
+          >
+            {presetPickerTarget === "home"
+              ? "Set Home Station"
+              : "Set Work Station"}
+          </Dialog.Title>
+          <Dialog.Content>
+            <Searchbar
+              value={presetSearchPhrase}
+              onChangeText={setPresetSearchPhrase}
+              mode="bar"
+              placeholder="Search station"
+              style={{
+                marginBottom: 12,
+                backgroundColor: theme.colors.elevation.level1,
+              }}
+            />
+            <SectionList
+              sections={presetSections}
+              keyExtractor={(item, index) => `${item}-${index}`}
+              style={{ maxHeight: 360 }}
+              keyboardShouldPersistTaps="handled"
+              showsVerticalScrollIndicator={false}
+              renderSectionHeader={({ section }) => (
+                <Text
+                  variant="labelSmall"
+                  style={{
+                    color: theme.colors.onSurfaceVariant,
+                    marginTop: 10,
+                    marginBottom: 6,
+                  }}
+                >
+                  {section.title}
+                </Text>
+              )}
+              renderItem={({ item, index, section }) => {
+                const selected =
+                  presetPickerTarget === "home"
+                    ? homeStation === item
+                    : workStation === item;
+
+                return (
+                  <Pressable onPress={() => handlePresetStationSave(item)}>
+                    <View
+                      style={{
+                        backgroundColor: selected
+                          ? theme.colors.secondaryContainer
+                          : theme.colors.elevation.level1,
+                        paddingHorizontal: 18,
+                        paddingVertical: 18,
+                        borderTopLeftRadius: index === 0 ? 22 : 6,
+                        borderTopRightRadius: index === 0 ? 22 : 6,
+                        borderBottomLeftRadius:
+                          index === section.data.length - 1 ? 22 : 6,
+                        borderBottomRightRadius:
+                          index === section.data.length - 1 ? 22 : 6,
+                        marginBottom: 3,
+                        flexDirection: "row",
+                        alignItems: "center",
+                        gap: 12,
+                      }}
+                    >
+                      <Text
+                        variant="bodyMedium"
+                        style={{
+                          flex: 1,
+                          color: selected
+                            ? theme.colors.onSecondaryContainer
+                            : theme.colors.onSurface,
+                        }}
+                      >
+                        {item}
+                      </Text>
+                      {selected && (
+                        <Icon
+                          source="check-circle"
+                          size={20}
+                          color={theme.colors.onSecondaryContainer}
+                        />
+                      )}
+                    </View>
+                  </Pressable>
+                );
+              }}
+            />
+          </Dialog.Content>
+          <Dialog.Actions
+            style={{
+              justifyContent: "center",
+              paddingBottom: 16,
+              paddingHorizontal: 24,
+            }}
+          >
+            <Button
+              style={{ width: "100%" }}
+              mode="contained-tonal"
+              onPress={() => {
+                setPresetPickerTarget(null);
+                setPresetSearchPhrase("");
+              }}
+            >
+              {strings.common.cancel}
+            </Button>
+          </Dialog.Actions>
+        </Dialog>
+      </Portal>
     </Surface>
   );
 }

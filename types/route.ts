@@ -11,6 +11,7 @@ export type MetroSystem =
   | "kochi";
 
 export type ThemeMode = "system" | "light" | "dark" | "amoled";
+export type LanguageCode = "en" | "hi";
 
 /** A single station-stop inside a route */
 export interface RouteStop {
