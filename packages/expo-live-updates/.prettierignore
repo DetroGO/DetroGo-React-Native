@@ -1,0 +1,9 @@
+/build
+/example/.expo
+/example/ios
+/plugin/build
+/.eslintrc.js
+android/build
+example/android/
+.github/
+README.md
