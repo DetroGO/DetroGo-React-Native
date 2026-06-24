@@ -4,13 +4,7 @@ import BottomSheet, { BottomSheetScrollView } from "@gorhom/bottom-sheet";
 import * as Location from "expo-location";
 import { useMemo, useEffect } from "react";
 import { useAppTheme } from "@/hooks/useAppTheme";
-import {
-  Pressable,
-  Image,
-  RefreshControl,
-  SafeAreaView,
-  Animated,
-} from "react-native";
+import { Pressable, Image, RefreshControl, Animated } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
 
 import React from "react";
@@ -306,45 +300,6 @@ function useSpringPress() {
   return { scale, onPressIn, onPressOut };
 }
 
-function StarburstBadge({
-  color,
-  size = 200,
-  children,
-}: {
-  color: string;
-  size?: number;
-  children: React.ReactNode;
-}) {
-  // Official Material 3 10-point badge path
-  const starburstPath =
-    "M112.67 19.78C116.243 16.64 118.029 15.07 119.671 13.8C143.425 -4.6 176.575 -4.6 200.329 13.8C201.971 15.07 203.757 16.64 207.33 19.78C208.526 20.84 209.124 21.3601 209.724 21.8701C218.136 28.9201 228.171 33.7699 238.92 35.9599C239.688 36.1199 240.471 36.26 242.038 36.54C246.719 37.38 249.059 37.79 251.075 38.29C280.234 45.43 300.902 71.4099 301.364 101.49C301.396 103.57 301.283 105.95 301.057 110.71C300.982 112.31 300.944 113.1 300.925 113.89C300.665 124.88 303.143 135.76 308.136 145.55C308.493 146.25 308.872 146.95 309.63 148.36C311.894 152.55 313.026 154.64 313.897 156.53C326.503 183.83 319.127 216.23 295.949 235.34C294.347 236.67 292.42 238.06 288.566 240.85C287.276 241.79 286.63 242.25 286.007 242.73C277.27 249.38 270.326 258.11 265.803 268.12C265.48 268.84 265.169 269.57 264.547 271.04C262.69 275.43 261.761 277.62 260.832 279.48C247.393 306.38 217.526 320.8 188.162 314.56C186.132 314.12 183.842 313.48 179.262 312.2C177.728 311.78 176.962 311.56 176.203 311.37C165.569 308.67 154.431 308.67 143.797 311.37C143.038 311.56 142.272 311.78 140.738 312.2C136.158 313.48 133.868 314.12 131.838 314.56C102.474 320.8 72.6071 306.38 59.168 279.48C58.2388 277.62 57.3102 275.43 55.453 271.04C54.8311 269.57 54.5202 268.84 54.1975 268.12C49.6741 258.11 42.7297 249.38 33.993 242.73C33.3696 242.25 32.7244 241.79 31.434 240.85C27.5801 238.06 25.6532 236.67 24.0507 235.34C0.872993 216.23 -6.50347 183.83 6.10269 156.53C6.97419 154.64 8.10619 152.55 10.3703 148.36C11.1283 146.95 11.5074 146.25 11.8636 145.55C16.8568 135.76 19.3353 124.88 19.0745 113.89C19.0559 113.1 19.0182 112.31 18.9426 110.71C18.7168 105.95 18.6039 103.57 18.6359 101.49C19.0982 71.4099 39.7665 45.43 68.9252 38.29C70.9411 37.79 73.2814 37.38 77.9618 36.54C79.5289 36.26 80.3125 36.1199 81.0795 35.9599C91.829 33.7699 101.864 28.9201 110.276 21.8701C110.876 21.3601 111.474 20.84 112.67 19.78Z";
-  return (
-    <View
-      style={{
-        width: size,
-        height: size,
-        alignItems: "center",
-        justifyContent: "center",
-      }}
-    >
-      {/* The viewBox "-14 0 128 128" strictly aligns with the mathematical extremes
-        of the path above, ensuring it renders perfectly centered without being cut off.
-      */}
-      <Svg
-        viewBox="-32 -30 380 380"
-        width="110%"
-        height="110%"
-        style={{ position: "absolute" }}
-      >
-        <Path d={starburstPath} fill={color} />
-      </Svg>
-
-      {/* Inner Icon Container */}
-      <View style={{ zIndex: 1 }}>{children}</View>
-    </View>
-  );
-}
-
 function ActionButton({
   onPress,
   label,
@@ -469,21 +424,6 @@ function EmptyRoutesState({
     })();
   }, []);
 
-  const tourRadius = tourSpring.scale.interpolate({
-    inputRange: [0.88, 1],
-    outputRange: [16, 50],
-  });
-  const planRadius = planSpring.scale.interpolate({
-    inputRange: [0.88, 1],
-    outputRange: [16, 50],
-  });
-
-  const handleNext = () => {
-    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    // Navigate to your main app or next onboarding step
-    router.replace("/map");
-  };
-
   return (
     <View style={styles.cont1}>
       <View style={styles.graphicContainer}></View>
@@ -538,19 +478,6 @@ function EmptyRoutesState({
   );
 }
 
-const LEGEND = [
-  { label: "Yellow", color: "#FFD700" },
-  { label: "Blue", color: "#1E88E5" },
-  { label: "Red", color: "#E53935" },
-  { label: "Violet", color: "#9370DB" },
-  { label: "Pink", color: "#F06292" },
-  { label: "Magenta", color: "#E040FB" },
-  { label: "Green", color: "#43A047" },
-  { label: "Orange", color: "#FB8C00" },
-  { label: "Aqua", color: "#26C6DA" },
-  { label: "Rapid", color: "#015b97" },
-];
-
 const DELHI_CENTER: [number, number] = [77.2195, 28.6329];
 
 export default function HomeScreen() {
@@ -569,10 +496,10 @@ export default function HomeScreen() {
 
   const cameraRef = useRef<any>(null);
   const hasFocusedUser = useRef(false);
-  const hasCentered = useRef(false);
-  const [initialCenter, setInitialCenter] =
-    useState<[number, number]>(DELHI_CENTER);
-  const [initialZoom, setInitialZoom] = useState(10.5);
+  // const hasCentered = useRef(false);
+  // const [initialCenter, setInitialCenter] =
+  //   useState<[number, number]>(DELHI_CENTER);
+  // const [initialZoom, setInitialZoom] = useState(10.5);
 
   const [tracking, setTracking] = useState<"default" | undefined>(undefined);
 
@@ -719,7 +646,6 @@ export default function HomeScreen() {
           />
         </GeoJSONSource>
 
-        {/* Stations */}
         {/* Stations */}
         <GeoJSONSource id="stations" data={STATIONS}>
           {/* Interchange */}
@@ -907,31 +833,6 @@ export default function HomeScreen() {
                       justifyContent: "center",
                     }}
                   >
-                    <View>
-                      {/*<Image
-                      source={require("../../assets/images/detrologo.png")}
-                      style={{
-                        width: 180,
-                        height: 120,
-                        marginRight: 8,
-
-                        marginLeft: 0,
-                        tintColor: theme.colors.primary,
-                      }}
-                    />*/}
-                      {/*<Text
-                    variant="titleSmall"
-                    style={{ color: theme.colors.onBackground }}
-                  >
-                    Good Morning,
-                  </Text>
-                  <Text
-                    variant="headlineSmall"
-                    style={{ color: theme.colors.onBackground }}
-                  >
-                    Where to?
-                  </Text>*/}
-                    </View>
                     <View
                       style={{ alignItems: "center", justifyContent: "center" }}
                     >
@@ -946,9 +847,7 @@ export default function HomeScreen() {
                   </View>
                 </View>
 
-                {/* Search */}
-
-                {/* Bookmarks */}
+                {/* Saved Routes */}
 
                 <View>
                   <View style={{ marginTop: 0, paddingTop: 0, gap: 10 }}>
@@ -1092,24 +991,6 @@ export default function HomeScreen() {
                           {strings.home.recentTrips}
                         </Text>
                       </View>
-                      {/*<Button
-                        style={{ width: "auto", marginRight: 0 }}
-                        onPress={() =>
-                          router.push({
-                            pathname: "/listpage",
-                            params: { type: "recent" },
-                          })
-                        }
-                      >
-                        <Text
-                          style={{
-                            fontSize: 12,
-                            color: theme.colors.secondary,
-                          }}
-                        >
-                          {strings.common.viewall}
-                        </Text>
-                      </Button>*/}
                     </View>
                     {recentTrips.length > 0 ? (
                       recentTrips
@@ -1164,6 +1045,33 @@ export default function HomeScreen() {
                   </View>
                 </View>
               </ScrollView>
+              <View
+                style={{
+                  flex: 1,
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+              >
+                <Button
+                  style={{ width: 350, padding: 5 }}
+                  mode="outlined"
+                  onPress={() =>
+                    router.push({
+                      pathname: "/listpage",
+                      params: { type: "recent" },
+                    })
+                  }
+                >
+                  <Text
+                    style={{
+                      fontSize: 16,
+                      color: theme.colors.secondary,
+                    }}
+                  >
+                    {strings.common.viewall}
+                  </Text>
+                </Button>
+              </View>
             </View>
           )}
           <Portal>

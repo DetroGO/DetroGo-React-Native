@@ -5,10 +5,8 @@ import { useStrings } from "@/constants/strings";
 
 import HomeScreen from "./index";
 import SettingsScreen from "./settings";
-import MapScreen from "./map";
 
 const HomeRoute = () => <HomeScreen />;
-const MapRoute = () => <MapScreen />;
 const SettingsRoute = () => <SettingsScreen />;
 
 export default function TabLayout() {
@@ -37,7 +35,6 @@ export default function TabLayout() {
 
   const renderScene = BottomNavigation.SceneMap({
     home: HomeRoute,
-    map: MapRoute,
     settings: SettingsRoute,
   });
 
