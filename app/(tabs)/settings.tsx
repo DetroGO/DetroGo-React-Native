@@ -527,7 +527,7 @@ export default function Settings() {
     },
     {
       id: "notifications",
-      label: strings.settings.notifications,
+      label: strings.settings.notifications + " (Beta)",
       subtitle: notificationsEnabled
         ? strings.settings.on
         : strings.settings.off,
