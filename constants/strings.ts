@@ -1,3 +1,6 @@
+// strings.ts contains the strings used in the app.
+// these are the strings that are displayed to the user. depending upon the language they select, the strings will be displayed you can help us translate by adding strings for other languages.
+
 import { usePrefStore } from "@/store/usePrefStore";
 import { LanguageCode } from "@/types/route";
 

@@ -1,3 +1,4 @@
+// amoled.ts contains the colors needed for amoled mode in the app.
 import { MD3DarkTheme } from "react-native-paper";
 
 export const amoledColors = {

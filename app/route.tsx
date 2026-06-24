@@ -20,14 +20,11 @@ import {
   Icon,
   Card,
   IconButton,
-  FAB,
 } from "react-native-paper";
 import { WebView } from "react-native-webview";
 import { router, useLocalSearchParams } from "expo-router";
 import * as Haptics from "expo-haptics";
 import { Asset } from "expo-asset";
-
-import stations from "@/cities/delhi/stationsdata.json";
 import {
   LINE_DISPLAY_NAMES,
   LINE_COLORS,
@@ -1172,16 +1169,3 @@ export default function RoutePlanScreen() {
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  bottomSheet: {
-    position: "absolute",
-    bottom: 0,
-    left: 0,
-    right: 0,
-    borderTopLeftRadius: 28,
-    borderTopRightRadius: 28,
-    padding: 24,
-    minHeight: "40%",
-  },
-});

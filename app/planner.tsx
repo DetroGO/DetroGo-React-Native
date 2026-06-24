@@ -1,4 +1,3 @@
-import { router } from "expo-router";
 import { useEffect } from "react";
 import * as Location from "expo-location";
 import * as Haptics from "expo-haptics";
@@ -22,8 +21,6 @@ import Animated, {
   useSharedValue,
   useAnimatedStyle,
   withSpring,
-  withTiming,
-  runOnJS,
 } from "react-native-reanimated";
 import strings from "@/constants/strings";
 
@@ -174,12 +171,12 @@ export default function ModalScreen() {
     }
   };
 
-  const showPlan = (item: string) => {
-    setFinalStation(item);
-    setFinalsel(true);
-    setSearchv("none");
-    setPlannerv("flex");
-  };
+  // const showPlan = (item: string) => {
+  //   setFinalStation(item);
+  //   setFinalsel(true);
+  //   setSearchv("none");
+  //   setPlannerv("flex");
+  // };
 
   const presetSections = useMemo(() => {
     const query = presetSearchPhrase.trim().toLowerCase();
@@ -603,9 +600,7 @@ export default function ModalScreen() {
                     borderBottomRightRadius: 6,
                   }}
                   mode="contained"
-                  onPress={() =>
-                    handlePresetStationSelect("home", homeStation)
-                  }
+                  onPress={() => handlePresetStationSelect("home", homeStation)}
                 >
                   <Card.Content
                     style={{
@@ -648,9 +643,7 @@ export default function ModalScreen() {
                     borderBottomRightRadius: 18,
                   }}
                   mode="contained"
-                  onPress={() =>
-                    handlePresetStationSelect("work", workStation)
-                  }
+                  onPress={() => handlePresetStationSelect("work", workStation)}
                 >
                   <Card.Content
                     style={{
@@ -852,16 +845,3 @@ export default function ModalScreen() {
     </Surface>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    padding: 20,
-  },
-  link: {
-    marginTop: 15,
-    paddingVertical: 15,
-  },
-});

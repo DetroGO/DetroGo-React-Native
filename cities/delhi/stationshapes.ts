@@ -1,3 +1,6 @@
+// stationshapes.ts is a collection of all the station shapes in the system basically the whole metro network in geojson form you can get this data either from openstreetmaps or ai models (which may give slop) or offical agency(this is preffered).
+// **THIS IS REQUIRED TO DISPLAY THE METRO STATIONS ON THE MAP**
+
 export const STATIONS: GeoJSON.FeatureCollection = {
   type: "FeatureCollection",
   features: [

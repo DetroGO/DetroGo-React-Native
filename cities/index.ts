@@ -1,11 +1,11 @@
 export interface CityConfig {
-  id: string;
-  name: string;
-  companies: string;
-  logo: string;
-  center: [number, number];
-  bounds?: [[number, number], [number, number]];
-  gtfsVersion?: string;
+  id: string; // city id example: "delhi","mumbai"
+  name: string; // city name example: "Delhi NCR", "Mumbai"
+  companies: string; // companies operating in the city
+  logo: string; // city logo URL
+  center: [number, number]; // city center coordinates [longitude, latitude]
+  bounds?: [[number, number], [number, number]]; // city bounds [southwest, northeast]
+  gtfsVersion?: string; // GTFS version for the city
   available: boolean; // false = shown but locked (coming soon)
 }
 

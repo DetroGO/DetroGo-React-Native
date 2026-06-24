@@ -10,7 +10,6 @@ import { useBookmarksStore } from "@/store/savedRoutes";
 import { RecentTrip, SavedRoute } from "@/types/route";
 import { useStrings } from "@/constants/strings";
 
-// ─── Spring hook ────────────────────────────────────────────────────────────
 function useSpringPress() {
   const scale = useRef(new Animated.Value(1)).current;
   const onPressIn = useCallback(() => {
@@ -32,9 +31,7 @@ function useSpringPress() {
   return { scale, onPressIn, onPressOut };
 }
 
-// ─── Mock data ───────────────────────────────────────────────────────────────
-
-// ─── RouteCard ───────────────────────────────────────────────────────────────
+// RouteCard
 function RouteCard({
   item,
   index,

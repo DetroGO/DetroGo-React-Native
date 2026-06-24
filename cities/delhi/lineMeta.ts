@@ -1,3 +1,8 @@
+// lineMeta.ts is a collection of line display names (ex: "Blue line main" -> "Blue Line (towards Dwarka)") and terminus points (start and end points of a line) for Delhi NCR.
+// LINE_DISPLAY_NAMES contains any unique line which we need to display for example blue line has 2 branches one from yamuna bank other form vaishali and they are labelled in the dataset as blue line main and blue line branch which is not helpful for display hence these simplified display names are used.
+// LINE_TERMINUS contains the start and end points of a line which are used to display the line on the map and stations list.
+// LINE_COLORS contains the color of all the lines in the system.
+
 export const LINE_DISPLAY_NAMES: Record<string, string> = {
   "Blue line main": "Blue Line (towards Dwarka)",
   "Blue line branch": "Blue Line (towards Vaishali)",

@@ -1,3 +1,6 @@
+// shapes.ts is a collection of all the line shapes in the system basically the whole metro network in geojson form you can get this data either from openstreetmaps or ai models (which may give slop) or offical agency(this is preffered).
+// **THIS IS REQUIRED TO DISPLAY THE METRO NETWORK ON THE MAP**
+
 export const LINES: GeoJSON.FeatureCollection = {
   type: "FeatureCollection",
   features: [

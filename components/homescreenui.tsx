@@ -1,5 +1,5 @@
-import React, { useEffect, useRef } from "react";
-import { Animated, Easing, StyleSheet, View, ScrollView } from "react-native";
+import React, { useRef } from "react";
+import { Animated, StyleSheet, View, ScrollView } from "react-native";
 import { useAppTheme } from "@/hooks/useAppTheme";
 import SearchBar from "@/components/ui/searchbar";
 // ─── Single shimmer bar ───────────────────────────────────────────────────────
