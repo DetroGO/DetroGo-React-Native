@@ -27,16 +27,16 @@ Open source, Material 3, and built to do exactly what a transit app should: help
 
 ## Features
 
-- [x] **Intelligent Pathfinding** — Custom routing engine using BFS algorithm
-- [x] **Interactive Map** — Minimal schematic map to understand your route at a glance
-- [x] **In-App System Map** — Built-in transit map for supported regions
-- [x] **Material 3 UI** — Follows Material 3 design guidelines throughout
-- [x] **Nearest Station** — Automatically finds your closest station
-- [x] **Dynamic Colors** — Full support for Android's Material You (Monet) theming
-- [x] **AMOLED Mode** — Pure black theme to save battery and navigate in the dark
-- [x] **Fully Offline** — Complete offline support for routing and GPS
-- [ ] **Route History** — Local storage for route history and user preferences 
-- [ ] **i18n Language Support** — Local and international language support *(planned)*
+- [x] **Routing Engine** - Custom routing engine using BFS algorithm
+- [x] **Schematic Map** - Minimal schematic map to understand your route at a glance
+- [x] **In-App System Map** - Built-in transit map for supported regions
+- [x] **Material 3 UI** - Follows Material 3 design guidelines throughout
+- [x] **Nearest Station** - Automatically finds your closest station
+- [x] **Dynamic Colors** - Full support for Android's Material You (Monet) theming
+- [x] **AMOLED Mode** - Pure black theme to save battery and navigate in the dark
+- [x] **Fully Offline** - Complete offline support for routing and GPS
+- [x] **Route History** - Local storage for route history and user preferences
+- [x] **i18n Language Support** - Local and international language support *(currently only supports english)* 
 
 ---
 
