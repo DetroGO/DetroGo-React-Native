@@ -1,1 +1,1 @@
-module.exports = (config) => config;
+module.exports = require('./plugin/build');
