@@ -6,7 +6,6 @@ import { useMemo, useEffect } from "react";
 import { useAppTheme } from "@/hooks/useAppTheme";
 import { Pressable, Image, RefreshControl, Animated } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
-
 import React from "react";
 import * as Haptics from "expo-haptics";
 import { useRef, useCallback } from "react";
@@ -1052,25 +1051,27 @@ export default function HomeScreen() {
                   alignItems: "center",
                 }}
               >
-                <Button
-                  style={{ width: 350, padding: 5 }}
-                  mode="outlined"
-                  onPress={() =>
-                    router.push({
-                      pathname: "/listpage",
-                      params: { type: "recent" },
-                    })
-                  }
-                >
-                  <Text
-                    style={{
-                      fontSize: 16,
-                      color: theme.colors.secondary,
-                    }}
+                {recentTrips.length > 3 ? (
+                  <Button
+                    style={{ width: "90%", padding: 5 }}
+                    mode="outlined"
+                    onPress={() =>
+                      router.push({
+                        pathname: "/listpage",
+                        params: { type: "recent" },
+                      })
+                    }
                   >
-                    {strings.common.viewall}
-                  </Text>
-                </Button>
+                    <Text
+                      style={{
+                        fontSize: 16,
+                        color: theme.colors.secondary,
+                      }}
+                    >
+                      {strings.common.viewall}
+                    </Text>
+                  </Button>
+                ) : null}
               </View>
             </View>
           )}
@@ -1149,7 +1150,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   footer: {
-    paddingBottom: 50,
+    paddingBottom: 0,
     marginTop: 40,
     alignItems: "center",
     gap: 20,

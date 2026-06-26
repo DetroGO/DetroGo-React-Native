@@ -472,10 +472,13 @@ export default function Settings() {
 
   const ABOUT_ROWS = [
     {
-      label: "Version",
-      subtitle: "ALPHA",
-      icon: "information-outline",
-      onPress: () => setVisibleAbout(true),
+      label: "Report Bug",
+      subtitle: "Github Issues",
+      icon: "bug",
+      onPress: () =>
+        Linking.openURL(
+          "https://github.com/DetroGO/DetroGo-React-Native/issues",
+        ),
     },
     {
       label: "Source Code",
@@ -812,7 +815,7 @@ export default function Settings() {
           <SectionLabel label={strings.settings.about} />
 
           {/* App banner card */}
-          <Pressable onPress={() => router.push({ pathname: "/onboarding" })}>
+          <Pressable onPress={() => setVisibleAbout(true)}>
             <View
               style={{
                 backgroundColor: theme.colors.elevation.level1,
@@ -897,7 +900,7 @@ export default function Settings() {
                 textAlign: "center",
               }}
             >
-              {strings.common.version}: Preview
+              v0.1.0-alpha
             </Text>
             <Text
               variant="bodySmall"
@@ -934,10 +937,25 @@ export default function Settings() {
           >
             <Button
               style={{ width: "100%" }}
+              mode="elevated"
+              onPress={() => Linking.openURL("https://discord.gg/kzhhKVMWA5")}
+            >
+              Join Discord
+            </Button>
+          </Dialog.Actions>
+          <Dialog.Actions
+            style={{
+              justifyContent: "center",
+              paddingBottom: 16,
+              paddingHorizontal: 24,
+            }}
+          >
+            <Button
+              style={{ width: "100%" }}
               mode="contained-tonal"
               onPress={() => setVisibleAbout(false)}
             >
-              {strings.common?.done ?? "Close"}
+              Close
             </Button>
           </Dialog.Actions>
         </Dialog>
