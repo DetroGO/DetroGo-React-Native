@@ -646,20 +646,6 @@ export default function RoutePlanScreen() {
     return (
       <Card
         mode="contained"
-        onPress={() => {
-          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-
-          setStationDialog({
-            item,
-            index,
-            isTransfer,
-            switchingToLine,
-            terminus:
-              isTransfer && lineLabel && lineLabel !== "Pink line loop"
-                ? terminus
-                : null,
-          });
-        }}
         style={{
           backgroundColor: isTransfer
             ? theme.dark
@@ -1058,114 +1044,6 @@ export default function RoutePlanScreen() {
           </View>
         )}
       </ScrollView>
-      <Portal>
-        <Dialog
-          visible={stationDialog !== null}
-          onDismiss={() => setStationDialog(null)}
-          style={{
-            backgroundColor: theme.dark
-              ? theme.colors.surfaceContainerHigh
-              : theme.colors.surfaceContainerLow,
-            borderRadius: 28,
-          }}
-        >
-          {stationDialog && (
-            <>
-              <Dialog.Icon
-                icon={stationDialog.isTransfer ? "transit-transfer" : "train"}
-                color={
-                  stationDialog.isTransfer
-                    ? theme.colors.tertiary
-                    : theme.colors.primary
-                }
-              />
-
-              <Dialog.Title
-                style={{
-                  textAlign: "center",
-                  color: theme.colors.onSurface,
-                }}
-              >
-                {stationDialog.item.station}
-              </Dialog.Title>
-
-              <Dialog.Content>
-                <View
-                  style={{
-                    alignItems: "center",
-                    gap: 8,
-                  }}
-                >
-                  <Text
-                    variant="labelLarge"
-                    style={{
-                      color: theme.colors.onSurfaceVariant,
-                      textAlign: "center",
-                    }}
-                  >
-                    Station {stationDialog.index + 1}
-                  </Text>
-
-                  <View
-                    style={{
-                      marginTop: 8,
-                      paddingHorizontal: 16,
-                      paddingVertical: 10,
-                      borderRadius: 999,
-                      backgroundColor: stationDialog.isTransfer
-                        ? theme.colors.tertiaryContainer
-                        : theme.colors.secondaryContainer,
-                    }}
-                  >
-                    <Text
-                      variant="labelMedium"
-                      style={{
-                        color: stationDialog.isTransfer
-                          ? theme.colors.onTertiaryContainer
-                          : theme.colors.onSecondaryContainer,
-                        textAlign: "center",
-                      }}
-                    >
-                      {stationDialog.isTransfer
-                        ? `Change to ${stationDialog.switchingToLine}`
-                        : stationDialog.item.line}
-                    </Text>
-                  </View>
-
-                  {stationDialog.terminus && (
-                    <Text
-                      variant="bodySmall"
-                      style={{
-                        color: theme.colors.onSurfaceVariant,
-                        textAlign: "center",
-                        marginTop: 6,
-                      }}
-                    >
-                      {stationDialog.terminus}
-                    </Text>
-                  )}
-                </View>
-              </Dialog.Content>
-
-              <Dialog.Actions
-                style={{
-                  justifyContent: "center",
-                  paddingHorizontal: 24,
-                  paddingBottom: 20,
-                }}
-              >
-                <Button
-                  mode="contained-tonal"
-                  style={{ width: "100%" }}
-                  onPress={() => setStationDialog(null)}
-                >
-                  {strings.common?.done ?? "Done"}
-                </Button>
-              </Dialog.Actions>
-            </>
-          )}
-        </Dialog>
-      </Portal>
     </SafeAreaView>
   );
 }

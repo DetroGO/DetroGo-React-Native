@@ -8,6 +8,7 @@ import {
   Platform,
   Linking,
 } from "react-native";
+import * as Location from "expo-location";
 
 import {
   Text,
@@ -15,7 +16,10 @@ import {
   Portal,
   Dialog,
   Button,
+  Switch,
+  ToggleButton,
   Searchbar,
+  IconButton,
 } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { ScrollView } from "react-native-gesture-handler";
@@ -182,10 +186,12 @@ function SettingsRow({
   row,
   position,
   onPress,
+  trailing,
 }: {
   row: { label: string; subtitle: string; icon: string };
   position: "first" | "middle" | "last";
   onPress: () => void;
+  trailing?: React.ReactNode;
 }) {
   const theme = useAppTheme();
   const spring = useSpringPress();
@@ -261,11 +267,13 @@ function SettingsRow({
               {row.subtitle}
             </Text>
           </View>
-          <Icon
-            source="chevron-right"
-            size={20}
-            color={theme.colors.onSurfaceVariant}
-          />
+          {trailing ?? (
+            <Icon
+              source="chevron-right"
+              size={20}
+              color={theme.colors.onSurfaceVariant}
+            />
+          )}
         </Animated.View>
       </Pressable>
     </Animated.View>
@@ -507,6 +515,8 @@ export default function Settings() {
     setLanguage,
     notificationsEnabled,
     setNotificationsEnabled,
+    locationEnabled,
+    setLocationEnabled,
     homeStation,
     setHomeStation,
     workStation,
@@ -517,7 +527,7 @@ export default function Settings() {
     LANGUAGE_OPTIONS.find((option) => option.value === language)?.label ??
     "English";
   const generalRows: {
-    id: "language" | "notifications";
+    id: "language" | "notifications" | "location";
     label: string;
     subtitle: string;
     icon: string;
@@ -535,6 +545,12 @@ export default function Settings() {
         ? strings.settings.on
         : strings.settings.off,
       icon: notificationsEnabled ? "bell-ring" : "bell-outline",
+    },
+    {
+      id: "location",
+      label: strings.settings.location,
+      subtitle: locationEnabled ? strings.settings.on : strings.settings.off,
+      icon: locationEnabled ? "crosshairs-gps" : "crosshairs",
     },
   ];
   const travelRows: {
@@ -572,6 +588,16 @@ export default function Settings() {
     setStationTarget(null);
     setStationSearch("");
   };
+  const openAppSettings = async () => {
+    try {
+      await Linking.openSettings();
+    } catch {
+      ToastAndroid.show(
+        "Open app settings and enable Location permission manually.",
+        ToastAndroid.LONG,
+      );
+    }
+  };
 
   const toggleNotifications = async () => {
     if (notificationsEnabled) {
@@ -584,6 +610,38 @@ export default function Settings() {
 
     if (!allowed && Platform.OS === "android") {
       ToastAndroid.show(strings.settings.permissionDenied, ToastAndroid.SHORT);
+    }
+  };
+  const toggleLocation = async () => {
+    if (locationEnabled) {
+      setLocationEnabled(false);
+      return;
+    }
+
+    const current = await Location.getForegroundPermissionsAsync();
+
+    if (current.granted) {
+      setLocationEnabled(true);
+      return;
+    }
+
+    const requested = await Location.requestForegroundPermissionsAsync();
+
+    if (requested.granted) {
+      setLocationEnabled(true);
+      return;
+    }
+
+    setLocationEnabled(false);
+
+    if (!requested.canAskAgain) {
+      ToastAndroid.show(
+        "Enable Location permission from app settings.",
+        ToastAndroid.LONG,
+      );
+      await openAppSettings();
+    } else {
+      ToastAndroid.show("Location permission denied", ToastAndroid.SHORT);
     }
   };
 
@@ -786,7 +844,21 @@ export default function Settings() {
               onPress={() => {
                 if (row.id === "language") setVisibleLanguage(true);
                 if (row.id === "notifications") toggleNotifications();
+                if (row.id === "location") toggleLocation();
               }}
+              trailing={
+                row.id === "notifications" ? (
+                  <Switch
+                    value={notificationsEnabled}
+                    onValueChange={toggleNotifications}
+                  />
+                ) : row.id === "location" ? (
+                  <Switch
+                    value={locationEnabled}
+                    onValueChange={toggleLocation}
+                  />
+                ) : undefined
+              }
             />
           ))}
         </View>
@@ -814,41 +886,6 @@ export default function Settings() {
         <View style={{ marginHorizontal: 15, marginTop: 24 }}>
           <SectionLabel label={strings.settings.about} />
 
-          {/* App banner card */}
-          <Pressable onPress={() => setVisibleAbout(true)}>
-            <View
-              style={{
-                backgroundColor: theme.colors.elevation.level1,
-                borderTopLeftRadius: 24,
-                borderTopRightRadius: 24,
-                borderBottomLeftRadius: 24,
-                borderBottomRightRadius: 24,
-                paddingVertical: 28,
-                alignItems: "center",
-                marginBottom: 10,
-              }}
-            >
-              <Image
-                source={require("../../assets/images/detrologo.png")}
-                style={{
-                  width: 140,
-                  height: 40,
-                  tintColor: theme.colors.secondary,
-                }}
-              />
-              <Text
-                style={{
-                  color: theme.colors.onSurfaceVariant,
-                  textAlign: "center",
-                  marginTop: 12,
-                }}
-                variant="bodySmall"
-              >
-                {strings.settings.aboutdesc}
-              </Text>
-            </View>
-          </Pressable>
-
           {ABOUT_ROWS.map((row, i) => (
             <SettingsRow
               key={row.label}
@@ -863,103 +900,107 @@ export default function Settings() {
               onPress={() => row.onPress()}
             />
           ))}
+          {/* App banner card */}
+          <View
+            style={{
+              backgroundColor: theme.colors.secondaryContainer,
+              borderRadius: 24,
+              paddingVertical: 28,
+              paddingHorizontal: 20,
+              alignItems: "center",
+              marginTop: 18,
+
+              gap: 16,
+            }}
+          >
+            <Pressable
+              onPress={() => setVisibleAbout(true)}
+              style={{ alignItems: "center" }}
+            >
+              <Image
+                source={require("../../assets/images/detrologo.png")}
+                style={{
+                  width: 140,
+                  height: 40,
+                  tintColor: theme.colors.onSecondaryContainer,
+                }}
+              />
+              <Text
+                style={{
+                  color: theme.colors.primary,
+                  textAlign: "center",
+                  marginTop: 8,
+                }}
+                variant="bodySmall"
+              >
+                v0.1.0-alpha
+              </Text>
+              <Text
+                style={{
+                  color: theme.colors.onSecondaryContainer,
+                  textAlign: "center",
+                  width: 300,
+                  marginTop: 12,
+                }}
+                variant="bodySmall"
+              >
+                This is an alpha build of DetroGo. Things may break and features
+                will change across future releases. If you encounter bugs or
+                have feature requests, reach out via Discord or drop an issue on
+                GitHub. Your feedback directly shapes what gets built next.
+              </Text>
+              <Text
+                variant="bodySmall"
+                style={{
+                  color: theme.colors.onSecondaryContainer,
+                  textAlign: "center",
+                  marginTop: 10,
+                }}
+              >
+                Thank you for testing DetroGo!
+              </Text>
+            </Pressable>
+
+            <View
+              style={{
+                flexDirection: "column",
+                gap: 8,
+                width: "100%",
+                marginTop: 6,
+              }}
+            >
+              {[
+                {
+                  icon: "web",
+                  label: "Website",
+                  url: "https://detrogo.vercel.app",
+                },
+                {
+                  icon: "forum",
+                  label: "Join Discord",
+                  url: "https://discord.gg/kzhhKVMWA5",
+                },
+              ].map((item) => (
+                <Button
+                  key={item.label}
+                  mode="elevated"
+                  icon={item.icon}
+                  onPress={() => Linking.openURL(item.url)}
+                  style={{ flex: 1 }}
+                  labelStyle={{ color: theme.colors.onSecondaryContainer }}
+                  compact
+                >
+                  {item.label}
+                </Button>
+              ))}
+            </View>
+          </View>
         </View>
 
         <View style={{ height: 40 }} />
       </ScrollView>
 
       {/* ── About dialog ── */}
-      <Portal>
-        <Dialog
-          style={{ backgroundColor: theme.colors.surface, borderRadius: 28 }}
-          visible={visibleAbout}
-          onDismiss={() => setVisibleAbout(false)}
-        >
-          <Dialog.Title
-            style={{
-              marginBottom: 4,
-              marginTop: 40,
-              textAlign: "center",
-              fontSize: 24,
-            }}
-          >
-            <Image
-              source={require("../../assets/images/detrologo.png")}
-              style={{
-                width: 140,
-                height: 40,
-                tintColor: theme.colors.secondary,
-              }}
-            />
-          </Dialog.Title>
-          <Dialog.Content>
-            <Text
-              variant="bodyMedium"
-              style={{
-                color: theme.colors.onSurfaceVariant,
-                textAlign: "center",
-              }}
-            >
-              v0.1.0-alpha
-            </Text>
-            <Text
-              variant="bodySmall"
-              style={{
-                color: theme.colors.outline,
-                textAlign: "center",
-                marginHorizontal: 20,
-                marginTop: 16,
-              }}
-            >
-              This is a preview build of DetroGo. It may contain bugs and
-              incomplete features. If you encounter any issues, please report
-              them it helps us get closer to the launch and and who doesnt love
-              squashing bugs
-            </Text>
-            <Text
-              variant="bodySmall"
-              style={{
-                color: theme.colors.outline,
-                textAlign: "center",
-                marginTop: 16,
-              }}
-            >
-              Thank you for testing DetroGo!
-            </Text>
-          </Dialog.Content>
-
-          <Dialog.Actions
-            style={{
-              justifyContent: "center",
-              paddingBottom: 16,
-              paddingHorizontal: 24,
-            }}
-          >
-            <Button
-              style={{ width: "100%" }}
-              mode="elevated"
-              onPress={() => Linking.openURL("https://discord.gg/kzhhKVMWA5")}
-            >
-              Join Discord
-            </Button>
-          </Dialog.Actions>
-          <Dialog.Actions
-            style={{
-              justifyContent: "center",
-              paddingBottom: 16,
-              paddingHorizontal: 24,
-            }}
-          >
-            <Button
-              style={{ width: "100%" }}
-              mode="contained-tonal"
-              onPress={() => setVisibleAbout(false)}
-            >
-              Close
-            </Button>
-          </Dialog.Actions>
-        </Dialog>
-      </Portal>
 
       {/* ── Language dialog ── */}
       <Portal>

@@ -12,6 +12,8 @@ type PrefStore = {
   setLanguage: (language: LanguageCode) => void;
   notificationsEnabled: boolean;
   setNotificationsEnabled: (enabled: boolean) => void;
+  locationEnabled: boolean;
+  setLocationEnabled: (enabled: boolean) => void;
   homeStation: string | null;
   setHomeStation: (station: string | null) => void;
   workStation: string | null;
@@ -30,12 +32,13 @@ export const usePrefStore = create<PrefStore>()(
       notificationsEnabled: false,
       setNotificationsEnabled: (enabled: boolean) =>
         set({ notificationsEnabled: enabled }),
+      locationEnabled: false,
+      setLocationEnabled: (enabled: boolean) =>
+        set({ locationEnabled: enabled }),
       homeStation: null,
-      setHomeStation: (station: string | null) =>
-        set({ homeStation: station }),
+      setHomeStation: (station: string | null) => set({ homeStation: station }),
       workStation: null,
-      setWorkStation: (station: string | null) =>
-        set({ workStation: station }),
+      setWorkStation: (station: string | null) => set({ workStation: station }),
     }),
     {
       name: "pref",

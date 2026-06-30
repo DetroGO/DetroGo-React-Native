@@ -39,6 +39,7 @@ import { router } from "expo-router";
 import { CITIES, CityConfig } from "@/cities/index";
 import { LINES } from "@/cities/delhi/shapes";
 import { STATIONS } from "@/cities/delhi/stationshapes";
+import { usePrefStore } from "@/store/usePrefStore";
 
 const RecentCard = ({
   index,
@@ -503,6 +504,7 @@ export default function HomeScreen() {
   const [tracking, setTracking] = useState<"default" | undefined>(undefined);
 
   const [popup, setPopup] = useState<string | null>(null);
+  const locationEnabled = usePrefStore((state) => state.locationEnabled);
 
   // Spring FAB
   const fabScale = useRef(new Animated.Value(1)).current;
@@ -529,14 +531,20 @@ export default function HomeScreen() {
     }).start();
 
   // Locate Me
-  const locateMe = () => {
+  const locateMe = async () => {
+    const { status } = await Location.getForegroundPermissionsAsync();
+    if (status !== "granted") {
+      // just fly to Delhi center, don't crash
+      cameraRef.current?.flyTo({
+        center: DELHI_CENTER,
+        zoom: 11,
+        duration: 1200,
+      });
+      return;
+    }
     setTracking("default");
     const target = lastKnownCoords.current ?? DELHI_CENTER;
-    cameraRef.current?.flyTo({
-      center: target,
-      zoom: 15,
-      duration: 1200,
-    });
+    cameraRef.current?.flyTo({ center: target, zoom: 15, duration: 1200 });
   };
 
   // Station popup
@@ -585,23 +593,20 @@ export default function HomeScreen() {
       >
         {/* User location */}
         <UserLocation
-          visible={true}
-          minDisplacement={20} // ← Only fires callback if user moved 20m (huge battery save)
+          visible={locationEnabled}
+          minDisplacement={20}
           onUpdate={(location) => {
             const coords: [number, number] = [
               location.coords.longitude,
               location.coords.latitude,
             ];
-
-            lastKnownCoords.current = coords; // ← Always cache latest position
-
+            lastKnownCoords.current = coords;
             if (!hasFocusedUser.current && cameraRef.current) {
               hasFocusedUser.current = true;
               cameraRef.current.flyTo({
                 center: coords,
                 zoom: 15,
                 duration: 1800,
-                easing: "fly",
               });
             }
           }}
@@ -1165,8 +1170,8 @@ const styles = StyleSheet.create({
   },
   fab: {
     position: "absolute",
-    bottom: "30%",
-    right: 16,
+    bottom: "31.5%",
+    right: 12,
   },
   fabInner: {
     width: 52,

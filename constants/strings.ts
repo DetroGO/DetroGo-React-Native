@@ -52,6 +52,7 @@ const en = {
   },
   settings: {
     settings: "Settings",
+    location: "Location",
     theme: "Theme",
     aboutdesc: "Transit utility app for Indian Transit",
     colorScheme: "Color Scheme",
