@@ -10,7 +10,7 @@ import {
 } from "react-native";
 
 import { useOnboardingStore } from "@/store/onboarding";
-import strings from "@/constants/strings";
+import { strings } from "@/constants/strings";
 import { Text, Card, Icon } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";

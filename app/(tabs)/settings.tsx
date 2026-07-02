@@ -256,7 +256,7 @@ function SettingsRow({
           <View style={{ flex: 1 }}>
             <Text
               variant="bodyMedium"
-              style={{ color: theme.colors.onSurface }}
+              style={{ color: theme.colors.onSurface, marginBottom: 2 }}
             >
               {row.label}
             </Text>
@@ -480,8 +480,8 @@ export default function Settings() {
 
   const ABOUT_ROWS = [
     {
-      label: "Report Bug",
-      subtitle: "Github Issues",
+      label: strings.settings.reportBug,
+      subtitle: strings.settings.githubIssues,
       icon: "bug",
       onPress: () =>
         Linking.openURL(
@@ -489,15 +489,15 @@ export default function Settings() {
         ),
     },
     {
-      label: "Source Code",
-      subtitle: "Github",
+      label: strings.settings.sourceCode,
+      subtitle: strings.settings.github,
       icon: "code-tags",
       onPress: () =>
         Linking.openURL("https://github.com/DetroGO/DetroGo-React-Native"),
     },
     {
-      label: "License",
-      subtitle: "GNU GPL v3.0",
+      label: strings.settings.license,
+      subtitle: strings.settings.licenseDesc,
       icon: "file-document-outline",
       onPress: () =>
         Linking.openURL(
@@ -541,15 +541,13 @@ export default function Settings() {
     {
       id: "notifications",
       label: strings.settings.notifications + " (Beta)",
-      subtitle: notificationsEnabled
-        ? strings.settings.on
-        : strings.settings.off,
+      subtitle: "Used for Live Updates/Notifications",
       icon: notificationsEnabled ? "bell-ring" : "bell-outline",
     },
     {
       id: "location",
-      label: strings.settings.location,
-      subtitle: locationEnabled ? strings.settings.on : strings.settings.off,
+      label: strings.settings.location + " (GPS)",
+      subtitle: "Used for GPS on Map and Live Updates",
       icon: locationEnabled ? "crosshairs-gps" : "crosshairs",
     },
   ];

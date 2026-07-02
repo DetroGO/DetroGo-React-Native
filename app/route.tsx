@@ -31,7 +31,7 @@ import {
   LINE_TERMINUS,
 } from "@/cities/delhi/lineMeta";
 import { RouteData } from "@/types/route";
-import strings from "@/constants/strings";
+import { strings } from "@/constants/strings";
 
 // Hooks & Stores
 import { useAppTheme } from "@/hooks/useAppTheme";
@@ -641,7 +641,7 @@ export default function RoutePlanScreen() {
     const lineLabel =
       LINE_DISPLAY_NAMES[switchingToLine as keyof typeof LINE_DISPLAY_NAMES] ??
       `${switchingToLine}`;
-    const terminus = `Towards (${getDirectionalTerminus(switchingToLine, data.route)})`;
+    const terminus = `${strings.route.towards.replace("{towards}", getDirectionalTerminus(switchingToLine, data.route))}`;
 
     return (
       <Card
@@ -709,7 +709,12 @@ export default function RoutePlanScreen() {
               variant="labelSmall"
               style={{ color: theme.colors.onSurfaceVariant, marginTop: 1 }}
             >
-              {isTransfer ? "Change to " + switchingToLine : item.line}
+              {isTransfer
+                ? strings.route.changeTo.replace(
+                    "{switchingToLine}",
+                    switchingToLine,
+                  )
+                : item.line}
             </Text>
             <Text
               variant="labelSmall"
@@ -796,7 +801,7 @@ export default function RoutePlanScreen() {
 
         {isTransferahead && TransferStation && !isTransferStation ? (
           <NotificationCard
-            title="Transfer Ahead"
+            title={strings.route.transferAhead}
             icon="directions-fork"
             desc={TransferStation.station}
             descbold={true}
@@ -807,7 +812,7 @@ export default function RoutePlanScreen() {
           />
         ) : isTransferStation && TransferStation ? (
           <NotificationCard
-            title="Transfer Here"
+            title={strings.route.transferHere}
             icon="transit-transfer"
             desc={TransferStation.station}
             descbold={true}
@@ -824,8 +829,8 @@ export default function RoutePlanScreen() {
           <NotificationCard
             title={
               isDestination
-                ? "Destination Reached"
-                : `${stopsLeft} stops remaining`
+                ? strings.route.destinationReached
+                : `${stopsLeft} ${strings.route.stopsRemaining}`
             }
             desc={toStation}
             icon={isDestination ? "flag-checkered" : "map-marker-radius"}
@@ -1030,7 +1035,7 @@ export default function RoutePlanScreen() {
                 style={{ marginBottom: 18, marginLeft: 8 }}
                 variant="labelMedium"
               >
-                Stations List
+                {strings.route.stationsList}
               </Text>
               {routeData.route.map((step: any, index: number) => (
                 <StationCard

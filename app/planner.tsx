@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import React, { useEffect } from "react";
 import * as Location from "expo-location";
 import * as Haptics from "expo-haptics";
 import { ToastAndroid } from "react-native";
@@ -22,7 +22,7 @@ import Animated, {
   useAnimatedStyle,
   withSpring,
 } from "react-native-reanimated";
-import strings from "@/constants/strings";
+import { strings } from "@/constants/strings";
 
 import {
   StyleSheet,
@@ -92,6 +92,70 @@ const findNearestMetroStation = (
   return { nearestStation, minDistance };
 };
 
+// ---- Memoized row for SectionList ----
+// Defined OUTSIDE the screen component so its identity never changes.
+// React.memo means this only re-renders if its own props actually change —
+// not just because the parent (ModalScreen) re-rendered on every keystroke.
+const StationRow = React.memo(function StationRow({
+  item,
+  isFirst,
+  isLast,
+  theme,
+  onPress,
+}: {
+  item: string;
+  isFirst: boolean;
+  isLast: boolean;
+  theme: ReturnType<typeof useAppTheme>;
+  onPress: (item: string) => void;
+}) {
+  return (
+    <Card
+      mode="contained"
+      style={{
+        marginBottom: 3,
+        padding: 10,
+        backgroundColor: theme.colors.surfaceContainerHigh,
+        borderTopLeftRadius: isFirst ? 28 : 6,
+        borderTopRightRadius: isFirst ? 28 : 6,
+        borderBottomLeftRadius: isLast ? 28 : 6,
+        borderBottomRightRadius: isLast ? 28 : 6,
+      }}
+      onPress={() => onPress(item)}
+    >
+      <Card.Content
+        style={{
+          flexDirection: "row",
+          alignItems: "center",
+          gap: 14,
+          paddingHorizontal: 14,
+          paddingVertical: 12,
+        }}
+      >
+        <View style={{ flex: 1 }}>
+          <Text variant="bodyMedium" style={{ color: theme.colors.onSurface }}>
+            {item}
+          </Text>
+        </View>
+      </Card.Content>
+    </Card>
+  );
+});
+
+const SectionHeader = React.memo(function SectionHeader({
+  title,
+}: {
+  title: string;
+}) {
+  return (
+    <View style={{ marginBottom: 5 }}>
+      <Text style={{ margin: 10 }} variant="titleMedium">
+        {title}
+      </Text>
+    </View>
+  );
+});
+
 export default function ModalScreen() {
   const theme = useAppTheme();
   const { homeStation, setHomeStation, workStation, setWorkStation } =
@@ -151,32 +215,31 @@ export default function ModalScreen() {
     }
   };
 
-  const handleStationSelect = (item: string) => {
-    if (editingMode === "start") {
-      Haptics.selectionAsync();
-      setStartStation(item);
-      setStartsel(true);
-      setEditingMode(null);
-      setSearchv("none");
-      setPlannerv("flex");
-    } else if (editingMode === "final") {
-      Haptics.selectionAsync();
-      setFinalStation(item);
-      setFinalsel(true);
-      setEditingMode(null);
-      setSearchv("none");
-      setPlannerv("flex");
-    } else {
-      ToastAndroid.show("First pick a endpoint to change", ToastAndroid.SHORT);
-    }
-  };
-
-  // const showPlan = (item: string) => {
-  //   setFinalStation(item);
-  //   setFinalsel(true);
-  //   setSearchv("none");
-  //   setPlannerv("flex");
-  // };
+  const handleStationSelect = useCallback(
+    (item: string) => {
+      if (editingMode === "start") {
+        Haptics.selectionAsync();
+        setStartStation(item);
+        setStartsel(true);
+        setEditingMode(null);
+        setSearchv("none");
+        setPlannerv("flex");
+      } else if (editingMode === "final") {
+        Haptics.selectionAsync();
+        setFinalStation(item);
+        setFinalsel(true);
+        setEditingMode(null);
+        setSearchv("none");
+        setPlannerv("flex");
+      } else {
+        ToastAndroid.show(
+          "First pick a endpoint to change",
+          ToastAndroid.SHORT,
+        );
+      }
+    },
+    [editingMode],
+  );
 
   const presetSections = useMemo(() => {
     const query = presetSearchPhrase.trim().toLowerCase();
@@ -341,6 +404,244 @@ export default function ModalScreen() {
     }
   }, [startsel]);
 
+  // ---- Stabilized list callbacks ----
+  // useCallback keeps these function references stable across re-renders
+  // (e.g. every keystroke in the search bar), so SectionList/VirtualizedList
+  // doesn't treat every render as "everything changed."
+  const renderItem = useCallback(
+    ({
+      item,
+      index,
+      section,
+    }: {
+      item: string;
+      index: number;
+      section: { data: string[] };
+    }) => (
+      <StationRow
+        item={item}
+        isFirst={index === 0}
+        isLast={index === section.data.length - 1}
+        theme={theme}
+        onPress={handleStationSelect}
+      />
+    ),
+    [theme, handleStationSelect],
+  );
+
+  const renderSectionHeader = useCallback(
+    ({ section }: { section: { title: string } }) => (
+      <SectionHeader title={section.title} />
+    ),
+    [],
+  );
+
+  const keyExtractor = useCallback(
+    (item: string, idx: number) => item + idx,
+    [],
+  );
+
+  // ---- Memoized list header ----
+  // This block only needs to change when these specific things change —
+  // not on every keystroke, which was happening before since it lived
+  // inline in the SectionList JSX and got rebuilt on every render.
+  const listHeader = useMemo(
+    () => (
+      <View>
+        <View>
+          {editingMode === "start" && nearest && (
+            <Card
+              style={{
+                backgroundColor: theme.dark
+                  ? theme.colors.primaryContainer
+                  : theme.colors.primaryContainer,
+                flex: 1,
+                marginTop: 12,
+                paddingLeft: 5,
+                borderRadius: 18,
+              }}
+              mode="contained"
+              onPress={() => {
+                if (!isLoading && nearest.nearestStation) {
+                  handleStationSelect(nearest.nearestStation.stop_name);
+                }
+              }}
+            >
+              <Card.Content
+                style={{
+                  flexDirection: "row",
+                  gap: 15,
+                  alignItems: "center",
+                }}
+              >
+                {isLoading ? (
+                  <ActivityIndicator
+                    color={theme.colors.onPrimaryContainer}
+                    size={26}
+                  />
+                ) : (
+                  <Icon
+                    color={
+                      theme.dark
+                        ? theme.colors.onPrimaryContainer
+                        : theme.colors.primary
+                    }
+                    source="crosshairs-gps"
+                    size={26}
+                  />
+                )}
+
+                <View style={{ flex: 1 }}>
+                  <Text
+                    variant="labelSmall"
+                    style={{
+                      color: theme.dark
+                        ? theme.colors.onPrimaryContainer
+                        : theme.colors.primary,
+                    }}
+                  >
+                    {isLoading
+                      ? strings.common.loading
+                      : strings.planner.nearestStation}
+                  </Text>
+
+                  {isLoading ? (
+                    <ProgressBar
+                      indeterminate
+                      color={theme.colors.onPrimaryContainer}
+                      style={{
+                        marginTop: 6,
+                        borderRadius: 4,
+                        backgroundColor: theme.colors.tertiary,
+                        opacity: 0.4,
+                      }}
+                    />
+                  ) : (
+                    <Text
+                      variant="titleMedium"
+                      style={{
+                        color: theme.dark
+                          ? theme.colors.onPrimaryContainer
+                          : theme.colors.primary,
+                      }}
+                    >
+                      {nearest.nearestStation?.stop_name ??
+                        strings.planner.noResults}
+                    </Text>
+                  )}
+                </View>
+              </Card.Content>
+            </Card>
+          )}
+        </View>
+
+        <View
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            gap: 4,
+            marginBottom: 10,
+            marginTop: 10,
+          }}
+        >
+          <Card
+            style={{
+              backgroundColor: theme.dark
+                ? theme.colors.primaryContainer
+                : theme.colors.secondaryContainer,
+              flex: 1,
+              alignItems: "center",
+              borderTopLeftRadius: 18,
+              borderTopRightRadius: 6,
+              borderBottomLeftRadius: 18,
+              borderBottomRightRadius: 6,
+            }}
+            mode="contained"
+            onPress={() => handlePresetStationSelect("home", homeStation)}
+          >
+            <Card.Content
+              style={{
+                flexDirection: "row",
+                gap: 10,
+              }}
+            >
+              <Icon
+                color={
+                  theme.dark
+                    ? theme.colors.onPrimaryContainer
+                    : theme.colors.primary
+                }
+                source="home"
+                size={24}
+              />
+              <Text
+                style={{
+                  color: theme.dark
+                    ? theme.colors.onPrimaryContainer
+                    : theme.colors.primary,
+                }}
+                variant="titleMedium"
+              >
+                {strings.common.home}
+              </Text>
+            </Card.Content>
+          </Card>
+          <Card
+            style={{
+              backgroundColor: theme.dark
+                ? theme.colors.primaryContainer
+                : theme.colors.secondaryContainer,
+              flex: 1,
+              alignItems: "center",
+              borderTopLeftRadius: 6,
+              borderTopRightRadius: 18,
+              borderBottomLeftRadius: 6,
+              borderBottomRightRadius: 18,
+            }}
+            mode="contained"
+            onPress={() => handlePresetStationSelect("work", workStation)}
+          >
+            <Card.Content
+              style={{
+                flexDirection: "row",
+                gap: 10,
+              }}
+            >
+              <Icon
+                color={
+                  theme.dark
+                    ? theme.colors.onPrimaryContainer
+                    : theme.colors.primary
+                }
+                source="briefcase-variant"
+                size={24}
+              />
+              <Text
+                style={{
+                  color: theme.dark
+                    ? theme.colors.onPrimaryContainer
+                    : theme.colors.primary,
+                }}
+                variant="titleMedium"
+              >
+                {strings.common.work}
+              </Text>
+            </Card.Content>
+          </Card>
+        </View>
+      </View>
+    ),
+    [
+      editingMode,
+      nearest,
+      isLoading,
+      homeStation,
+      workStation,
+      theme,
+      handleStationSelect,
+    ],
+  );
+
   return (
     <Surface
       style={{
@@ -486,244 +787,16 @@ export default function ModalScreen() {
       <View style={{ flex: 1, padding: 10 }}>
         <SectionList
           showsVerticalScrollIndicator={false}
-          // Use filteredSections for rendering
           sections={filteredSections}
-          keyExtractor={(item, idx) => item + idx}
-          ListHeaderComponent={
-            <View>
-              <View>
-                {editingMode === "start" && nearest && (
-                  <Card
-                    style={{
-                      backgroundColor: theme.dark
-                        ? theme.colors.primaryContainer
-                        : theme.colors.primaryContainer,
-                      flex: 1,
-                      marginTop: 12,
-                      paddingLeft: 5,
-                      borderRadius: 18,
-                    }}
-                    mode="contained"
-                    onPress={() => {
-                      if (!isLoading && nearest.nearestStation) {
-                        handleStationSelect(nearest.nearestStation.stop_name);
-                      }
-                    }}
-                  >
-                    <Card.Content
-                      style={{
-                        flexDirection: "row",
-                        gap: 15,
-                        alignItems: "center",
-                      }}
-                    >
-                      {isLoading ? (
-                        <ActivityIndicator
-                          color={theme.colors.onPrimaryContainer}
-                          size={26}
-                        />
-                      ) : (
-                        <Icon
-                          color={
-                            theme.dark
-                              ? theme.colors.onPrimaryContainer
-                              : theme.colors.primary
-                          }
-                          source="crosshairs-gps"
-                          size={26}
-                        />
-                      )}
-
-                      <View style={{ flex: 1 }}>
-                        <Text
-                          variant="labelSmall"
-                          style={{
-                            color: theme.dark
-                              ? theme.colors.onPrimaryContainer
-                              : theme.colors.primary,
-                          }}
-                        >
-                          {isLoading
-                            ? strings.common.loading
-                            : strings.planner.nearestStation}
-                        </Text>
-
-                        {isLoading ? (
-                          <ProgressBar
-                            indeterminate
-                            color={theme.colors.onPrimaryContainer}
-                            style={{
-                              marginTop: 6,
-                              borderRadius: 4,
-                              backgroundColor: theme.colors.tertiary,
-                              opacity: 0.4,
-                            }}
-                          />
-                        ) : (
-                          <Text
-                            variant="titleMedium"
-                            style={{
-                              color: theme.dark
-                                ? theme.colors.onPrimaryContainer
-                                : theme.colors.primary,
-                            }}
-                          >
-                            {nearest.nearestStation?.stop_name ??
-                              strings.planner.noResults}
-                          </Text>
-                        )}
-                      </View>
-                    </Card.Content>
-                  </Card>
-                )}
-              </View>
-
-              <View
-                style={{
-                  flexDirection: "row",
-                  alignItems: "center",
-                  gap: 4,
-                  marginBottom: 10,
-                  marginTop: 10,
-                }}
-              >
-                <Card
-                  style={{
-                    backgroundColor: theme.dark
-                      ? theme.colors.primaryContainer
-                      : theme.colors.secondaryContainer,
-                    flex: 1,
-                    alignItems: "center",
-                    borderTopLeftRadius: 18,
-                    borderTopRightRadius: 6,
-                    borderBottomLeftRadius: 18,
-                    borderBottomRightRadius: 6,
-                  }}
-                  mode="contained"
-                  onPress={() => handlePresetStationSelect("home", homeStation)}
-                >
-                  <Card.Content
-                    style={{
-                      flexDirection: "row",
-
-                      gap: 10,
-                    }}
-                  >
-                    <Icon
-                      color={
-                        theme.dark
-                          ? theme.colors.onPrimaryContainer
-                          : theme.colors.primary
-                      }
-                      source="home"
-                      size={24}
-                    />
-                    <Text
-                      style={{
-                        color: theme.dark
-                          ? theme.colors.onPrimaryContainer
-                          : theme.colors.primary,
-                      }}
-                      variant="titleMedium"
-                    >
-                      {strings.common.home}
-                    </Text>
-                  </Card.Content>
-                </Card>
-                <Card
-                  style={{
-                    backgroundColor: theme.dark
-                      ? theme.colors.primaryContainer
-                      : theme.colors.secondaryContainer,
-                    flex: 1,
-                    alignItems: "center",
-                    borderTopLeftRadius: 6,
-                    borderTopRightRadius: 18,
-                    borderBottomLeftRadius: 6,
-                    borderBottomRightRadius: 18,
-                  }}
-                  mode="contained"
-                  onPress={() => handlePresetStationSelect("work", workStation)}
-                >
-                  <Card.Content
-                    style={{
-                      flexDirection: "row",
-
-                      gap: 10,
-                    }}
-                  >
-                    <Icon
-                      color={
-                        theme.dark
-                          ? theme.colors.onPrimaryContainer
-                          : theme.colors.primary
-                      }
-                      source="briefcase-variant"
-                      size={24}
-                    />
-                    <Text
-                      style={{
-                        color: theme.dark
-                          ? theme.colors.onPrimaryContainer
-                          : theme.colors.primary,
-                      }}
-                      variant="titleMedium"
-                    >
-                      {strings.common.work}
-                    </Text>
-                  </Card.Content>
-                </Card>
-              </View>
-            </View>
-          }
-          renderSectionHeader={({ section }) => (
-            <View
-              style={{
-                marginBottom: 5,
-              }}
-            >
-              <Text style={{ margin: 10 }} variant="titleMedium">
-                {section.title}
-              </Text>
-            </View>
-          )}
-          renderItem={({ item, index, section }) => (
-            <Card
-              mode="contained"
-              style={{
-                marginBottom: 3,
-                padding: 10,
-                backgroundColor: theme.colors.surfaceContainerHigh,
-                borderTopLeftRadius: index === 0 ? 28 : 6,
-                borderTopRightRadius: index === 0 ? 28 : 6,
-                borderBottomLeftRadius:
-                  index === section.data.length - 1 ? 28 : 6,
-                borderBottomRightRadius:
-                  index === section.data.length - 1 ? 28 : 6,
-              }}
-              onPress={() => handleStationSelect(item)}
-            >
-              <Card.Content
-                style={{
-                  flexDirection: "row",
-                  alignItems: "center",
-                  gap: 14,
-                  paddingHorizontal: 14,
-                  paddingVertical: 12,
-                }}
-              >
-                <View style={{ flex: 1 }}>
-                  <Text
-                    variant="bodyMedium"
-                    style={{ color: theme.colors.onSurface }}
-                  >
-                    {item}
-                  </Text>
-                </View>
-              </Card.Content>
-            </Card>
-          )}
+          keyExtractor={keyExtractor}
+          ListHeaderComponent={listHeader}
+          renderSectionHeader={renderSectionHeader}
+          renderItem={renderItem}
           initialNumToRender={10}
+          removeClippedSubviews={true}
+          maxToRenderPerBatch={12}
+          windowSize={10}
+          updateCellsBatchingPeriod={50}
         />
       </View>
       <Portal>

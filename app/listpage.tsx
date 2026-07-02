@@ -8,7 +8,7 @@ import { useLocalSearchParams, router } from "expo-router";
 import { useRecentTripsStore } from "@/store/recentTrips";
 import { useBookmarksStore } from "@/store/savedRoutes";
 import { RecentTrip, SavedRoute } from "@/types/route";
-import { useStrings } from "@/constants/strings";
+import { strings } from "@/constants/strings";
 import * as Haptics from "expo-haptics";
 import { useFocusEffect } from "@react-navigation/native";
 
@@ -110,9 +110,7 @@ function RouteCard({
               }}
             >
               <Icon
-                source={
-                  selectMode ? (selected ? "check" : "minus") : "source-commit"
-                }
+                source={selectMode ? (selected ? "check" : "minus") : "drag"}
                 size={28}
                 color={
                   selected
@@ -157,7 +155,7 @@ function RouteCard({
                     variant="labelSmall"
                     style={{ color: theme.colors.onSurfaceVariant }}
                   >
-                    {item.stops} stops
+                    {item.stops} {strings.common.stops}
                   </Text>
                 </View>
                 <View
@@ -172,7 +170,8 @@ function RouteCard({
                     variant="labelSmall"
                     style={{ color: theme.colors.onSurfaceVariant }}
                   >
-                    {item.transfers} transfer{item.transfers !== 1 ? "s" : ""}
+                    {item.transfers} {strings.common.transfers}
+                    {item.transfers !== 1 ? "s" : ""}
                   </Text>
                 </View>
               </View>
@@ -195,12 +194,11 @@ function RouteCard({
 
 export default function ListPage() {
   const theme = useAppTheme();
-  const strings = useStrings();
   const { type } = useLocalSearchParams<{ type: string }>();
   const isSaved = type === "saved";
 
   const recentTrips = useRecentTripsStore((state) => state.recentTrips);
-  const removeRecentTrip = useRecentTripsStore((state) => state.removeTrip);
+  const removeRecentTrip = useRecentTripsStore((state) => state.clearTrips);
   const bookmarks = useBookmarksStore((state) => state.bookmarks);
   const removeBookmark = useBookmarksStore((state) => state.removeBookmark);
 
@@ -301,7 +299,7 @@ export default function ListPage() {
                 variant="titleLarge"
                 style={{ color: theme.colors.onSurface }}
               >
-                {selectedIds.size} selected
+                {selectedIds.size} {strings.common.selected}
               </Text>
             </View>
             <Button
@@ -365,7 +363,8 @@ export default function ListPage() {
               marginTop: 4,
             }}
           >
-            {data.length} {isSaved ? "saved route" : "recent trip"}
+            {data.length}{" "}
+            {isSaved ? strings.listpage.savedRoutes : strings.home.recentTrips}
             {data.length !== 1 ? "s" : ""}
           </Text>
         )}
@@ -451,14 +450,16 @@ export default function ListPage() {
               color={theme.colors.onErrorContainer}
             />
             <Text
-              variant="titleSmall"
               style={{
                 color: theme.colors.onErrorContainer,
+                fontSize: 16,
                 fontWeight: "600",
               }}
             >
-              Delete {selectedIds.size}{" "}
-              {selectedIds.size === 1 ? "item" : "items"}
+              {strings.common.delete} {selectedIds.size}{" "}
+              {selectedIds.size === 1
+                ? strings.common.item
+                : strings.common.items}
             </Text>
           </Pressable>
         </View>

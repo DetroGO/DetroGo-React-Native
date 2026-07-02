@@ -14,7 +14,7 @@ import { RecentTrip, SavedRoute } from "@/types/route";
 import { useState } from "react";
 import { useRecentTripsStore } from "@/store/recentTrips";
 import { useBookmarksStore } from "@/store/savedRoutes";
-import strings from "@/constants/strings";
+import { strings } from "@/constants/strings";
 import {
   Button,
   Text,
@@ -169,7 +169,7 @@ const BookmarkCard = ({ item }: { item: SavedRoute }) => {
                 variant="labelMedium"
                 style={{ color: theme.colors.onSurfaceVariant }}
               >
-                {item.stops} stops
+                {item.stops} {strings.common.stops}
               </Text>
             </View>
             <View
@@ -184,7 +184,7 @@ const BookmarkCard = ({ item }: { item: SavedRoute }) => {
                 variant="labelMedium"
                 style={{ color: theme.colors.onSurfaceVariant }}
               >
-                {item.transfers} transfer
+                {item.transfers} {strings.common.transfers}
               </Text>
             </View>
           </View>
@@ -440,7 +440,7 @@ function EmptyRoutesState({
               textAlign: "center",
             }}
           >
-            {hasSeenTutorial ? "Get Started" : strings.home.try}
+            {hasSeenTutorial ? strings.home.getStarted : strings.home.try}
           </Text>
         </View>
         <Text
@@ -453,7 +453,7 @@ function EmptyRoutesState({
           }}
         >
           {hasSeenTutorial
-            ? "Get Started by Planning a Trip by clicking the button below"
+            ? strings.home.getStartedDesc
             : strings.home.startbysearch}
         </Text>
       </View>
@@ -461,14 +461,14 @@ function EmptyRoutesState({
       {/* BOTTOM ACTION SECTION */}
       <View style={styles.footer}>
         <ActionButton
-          label="Take Tour"
+          label={strings.home.takeTour}
           color={theme.colors.primaryContainer}
           hidden={hasSeenTutorial}
           size="large"
           onPress={onTakeTour}
         />
         <ActionButton
-          label="Open Planner"
+          label={strings.home.openPlanner}
           color={hasSeenTutorial ? theme.colors.surfaceBright : "transparent"}
           size={hasSeenTutorial ? "large" : "small"}
           onPress={onPlanTrip}
@@ -482,6 +482,7 @@ const DELHI_CENTER: [number, number] = [77.2195, 28.6329];
 
 export default function HomeScreen() {
   const theme = useAppTheme();
+  const language = usePrefStore((state) => state.language);
   const bottomSheetRef = useRef<BottomSheet>(null);
   const lastKnownCoords = useRef<[number, number] | null>(null);
   const snapPoints = useMemo(() => [240, 420], []);
