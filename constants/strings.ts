@@ -48,6 +48,7 @@ const en = {
     startStation: "Select Starting Station",
     finalStation: "Select Destination Station",
     easteregg: "Drink Some Water Fam You've Reached The End",
+    locationDisabled: "Location Access is Disabled",
   },
   route: {
     noRouteFound: "No Route Found",
@@ -102,6 +103,7 @@ const en = {
     systemDefault: "System Default",
     confirm: "Confirm",
     colorsAmoled: "Managed by Amoled Mode",
+    searching: "Searching…",
     dynamicColors: "Dynamic Colors",
     loading: "Loading…",
     done: "Done",
@@ -211,6 +213,7 @@ const hi: Strings = {
     startStation: "प्रारंभिक स्टेशन चुनें",
     finalStation: "गंतव्य स्टेशन चुनें",
     easteregg: "थोड़ा पानी पी लो मित्र, तुम आखिर तक पहुँच गए हो।",
+    locationDisabled: "स्थान पहुँच की अनुमति नहीं है",
   },
   route: {
     noRouteFound: "कोई रूट नहीं मिला",
@@ -263,6 +266,7 @@ const hi: Strings = {
     selected: "चुना हुआ",
     back: "पीछे",
     cancel: "रद्द करें",
+    searching: "खोज रहा है…",
     systemDefault: "सिस्टम डिफॉल्ट",
     confirm: "पुष्टि करें",
     colorsAmoled: "एमोलेड मोड द्वारा प्रबंधित",

@@ -160,6 +160,8 @@ export default function ModalScreen() {
   const theme = useAppTheme();
   const { homeStation, setHomeStation, workStation, setWorkStation } =
     usePrefStore();
+  const locationEnabled = usePrefStore((state) => state.locationEnabled);
+
   const scale = useSharedValue(1);
   const scale2 = useSharedValue(1);
   const animStyle = useAnimatedStyle(() => ({
@@ -449,12 +451,55 @@ export default function ModalScreen() {
     () => (
       <View>
         <View>
-          {editingMode === "start" && nearest && (
+          {!locationEnabled ? (
             <Card
               style={{
-                backgroundColor: theme.dark
-                  ? theme.colors.primaryContainer
-                  : theme.colors.primaryContainer,
+                backgroundColor: theme.colors.errorContainer,
+                flex: 1,
+                marginTop: 12,
+                paddingLeft: 5,
+                borderRadius: 18,
+              }}
+              mode="contained"
+              onPress={() => router.push("/settings" as any)}
+            >
+              <Card.Content
+                style={{
+                  flexDirection: "row",
+                  gap: 15,
+                  alignItems: "center",
+                }}
+              >
+                <Icon
+                  color={theme.colors.onErrorContainer}
+                  source="crosshairs-off"
+                  size={26}
+                />
+                <View style={{ flex: 1 }}>
+                  <Text
+                    variant="labelSmall"
+                    style={{ color: theme.colors.onErrorContainer }}
+                  >
+                    {strings.planner.nearestStation}
+                  </Text>
+                  <Text
+                    variant="titleMedium"
+                    style={{ color: theme.colors.onErrorContainer }}
+                  >
+                    {strings.common.locationPermissionDenied}
+                  </Text>
+                </View>
+                <Icon
+                  color={theme.colors.onErrorContainer}
+                  source="chevron-right"
+                  size={20}
+                />
+              </Card.Content>
+            </Card>
+          ) : editingMode === "start" ? (
+            <Card
+              style={{
+                backgroundColor: theme.colors.primaryContainer,
                 flex: 1,
                 marginTop: 12,
                 paddingLeft: 5,
@@ -462,7 +507,7 @@ export default function ModalScreen() {
               }}
               mode="contained"
               onPress={() => {
-                if (!isLoading && nearest.nearestStation) {
+                if (!isLoading && nearest?.nearestStation) {
                   handleStationSelect(nearest.nearestStation.stop_name);
                 }
               }}
@@ -490,7 +535,6 @@ export default function ModalScreen() {
                     size={26}
                   />
                 )}
-
                 <View style={{ flex: 1 }}>
                   <Text
                     variant="labelSmall"
@@ -500,22 +544,19 @@ export default function ModalScreen() {
                         : theme.colors.primary,
                     }}
                   >
-                    {isLoading
-                      ? strings.common.loading
-                      : strings.planner.nearestStation}
+                    {strings.planner.nearestStation}
                   </Text>
-
                   {isLoading ? (
-                    <ProgressBar
-                      indeterminate
-                      color={theme.colors.onPrimaryContainer}
+                    <Text
+                      variant="titleMedium"
                       style={{
-                        marginTop: 6,
-                        borderRadius: 4,
-                        backgroundColor: theme.colors.tertiary,
-                        opacity: 0.4,
+                        color: theme.dark
+                          ? theme.colors.onPrimaryContainer
+                          : theme.colors.primary,
                       }}
-                    />
+                    >
+                      {strings.common.searching}
+                    </Text>
                   ) : (
                     <Text
                       variant="titleMedium"
@@ -525,14 +566,14 @@ export default function ModalScreen() {
                           : theme.colors.primary,
                       }}
                     >
-                      {nearest.nearestStation?.stop_name ??
+                      {nearest?.nearestStation?.stop_name ??
                         strings.planner.noResults}
                     </Text>
                   )}
                 </View>
               </Card.Content>
             </Card>
-          )}
+          ) : null}
         </View>
 
         <View

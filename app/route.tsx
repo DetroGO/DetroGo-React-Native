@@ -264,9 +264,7 @@ function NotificationCard({
               </Text>
             </View>
           </View>
-          <Pressable hitSlop={12} style={{ padding: 4 }}>
-            <Icon source="close" size={20} color={cardfg} />
-          </Pressable>
+          <Pressable hitSlop={12} style={{ padding: 4 }}></Pressable>
         </View>
       </Card.Content>
     </Card>
@@ -282,6 +280,10 @@ export default function RoutePlanScreen() {
   const notificationsEnabled = usePrefStore(
     (state) => state.notificationsEnabled,
   );
+  const locationEnabled = usePrefStore(
+    (state) => state.locationEnabled,
+  );
+  
   const screenWidth = Dimensions.get("window").width;
   const [liveNavId, setLiveNavId] = useState<number | string | undefined>(
     undefined,
@@ -783,19 +785,33 @@ export default function RoutePlanScreen() {
           </View>
 
           {htmlUri && (
-            <WebView
-              ref={webviewRef}
-              source={{ uri: htmlUri }}
-              javaScriptEnabled={true}
-              startInLoadingState={true}
-              onMessage={handleWebViewMessage}
-              style={{ backgroundColor: "transparent" }}
-              originWhitelist={["*"]}
-              allowFileAccess={true}
-              scrollEnabled={false}
-              overScrollMode="never"
-              bounces={false}
-            />
+            <View
+              style={{ position: "relative", flex: 1 }}
+              renderToHardwareTextureAndroid={true}
+            >
+              <WebView
+                ref={webviewRef}
+                source={{ uri: htmlUri }}
+                javaScriptEnabled={true}
+                startInLoadingState={true}
+                onMessage={handleWebViewMessage}
+                style={{ flex: 1, backgroundColor: "transparent" }}
+                originWhitelist={["*"]}
+                allowFileAccess={true}
+                scrollEnabled={false}
+                overScrollMode="never"
+                setDisplayZoomControls={false}
+                setBuiltInZoomControls={false}
+                bounces={false}
+              />
+              <View
+                style={[
+                  StyleSheet.absoluteFillObject,
+                  { elevation: 10, zIndex: 10 },
+                ]}
+                pointerEvents="auto"
+              />
+            </View>
           )}
         </View>
 

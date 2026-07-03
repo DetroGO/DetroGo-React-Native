@@ -7,6 +7,7 @@ import {
   ToastAndroid,
   Platform,
   Linking,
+  AppState,
 } from "react-native";
 import * as Location from "expo-location";
 
@@ -26,7 +27,7 @@ import { ScrollView } from "react-native-gesture-handler";
 import { LANGUAGE_OPTIONS, useStrings } from "@/constants/strings";
 import { usePrefStore } from "@/store/usePrefStore";
 import { useAppTheme } from "@/hooks/useAppTheme";
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState, useEffect } from "react";
 import { M3_COLORS } from "@/constants/m3Colors";
 import { router } from "expo-router";
 import metroLines from "@/cities/delhi/metrolines.json";
@@ -478,6 +479,8 @@ export default function Settings() {
   const springTheme = useSpringPress();
   const springScheme = useSpringPress();
 
+  const [hasLocationPermission, setHasLocationPermission] = useState(false);
+
   const ABOUT_ROWS = [
     {
       label: strings.settings.reportBug,
@@ -522,6 +525,27 @@ export default function Settings() {
     workStation,
     setWorkStation,
   } = usePrefStore();
+
+  useEffect(() => {
+    // Sync the stored `locationEnabled` preference with the OS's actual
+    // current permission state — both on mount and whenever the app returns
+    // to foreground (e.g. user flips permission in system Settings and comes back).
+    const syncPermissionState = async () => {
+      const current = await Location.getForegroundPermissionsAsync();
+      setHasLocationPermission(current.granted);
+      setLocationEnabled(current.granted);
+    };
+
+    syncPermissionState();
+
+    const subscription = AppState.addEventListener("change", (nextState) => {
+      if (nextState === "active") {
+        syncPermissionState();
+      }
+    });
+
+    return () => subscription.remove();
+  }, []);
 
   const languageLabel =
     LANGUAGE_OPTIONS.find((option) => option.value === language)?.label ??
@@ -808,11 +832,11 @@ export default function Settings() {
                     variant="labelSmall"
                     style={{ color: theme.colors.primary }}
                   >
-                    {sourceColor === "system"
-                      ? themeMode === "amoled"
-                        ? strings.common.colorsAmoled
-                        : strings.common.dynamicColors
-                      : sourceColor}
+                    {themeMode === "amoled"
+                      ? strings.common.colorsAmoled
+                      : sourceColor === "system"
+                        ? strings.common.dynamicColors
+                        : sourceColor}
                   </Text>
                 </View>
                 <Icon
