@@ -72,12 +72,18 @@ export const STATIONS: GeoJSON.FeatureCollection = {
     {
       type: "Feature",
       properties: { name: "Kanhaiya Nagar", interchange: 0 },
-      geometry: { type: "Point", coordinates: [77.162552, 28.682386] },
+      geometry: {
+        type: "Point",
+        coordinates: [77.16516215191596, 28.681680009399244],
+      },
     },
     {
       type: "Feature",
       properties: { name: "Keshav Puram", interchange: 0 },
-      geometry: { type: "Point", coordinates: [77.161774, 28.688944] },
+      geometry: {
+        type: "Point",
+        coordinates: [77.16169246530573, 28.688849820898568],
+      },
     },
     {
       type: "Feature",
@@ -492,22 +498,34 @@ export const STATIONS: GeoJSON.FeatureCollection = {
     {
       type: "Feature",
       properties: { name: "Patel Nagar", interchange: 0 },
-      geometry: { type: "Point", coordinates: [77.167046, 28.645037] },
+      geometry: {
+        type: "Point",
+        coordinates: [77.16930601173074, 28.645003568888143],
+      },
     },
     {
       type: "Feature",
       properties: { name: "Shadipur", interchange: 0 },
-      geometry: { type: "Point", coordinates: [77.156021, 28.65143] },
+      geometry: {
+        type: "Point",
+        coordinates: [77.15868413940038, 28.65140601864574],
+      },
     },
     {
       type: "Feature",
       properties: { name: "Kirti Nagar", interchange: 1 },
-      geometry: { type: "Point", coordinates: [77.148499, 28.655773] },
+      geometry: {
+        type: "Point",
+        coordinates: [77.15176891024281, 28.65508818916797],
+      },
     },
     {
       type: "Feature",
       properties: { name: "Moti Nagar", interchange: 0 },
-      geometry: { type: "Point", coordinates: [77.140488, 28.657803] },
+      geometry: {
+        type: "Point",
+        coordinates: [77.14265628310737, 28.657854546475065],
+      },
     },
     {
       type: "Feature",
@@ -1072,7 +1090,10 @@ export const STATIONS: GeoJSON.FeatureCollection = {
     {
       type: "Feature",
       properties: { name: "Maujpur - Babarpur", interchange: 0 },
-      geometry: { type: "Point", coordinates: [77.280922, 28.692057] },
+      geometry: {
+        type: "Point",
+        coordinates: [77.2796342874342, 28.69210470829996],
+      },
     },
     {
       type: "Feature",
@@ -1084,6 +1105,54 @@ export const STATIONS: GeoJSON.FeatureCollection = {
       properties: { name: "Johri Enclave", interchange: 0 },
       geometry: { type: "Point", coordinates: [77.290154, 28.713297] },
     },
+
+    {
+      type: "Feature",
+      properties: { name: "Yamuna Vihar", interchange: 0 },
+      geometry: { type: "Point", coordinates: [77.277409, 28.702488] },
+    },
+    {
+      type: "Feature",
+      properties: { name: "Bhajanpura", interchange: 0 },
+      geometry: { type: "Point", coordinates: [77.263417, 28.703706] },
+    },
+    {
+      type: "Feature",
+      properties: { name: "Khajuri Khas", interchange: 0 },
+      geometry: { type: "Point", coordinates: [77.254404, 28.705306] },
+    },
+    {
+      type: "Feature",
+      properties: { name: "Nanaksar - Sonia Vihar", interchange: 0 },
+      geometry: { type: "Point", coordinates: [77.241775, 28.708919] },
+    },
+    {
+      type: "Feature",
+      properties: { name: "Soorghat", interchange: 0 },
+      geometry: {
+        type: "Point",
+        coordinates: [77.22741053313834, 28.710454743278948],
+      },
+    },
+    {
+      type: "Feature",
+      properties: { name: "Jagatpur - Wazirabad", interchange: 0 },
+      geometry: {
+        type: "Point",
+        coordinates: [77.22331686503469, 28.721097575718456],
+      },
+    },
+    {
+      type: "Feature",
+      properties: { name: "Jharoda Majra", interchange: 0 },
+      geometry: { type: "Point", coordinates: [77.213668, 28.724896] },
+    },
+    {
+      type: "Feature",
+      properties: { name: "Burari", interchange: 0 },
+      geometry: { type: "Point", coordinates: [77.199463, 28.730057] },
+    },
+
     {
       type: "Feature",
       properties: { name: "Shiv Vihar", interchange: 0 },

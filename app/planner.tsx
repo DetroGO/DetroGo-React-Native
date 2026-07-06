@@ -5,6 +5,8 @@ import { ToastAndroid } from "react-native";
 import metroLines from "@/cities/delhi/metrolines.json";
 import stations from "@/cities/delhi/stationsdata.json";
 import { useAppTheme } from "@/hooks/useAppTheme";
+import { useNearestStationStore } from "@/store/useNearestStationStore";
+import { findNearestStation } from "@/utils/nearestStation";
 import { usePrefStore } from "@/store/usePrefStore";
 import {
   Text,
@@ -37,65 +39,15 @@ import { useRouter } from "expo-router";
 import { useRef } from "react";
 type TransitLines = Record<string, string[]>;
 type DisplayValue = "flex" | "none";
-type StationData = {
-  stop_name: string;
-  stop_lat: string;
-  stop_lon: string;
-};
-type NearestStationResult = {
-  nearestStation: StationData | null;
-  minDistance: number;
-};
 
 const lines: TransitLines = metroLines as TransitLines;
+const STALE_MS = 1 * 60 * 1000; // tune this — 3 min is a reasonable start
 
-// Original sections data
 const initialSections = Object.entries(lines).map(([title, data]) => ({
   title,
   data,
 }));
 
-const haversine = (lat1: number, lon1: number, lat2: number, lon2: number) => {
-  const toRad = (v: number) => (v * Math.PI) / 180;
-  const R = 6371;
-  const dLat = toRad(lat2 - lat1);
-  const dLon = toRad(lon2 - lon1);
-
-  const a =
-    Math.sin(dLat / 2) ** 2 +
-    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) ** 2;
-
-  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-};
-
-const findNearestMetroStation = (
-  userLat: number,
-  userLon: number,
-  stationList: StationData[],
-): NearestStationResult => {
-  let nearestStation: StationData | null = null;
-  let minDistance = Infinity;
-
-  stationList.forEach((station) => {
-    const d = haversine(
-      userLat,
-      userLon,
-      parseFloat(station.stop_lat),
-      parseFloat(station.stop_lon),
-    );
-    if (d < minDistance) {
-      minDistance = d;
-      nearestStation = station;
-    }
-  });
-
-  return { nearestStation, minDistance };
-};
-
-// ---- Memoized row for SectionList ----
-// Defined OUTSIDE the screen component so its identity never changes.
-// React.memo means this only re-renders if its own props actually change —
-// not just because the parent (ModalScreen) re-rendered on every keystroke.
 const StationRow = React.memo(function StationRow({
   item,
   isFirst,
@@ -195,7 +147,71 @@ export default function ModalScreen() {
   const [presetPickerTarget, setPresetPickerTarget] = useState<
     "home" | "work" | null
   >(null);
+
   const [presetSearchPhrase, setPresetSearchPhrase] = useState("");
+  const storedNearest = useNearestStationStore((s) => s.nearestStation);
+  const storedUpdatedAt = useNearestStationStore((s) => s.updatedAt);
+  const setNearestStationInStore = useNearestStationStore(
+    (s) => s.setNearestStation,
+  );
+
+  useEffect(() => {
+    const isStale = !storedUpdatedAt || Date.now() - storedUpdatedAt > STALE_MS;
+
+    if (!isStale && storedNearest) {
+      // fast path — reuse what index already computed, no fetch, no spinner
+      setNearest({ nearestStation: storedNearest, minDistance: 0 });
+      setStartStation(storedNearest.stop_name);
+      setIsLoading(false);
+      return;
+    }
+
+    // slow path — same one-shot fetch as before, only runs when store is empty/stale
+    let isActive = true;
+    (async () => {
+      try {
+        let { status } = await Location.requestForegroundPermissionsAsync();
+        if (status !== "granted") {
+          if (isActive) {
+            setErrorMsg(strings.common.locationPermissionDenied);
+            setIsLoading(false);
+          }
+          return;
+        }
+        let currentPosition = await Location.getCurrentPositionAsync({});
+        if (!isActive) return;
+
+        const result = findNearestStation(
+          currentPosition.coords.latitude,
+          currentPosition.coords.longitude,
+          stations,
+        );
+        setNearest({
+          nearestStation: result.nearestStation,
+          minDistance: result.distanceKm,
+        });
+        if (result.nearestStation) {
+          setStartStation(result.nearestStation.stop_name);
+          setNearestStationInStore(result.nearestStation, result.distanceKm);
+        }
+      } catch (error) {
+        if (isActive) {
+          const message =
+            error instanceof Error
+              ? `${strings.common.error}: ${error.message}`
+              : strings.common.error;
+          setErrorMsg(message);
+          ToastAndroid.show(message, ToastAndroid.SHORT);
+        }
+      } finally {
+        if (isActive) setIsLoading(false);
+      }
+    })();
+
+    return () => {
+      isActive = false;
+    };
+  }, []);
 
   const animatedCircle = useAnimatedStyle(() => ({
     transform: [{ scale: scale3.value }],
@@ -354,44 +370,6 @@ export default function ModalScreen() {
     // If editingMode is null, we do nothing.
     // Expo Router will naturally handle the back press and close the Modal.
   }, [editingMode, cancelSearch]); // Make sure editingMode is in the dependency array
-
-  useEffect(() => {
-    (async () => {
-      try {
-        // Request permission from the user
-        let { status } = await Location.requestForegroundPermissionsAsync();
-        if (status !== "granted") {
-          setErrorMsg(strings.common.locationPermissionDenied);
-          setIsLoading(false);
-          return;
-        }
-
-        // Fetch current position
-        let currentPosition = await Location.getCurrentPositionAsync({});
-        const lat = currentPosition.coords.latitude;
-        const lon = currentPosition.coords.longitude;
-        setLocation({ lat, lon });
-
-        // Run your custom logic
-        const result = findNearestMetroStation(lat, lon, stations);
-        setNearest(result);
-
-        // Auto-fill start station if we found one
-        if (result.nearestStation) {
-          setStartStation(result.nearestStation.stop_name);
-        }
-      } catch (error) {
-        const message =
-          error instanceof Error
-            ? `${strings.common.error}: ${error.message}`
-            : strings.common.error;
-        setErrorMsg(message);
-        ToastAndroid.show(message, ToastAndroid.SHORT);
-      } finally {
-        setIsLoading(false);
-      }
-    })();
-  }, []);
 
   useEffect(() => {
     if (startsel && !finalsel) {
@@ -834,7 +812,7 @@ export default function ModalScreen() {
           renderSectionHeader={renderSectionHeader}
           renderItem={renderItem}
           initialNumToRender={10}
-          removeClippedSubviews={true}
+          removeClippedSubviews={false}
           maxToRenderPerBatch={12}
           windowSize={10}
           updateCellsBatchingPeriod={50}

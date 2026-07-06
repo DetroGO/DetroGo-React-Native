@@ -1,8 +1,12 @@
 import { View, StyleSheet } from "react-native";
 import BottomSheet, { BottomSheetScrollView } from "@gorhom/bottom-sheet";
-
+import { useIsFocused } from "@react-navigation/native";
 import * as Location from "expo-location";
 import { useMemo, useEffect } from "react";
+import { findNearestStation } from "@/utils/nearestStation";
+import { useNearestStationStore } from "@/store/useNearestStationStore";
+import stations from "@/cities/delhi/stationsdata.json";
+import { useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
 import { useAppTheme } from "@/hooks/useAppTheme";
 import { Pressable, Image, RefreshControl, Animated } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
@@ -482,10 +486,13 @@ const DELHI_CENTER: [number, number] = [77.2195, 28.6329];
 
 export default function HomeScreen() {
   const theme = useAppTheme();
+  const isFocused = useIsFocused();
   const language = usePrefStore((state) => state.language);
   const bottomSheetRef = useRef<BottomSheet>(null);
+  const animatedPosition = useSharedValue(0); // distance from top of screen to top of sheet
+
   const lastKnownCoords = useRef<[number, number] | null>(null);
-  const snapPoints = useMemo(() => [240, 420], []);
+  const snapPoints = useMemo(() => [70, 240, 420], []);
   const hasSeenTutorial = useOnboardingStore((state) => state.hasSeenTutorial);
   const [visible, setVisible] = useState(false);
   const recentTrips = useRecentTripsStore((state) => state.recentTrips);
@@ -503,7 +510,9 @@ export default function HomeScreen() {
   // const [initialZoom, setInitialZoom] = useState(10.5);
 
   const [tracking, setTracking] = useState<"default" | undefined>(undefined);
-
+  const setNearestStation = useNearestStationStore(
+    (state) => state.setNearestStation,
+  );
   const [popup, setPopup] = useState<string | null>(null);
   const locationEnabled = usePrefStore((state) => state.locationEnabled);
 
@@ -514,6 +523,9 @@ export default function HomeScreen() {
     inputRange: [0.88, 1],
     outputRange: [14, 28],
   });
+  const fabWrapperStyle = useAnimatedStyle(() => ({
+    transform: [{ translateY: animatedPosition.value - FAB_HEIGHT - FAB_MARGIN }],
+  }));
 
   const onFabIn = () =>
     Animated.spring(fabScale, {
@@ -575,181 +587,200 @@ export default function HomeScreen() {
           hint={strings.home.searchbar}
         />
       </View>
-      <Map
-        style={styles.map}
-        mapStyle={
-          theme.dark
-            ? "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json"
-            : "https://tiles.basemaps.cartocdn.com/gl/positron-gl-style/style.json"
-        }
-        logoEnabled={false}
-        attributionEnabled={false}
-        compassPosition={{ top: 420, right: 18 }}
-        onRegionWillChange={() => {
-          // Stop tracking when user manually moves map
-          if (tracking) {
-            setTracking(undefined);
+      {isFocused && (
+        <Map
+          style={styles.map}
+          mapStyle={
+            theme.dark
+              ? "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json"
+              : "https://tiles.basemaps.cartocdn.com/gl/positron-gl-style/style.json"
           }
-        }}
-      >
-        {/* User location */}
-        <UserLocation
-          visible={locationEnabled}
-          minDisplacement={20}
-          onUpdate={(location) => {
-            const coords: [number, number] = [
-              location.coords.longitude,
-              location.coords.latitude,
-            ];
-            lastKnownCoords.current = coords;
-            if (!hasFocusedUser.current && cameraRef.current) {
-              hasFocusedUser.current = true;
-              cameraRef.current.flyTo({
-                center: coords,
-                zoom: 15,
-                duration: 1800,
-              });
+          logoEnabled={false}
+          attributionEnabled={false}
+          compassPosition={{ top: 420, right: 18 }}
+          onRegionWillChange={() => {
+            // Stop tracking when user manually moves map
+            if (tracking) {
+              setTracking(undefined);
             }
           }}
-        />
+        >
+          {/* User location */}
+          <UserLocation
+            visible={locationEnabled}
+            minDisplacement={20}
+            onUpdate={(location) => {
+              const coords: [number, number] = [
+                location.coords.longitude,
+                location.coords.latitude,
+              ];
+              lastKnownCoords.current = coords;
 
-        {/* Camera */}
-        <Camera
-          ref={cameraRef}
-          maxZoom={15}
-          trackUserLocation={tracking}
-          initialViewState={{
-            center: DELHI_CENTER,
-            zoom: 10.8,
-          }}
-        />
+              const result = findNearestStation(
+                location.coords.latitude,
+                location.coords.longitude,
+                stations,
+              );
+              if (result.nearestStation) {
+                setNearestStation(result.nearestStation, result.distanceKm);
+              }
 
-        {/* Metro lines */}
-        <GeoJSONSource id="lines" data={LINES} onPress={onStationPress}>
-          <Layer
-            id="lines-layer"
-            type="line"
-            paint={{
-              "line-color": ["get", "stroke"],
-              "line-width": [
-                "interpolate",
-                ["linear"],
-                ["zoom"],
-                6,
-                3.5,
-                11,
-                2.5,
-                14,
-                4.5,
-              ],
-              "line-opacity": 0.95,
-            }}
-            layout={{
-              "line-cap": "round",
-              "line-join": "round",
+              if (!hasFocusedUser.current && cameraRef.current) {
+                hasFocusedUser.current = true;
+                cameraRef.current.flyTo({
+                  center: coords,
+                  zoom: 15,
+                  duration: 1800,
+                });
+              }
             }}
           />
-        </GeoJSONSource>
-
-        {/* Stations */}
-        <GeoJSONSource id="stations" data={STATIONS}>
-          {/* Interchange */}
-          <Layer
-            id="interchange-layer"
-            type="circle"
-            filter={["==", ["get", "interchange"], 1]}
-            paint={{
-              "circle-radius": [
-                "interpolate",
-                ["linear"],
-                ["zoom"],
-                6,
-                3.5,
-                11,
-                5,
-                14,
-                8,
-              ],
-              "circle-color": "#ffffff",
-              "circle-stroke-width": 1.5,
-              "circle-stroke-color": "#555555",
+          {/* Camera */}
+          <Camera
+            ref={cameraRef}
+            maxZoom={15}
+            trackUserLocation={tracking}
+            initialViewState={{
+              center: DELHI_CENTER,
+              zoom: 10.8,
             }}
           />
 
-          {/* Regular */}
-          <Layer
-            id="regular-layer"
-            type="circle"
-            filter={["==", ["get", "interchange"], 0]}
-            minZoomLevel={10}
-            paint={{
-              "circle-radius": [
-                "interpolate",
-                ["linear"],
-                ["zoom"],
-                8,
-                1.5,
-                11,
-                3,
-                14,
-                5,
-              ],
-              "circle-color": "#bbbbbb",
-              "circle-opacity": 0.8,
-            }}
-          />
+          {/* Metro lines */}
+          <GeoJSONSource id="lines" data={LINES} onPress={onStationPress}>
+            <Layer
+              id="lines-layer"
+              type="line"
+              paint={{
+                "line-color": ["get", "stroke"],
+                "line-width": [
+                  "interpolate",
+                  ["linear"],
+                  ["zoom"],
+                  6,
+                  3.5,
+                  11,
+                  2.5,
+                  14,
+                  4.5,
+                ],
+                "line-opacity": 0.95,
+              }}
+              layout={{
+                "line-cap": "round",
+                "line-join": "round",
+              }}
+            />
+          </GeoJSONSource>
 
-          {/* Station name labels - interchange stations */}
-          <Layer
-            id="interchange-labels"
-            type="symbol"
-            filter={["==", ["get", "interchange"], 1]}
-            minZoomLevel={11}
-            layout={{
-              "text-field": ["get", "name"],
-              "text-size": [
-                "interpolate",
-                ["linear"],
-                ["zoom"],
-                11,
-                10,
-                14,
-                13,
-              ],
-              "text-offset": [0, 1.4],
-              "text-anchor": "top",
-              "text-max-width": 8,
-              "text-font": ["Noto Sans Regular"],
-            }}
-            paint={{
-              "text-color": theme.dark ? "#ffffff" : "#111111",
-              "text-halo-color": theme.dark ? "#000000" : "#ffffff",
-              "text-halo-width": 1.5,
-            }}
-          />
+          {/* Stations */}
+          <GeoJSONSource id="stations" data={STATIONS}>
+            {/* Interchange */}
+            <Layer
+              id="interchange-layer"
+              type="circle"
+              filter={["==", ["get", "interchange"], 1]}
+              paint={{
+                "circle-radius": [
+                  "interpolate",
+                  ["linear"],
+                  ["zoom"],
+                  6,
+                  3.5,
+                  11,
+                  5,
+                  14,
+                  8,
+                ],
+                "circle-color": "#ffffff",
+                "circle-stroke-width": 1.5,
+                "circle-stroke-color": "#555555",
+              }}
+            />
 
-          {/* Station name labels - regular stations, only at high zoom */}
-          <Layer
-            id="regular-labels"
-            type="symbol"
-            filter={["==", ["get", "interchange"], 0]}
-            minZoomLevel={13}
-            layout={{
-              "text-field": ["get", "name"],
-              "text-size": ["interpolate", ["linear"], ["zoom"], 13, 9, 15, 12],
-              "text-offset": [0, 1.2],
-              "text-anchor": "top",
-              "text-max-width": 8,
-              "text-font": ["Noto Sans Regular"],
-            }}
-            paint={{
-              "text-color": theme.dark ? "#cccccc" : "#333333",
-              "text-halo-color": theme.dark ? "#000000" : "#ffffff",
-              "text-halo-width": 1.5,
-            }}
-          />
-        </GeoJSONSource>
-      </Map>
+            {/* Regular */}
+            <Layer
+              id="regular-layer"
+              type="circle"
+              filter={["==", ["get", "interchange"], 0]}
+              minZoomLevel={10}
+              paint={{
+                "circle-radius": [
+                  "interpolate",
+                  ["linear"],
+                  ["zoom"],
+                  8,
+                  1.5,
+                  11,
+                  3,
+                  14,
+                  5,
+                ],
+                "circle-color": "#bbbbbb",
+                "circle-opacity": 0.8,
+              }}
+            />
+
+            {/* Station name labels - interchange stations */}
+            <Layer
+              id="interchange-labels"
+              type="symbol"
+              filter={["==", ["get", "interchange"], 1]}
+              minZoomLevel={11}
+              layout={{
+                "text-field": ["get", "name"],
+                "text-size": [
+                  "interpolate",
+                  ["linear"],
+                  ["zoom"],
+                  11,
+                  10,
+                  14,
+                  13,
+                ],
+                "text-offset": [0, 1.4],
+                "text-anchor": "top",
+                "text-max-width": 8,
+                "text-font": ["Noto Sans Regular"],
+              }}
+              paint={{
+                "text-color": theme.dark ? "#ffffff" : "#111111",
+                "text-halo-color": theme.dark ? "#000000" : "#ffffff",
+                "text-halo-width": 1.5,
+              }}
+            />
+
+            {/* Station name labels - regular stations, only at high zoom */}
+            <Layer
+              id="regular-labels"
+              type="symbol"
+              filter={["==", ["get", "interchange"], 0]}
+              minZoomLevel={13}
+              layout={{
+                "text-field": ["get", "name"],
+                "text-size": [
+                  "interpolate",
+                  ["linear"],
+                  ["zoom"],
+                  13,
+                  9,
+                  15,
+                  12,
+                ],
+                "text-offset": [0, 1.2],
+                "text-anchor": "top",
+                "text-max-width": 8,
+                "text-font": ["Noto Sans Regular"],
+              }}
+              paint={{
+                "text-color": theme.dark ? "#cccccc" : "#333333",
+                "text-halo-color": theme.dark ? "#000000" : "#ffffff",
+                "text-halo-width": 1.5,
+              }}
+            />
+          </GeoJSONSource>
+        </Map>
+      )}
 
       <View style={styles.fab}>
         <Animated.View
@@ -785,6 +816,7 @@ export default function HomeScreen() {
         ref={bottomSheetRef}
         index={1}
         snapPoints={snapPoints}
+        animatedPosition={animatedPosition}
         style={{ zIndex: 10 }}
         backgroundStyle={{
           backgroundColor: theme.dark

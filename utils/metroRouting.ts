@@ -1,6 +1,16 @@
 import metroLines from "../cities/delhi/metrolines.json";
+import type {
+  MetroLines,
+  StationGraph,
+  StationName,
+  LineName,
+  Interchange,
+  RouteStep,
+  TransferDetail,
+  RouteResult,
+} from "../types/routing";
 
-const interchanges = [
+const interchanges: Interchange[] = [
   { from: "Noida Sec-52", to: "Noida Sector 51", note: "Walkway transfer" },
   {
     from: "Dilli Haat - INA",
@@ -10,9 +20,8 @@ const interchanges = [
   { from: "Maujpur - Babarpur", to: "Maujpur - Babarpur", note: "loop" },
 ];
 
-function buildGraph(lines) {
-  const g = {};
-
+function buildGraph(lines: MetroLines): StationGraph {
+  const g: StationGraph = {};
   for (const line in lines) {
     const s = lines[line];
     for (let i = 0; i < s.length - 1; i++) {
@@ -22,37 +31,35 @@ function buildGraph(lines) {
       g[s[i + 1]].push(s[i]);
     }
   }
-
   interchanges.forEach((link) => {
     if (g[link.from] && g[link.to]) {
       g[link.from].push(link.to);
       g[link.to].push(link.from);
     }
   });
-
   return g;
 }
 
-// ⚠️ FIXED: Now actually reconstructs and returns the path array
-function findRoute(graph, start, end) {
-  const queue = [start];
-  const visited = new Set([start]);
-  const parent = {};
+function findRoute(
+  graph: StationGraph,
+  start: StationName,
+  end: StationName,
+): StationName[] {
+  const queue: StationName[] = [start];
+  const visited = new Set<StationName>([start]);
+  const parent: Partial<Record<StationName, StationName>> = {};
 
   while (queue.length > 0) {
-    const current = queue.shift();
-
+    const current = queue.shift()!;
     if (current === end) {
-      // Reconstruct the path by walking backward from the end
-      const path = [];
-      let step = end;
+      const path: StationName[] = [];
+      let step: StationName | undefined = end;
       while (step) {
         path.push(step);
         step = parent[step];
       }
-      return path.reverse(); // Reverse it so it goes from Start -> End
+      return path.reverse();
     }
-
     const neighbors = graph[current] || [];
     for (const neighbor of neighbors) {
       if (!visited.has(neighbor)) {
@@ -62,10 +69,14 @@ function findRoute(graph, start, end) {
       }
     }
   }
-  return []; // Return empty array if no route is found
+  return [];
 }
 
-function getConnectingLine(lines, a, b) {
+function getConnectingLine(
+  lines: MetroLines,
+  a: StationName,
+  b: StationName,
+): LineName | null {
   for (const line in lines) {
     const s = lines[line];
     for (let i = 0; i < s.length - 1; i++) {
@@ -77,11 +88,12 @@ function getConnectingLine(lines, a, b) {
   return null;
 }
 
-// ⚠️ FIXED: Handled the null interchange case
-function getRouteLines(route, lines) {
-  const used = [];
+function getRouteLines(
+  route: StationName[],
+  lines: MetroLines,
+): (LineName | "INTERCHANGE")[] {
+  const used: (LineName | "INTERCHANGE")[] = [];
   for (let i = 0; i < route.length - 1; i++) {
-    // If it's a manual walkway interchange, label it safely
     used.push(
       getConnectingLine(lines, route[i], route[i + 1]) ?? "INTERCHANGE",
     );
@@ -89,8 +101,11 @@ function getRouteLines(route, lines) {
   return used;
 }
 
-function findTransferStations(route, segmentLines) {
-  const transfers = [];
+function findTransferStations(
+  route: StationName[],
+  segmentLines: (LineName | "INTERCHANGE")[],
+): StationName[] {
+  const transfers: StationName[] = [];
   for (let i = 1; i < segmentLines.length; i++) {
     if (
       segmentLines[i] !== segmentLines[i - 1] &&
@@ -102,8 +117,11 @@ function findTransferStations(route, segmentLines) {
   return transfers;
 }
 
-function findTransferDetails(route, segmentLines) {
-  const details = [];
+function findTransferDetails(
+  route: StationName[],
+  segmentLines: (LineName | "INTERCHANGE")[],
+): TransferDetail[] {
+  const details: TransferDetail[] = [];
   for (let i = 1; i < segmentLines.length; i++) {
     if (
       segmentLines[i] !== segmentLines[i - 1] &&
@@ -112,15 +130,19 @@ function findTransferDetails(route, segmentLines) {
       details.push({
         station: route[i],
         position: i,
-        fromLine: segmentLines[i - 1],
-        toLine: segmentLines[i],
+        fromLine: segmentLines[i - 1] as LineName,
+        toLine: segmentLines[i] as LineName,
       });
     }
   }
   return details;
 }
 
-function buildRouteSteps(route, segmentLines, transferStations) {
+function buildRouteSteps(
+  route: StationName[],
+  segmentLines: (LineName | "INTERCHANGE")[],
+  transferStations: StationName[],
+): RouteStep[] {
   return route.map((station, i) => ({
     station,
     line: i === 0 ? segmentLines[0] : segmentLines[i - 1],
@@ -128,20 +150,20 @@ function buildRouteSteps(route, segmentLines, transferStations) {
   }));
 }
 
-const graph = buildGraph(metroLines);
+const graph = buildGraph(metroLines as MetroLines);
 
-export function calculateRoute(from, to) {
+export function calculateRoute(
+  from: StationName,
+  to: StationName,
+): RouteResult {
   if (!graph[from] || !graph[to]) {
     return { error: "Invalid station name" };
   }
-
   const route = findRoute(graph, from, to);
-
   if (route.length === 0) {
     return { error: "No route found" };
   }
-
-  const segmentLines = getRouteLines(route, metroLines);
+  const segmentLines = getRouteLines(route, metroLines as MetroLines);
   const transferStations = findTransferStations(route, segmentLines);
   const transferDetails = findTransferDetails(route, segmentLines);
   const steps = buildRouteSteps(route, segmentLines, transferStations);

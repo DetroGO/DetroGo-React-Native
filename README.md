@@ -83,7 +83,7 @@ Open source, Material 3, and built to do exactly what a transit app should: help
 
 1. **Clone the repository:**
    ```bash
-   git clone https://github.com/simplystudios/DetroGo.git
+   git clone https://github.com/simplystudios/DetroGo-React-Native.git
    cd DetroGo
    ```
 
