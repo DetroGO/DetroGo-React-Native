@@ -10,11 +10,25 @@ Minimal, clean, and native experience.
 
 [![GPL 3.0 License](https://img.shields.io/badge/license-GPL3-green.svg)](LICENSE)
 [![Made in Delhi](https://img.shields.io/badge/made%20in-Delhi-orange.svg)]()
+[![Crowdin](https://badges.crowdin.net/detrogo/localized.svg)](https://crowdin.com)
 
 **[detrogo.vercel.app](https://detrogo.vercel.app/)**
 
 </div>
 
+---
+
+## Table of Contents
+
+- [About](#about)
+- [Screenshots](#screenshots)
+- [Features](#features)
+- [Tech Stack](#tech-stack)
+- [Supported Cities](#supported-cities)
+- [Getting Started](#getting-started)
+- [Contributing](#contributing)
+- [Contributors](#contributors)
+- [License](#license)
 ---
 
 ## About
@@ -27,16 +41,27 @@ Open source, Material 3, and built to do exactly what a transit app should: help
 
 ## Features
 
-- [x] **Routing Engine** - Custom routing engine using BFS algorithm
-- [x] **Schematic Map** - Minimal schematic map to understand your route at a glance
-- [x] **In-App System Map** - Built-in transit map for supported regions
-- [x] **Material 3 UI** - Follows Material 3 design guidelines throughout
-- [x] **Nearest Station** - Automatically finds your closest station
-- [x] **Dynamic Colors** - Full support for Android's Material You (Monet) theming
-- [x] **AMOLED Mode** - Pure black theme to save battery and navigate in the dark
-- [x] **Fully Offline** - Complete offline support for routing and GPS
-- [x] **Route History** - Local storage for route history and user preferences
-- [x] **i18n Language Support** - Local and international language support *(currently only supports english)* 
+- **Routing Engine** - Custom routing engine using BFS and Dijkstra's algorithm
+- **Schematic Map Renderer** - Minimal schematic map to understand your route at a glance
+- **In-App System Map** - Built-in transit map for supported regions
+- **Material 3 UI** - Follows Material 3 design guidelines throughout
+- **Nearest Station** - Automatically finds your closest station
+- **Dynamic Colors** - Full support for Android's Material You (Monet) theming
+- **AMOLED Mode** - Pure black theme to save battery and navigate in the dark
+- **Fully Offline** - Complete offline support for routing and GPS
+- **Route History** - Local storage for route history and user preferences
+- **i18n Language Support** - Local and international language support *(currently only supports english)* 
+
+---
+
+## Tech Stack
+
+- **[React Native]([https://reactnative.dev/]) + [Expo]([https://expo.dev/])** — cross-platform app framework
+- **TypeScript** — powering the core routing and data logic
+- **[Zustand]([https://github.com/pmndrs/zustand])** — lightweight state management
+- **[React Native Reanimated]([https://docs.swmansion.com/react-native-reanimated/])** — smooth, native-thread animations
+- **[MapLibre]([https://maplibre.org/])** — open-source map rendering
+- **[Custom Route Rendering Engine]([https://github.com/DetroGo/detrogo-map-renderer])** — Schematic map rendering engine using Svelte
 
 ---
 
@@ -44,11 +69,11 @@ Open source, Material 3, and built to do exactly what a transit app should: help
 
 | City | Status |
 |------|--------|
-| **Delhi NCR** | ✅ All operational lines - system map, route finding, route history |
-| Mumbai | 🔲 Planned |
-| Bengaluru | 🔲 Planned |
-| Chennai | 🔲 Planned |
-| Hyderabad | 🔲 Planned |
+| **Delhi NCR** | Operational |
+| Mumbai | Planned |
+| Bengaluru | Planned |
+| Chennai | Planned |
+| Hyderabad | Planned |
 
 ---
 
@@ -81,29 +106,52 @@ Open source, Material 3, and built to do exactly what a transit app should: help
 
 ## 🛠️ Setup & Installation
 
-1. **Clone the repository:**
-   ```bash
-   git clone https://github.com/simplystudios/DetroGo-React-Native.git
-   cd DetroGo
-   ```
+### Prerequisites
 
-2. **Install dependencies:**
-   ```bash
+- [Node.js]([https://nodejs.org/](https://nodejs.org/)) (LTS recommended)
+- npm or yarn
+- an Android emulator or a Android device connected via USB
+
+### Installation
+
+1. **Clone the repository**
+  ```bash
+
+   git clone [https://github.com/simplystudios/DetroGo-React-Native.git](https://github.com/simplystudios/DetroGo-React-Native.git)
+
+   cd DetroGo-React-Native
+
+  ```
+2. **Install dependencies**
+  ```bash
+
    npm install
-   ```
 
-3. **Start the development server:**
-   ```bash
-   npx expo start
-   ```
+  ```
+3. **Build the development client( IMPORTANT - Does not work with Expo Go )**
+  ```bash
+
+   npx expo run:android
+
+  ```
 
 ---
 
-## 🧩 Add Your City to DetroGo
+## Contributing
 
-Want to bring DetroGo to your city? You can contribute by submitting your city's GTFS file or a JSON list of stations with coordinates and basic data (line colors, names, etc.).
+Contributions are welcome, whether that's fixing a bug, adding a feature, or bringing DetroGo to a new city.
 
-> This section is a work in progress — contribution guide coming soon.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for full guidelines.
+
+### Adding a New City
+
+To add a new city you need to get the city's transit system GTFS file, or a JSON list of stations with coordinates and basic line data (names, colors, etc.), and follow the [Adding a New City](docs/adding_a_new_city.md) guide to get started.
+
+### Translating the App
+
+To translate the app into your language just head on over to crowdin and start translating the strings. You can find the crowdin project [here](https://crowdin.com/project/detrogo).
+
+for a more detailed guide on how to translate the app, see [docs/TRANSLATING.md](docs/TRANSLATING.md).
 
 ---
 

@@ -1,88 +1,152 @@
-// strings.ts contains the strings used in the app.
-// these are the strings that are displayed to the user. depending upon the language they select, the strings will be displayed.
-// you can help us translate by adding a partial locale object below (see `hi` for an example) —
-// you only need to include the keys you're actually translating; anything you omit falls back to English.
+// strings.ts contains all user-facing app strings.
+// English is the source language. Other locale files may be partial.
+// Missing keys automatically fall back to English.
 
 import { usePrefStore } from "@/store/usePrefStore";
-import { LanguageCode } from "@/types/route";
+import { DEFAULT_LANGUAGE, LanguageCode } from "@/types/route";
+
 import en from "@/i18n/locales/en.json";
 import hi from "@/i18n/locales/hi.json";
 
-// Full shape every locale resolves to (after merging with `en`).
 type DeepString<T> = {
   readonly [K in keyof T]: T[K] extends string ? string : DeepString<T[K]>;
 };
+
 export type Strings = DeepString<typeof en>;
 
-// Shape a locale FILE is allowed to provide: any subset, at any depth.
 type DeepPartial<T> = {
   [K in keyof T]?: T[K] extends string ? string : DeepPartial<T[K]>;
 };
+
 type PartialStrings = DeepPartial<typeof en>;
+
+const isPlainObject = (value: unknown): value is Record<string, unknown> =>
+  !!value && typeof value === "object" && !Array.isArray(value);
 
 function deepMerge<T extends Record<string, any>>(
   base: T,
-  override: DeepPartial<T> | undefined,
+  override?: DeepPartial<T>,
 ): T {
   if (!override) return base;
-  const result: any = { ...base };
-  for (const key in override) {
-    const overrideVal = override[key];
+
+  const result: Record<string, any> = { ...base };
+
+  for (const key of Object.keys(override) as Array<keyof T>) {
     const baseVal = base[key];
-    if (
-      overrideVal &&
-      typeof overrideVal === "object" &&
-      baseVal &&
-      typeof baseVal === "object"
-    ) {
-      result[key] = deepMerge(baseVal, overrideVal as any);
-    } else if (overrideVal !== undefined) {
-      result[key] = overrideVal;
+    const overrideVal = override[key];
+
+    if (overrideVal === undefined) continue;
+
+    if (isPlainObject(baseVal) && isPlainObject(overrideVal)) {
+      result[key as string] = deepMerge(
+        baseVal as Record<string, any>,
+        overrideVal as Record<string, any>,
+      );
+    } else {
+      result[key as string] = overrideVal;
     }
   }
-  return result;
+
+  return result as T;
 }
 
-// ---- Locale overrides ----
-// `hi` here is a COMPLETE translation, so it's typed directly as `Strings`
-// (not merged with `en`). If you ever want to trim it back down to only the
-// keys that differ from English, switch it to `PartialStrings` and wrap it
-// in `deepMerge(en, hiPartial)` like before — the helper is still here.
-
-export const translations: Record<LanguageCode, Strings> = {
+// Add new Crowdin-exported locale JSON files here when you enable them.
+// Example later:
+// import bn from "@/i18n/locales/bn.json";
+// import gu from "@/i18n/locales/gu.json";
+const localeFiles = {
   en,
-  hi,
+  hi: hi as PartialStrings,
+
+  // bn: bn as PartialStrings,
+  // gu: gu as PartialStrings,
+  // mr: mr as PartialStrings,
+  // ta: ta as PartialStrings,
+  // te: te as PartialStrings,
+  // kn: kn as PartialStrings,
+  // ml: ml as PartialStrings,
+  // pa: pa as PartialStrings,
+  // ur: ur as PartialStrings,
+} satisfies Record<string, PartialStrings>;
+
+const LANGUAGE_LABELS: Record<string, string> = {
+  en: "English",
+  hi: "Hindi",
+  bn: "Bengali",
+  gu: "Gujarati",
+  mr: "Marathi",
+  ta: "Tamil",
+  te: "Telugu",
+  kn: "Kannada",
+  ml: "Malayalam",
+  pa: "Punjabi",
+  ur: "Urdu",
 };
 
-export const LANGUAGE_OPTIONS: { label: string; value: LanguageCode }[] = [
-  { label: "English", value: "en" },
-  { label: "Hindi", value: "hi" },
-];
+export const AVAILABLE_LOCALE_CODES = Object.keys(
+  localeFiles,
+) as LanguageCode[];
 
-export const getStrings = (language: LanguageCode = "en"): Strings =>
-  translations[language] ?? en;
+export const isSupportedLanguage = (
+  language: string | null | undefined,
+): language is LanguageCode =>
+  !!language && Object.prototype.hasOwnProperty.call(localeFiles, language);
 
-// For use INSIDE React components (JSX render) — subscribes to the store
-// and triggers a re-render when language changes.
-export const useStrings = () => {
+export const translations: Record<string, Strings> = Object.fromEntries(
+  Object.entries(localeFiles).map(([code, locale]) => [
+    code,
+    deepMerge(en, locale),
+  ]),
+) as Record<string, Strings>;
+
+export const LANGUAGE_OPTIONS: { label: string; value: LanguageCode }[] =
+  AVAILABLE_LOCALE_CODES.map((code) => ({
+    label: LANGUAGE_LABELS[code] ?? code.toUpperCase(),
+    value: code,
+  }));
+
+export const getStrings = (
+  language: LanguageCode | null | undefined = DEFAULT_LANGUAGE,
+): Strings => {
+  const safeLanguage = isSupportedLanguage(language)
+    ? language
+    : DEFAULT_LANGUAGE;
+
+  return translations[safeLanguage] ?? translations[DEFAULT_LANGUAGE] ?? en;
+};
+
+export const useStrings = (): Strings => {
   const language = usePrefStore((state) => state.language);
   return getStrings(language);
 };
 
-// For use EVERYWHERE ELSE — top-level helpers, formatters, non-component
-// files, event handlers, functions nested inside a component, etc.
-// This is NOT a hook, so it can be imported and used exactly like the old
-// static `strings` object (`strings.home.searchbar`) — but unlike a static
-// import, every property access re-reads the CURRENT language from the
-// store at call time, so it never goes stale.
-// Caveat: reading this inside JSX does not by itself trigger a re-render
-// when language changes (property access can't do that — only a hook
-// subscription can). See note below on how the app-wide re-render happens.
-export const strings: Strings = new Proxy({} as Strings, {
-  get(_target, prop) {
-    const current = getStrings(usePrefStore.getState().language);
-    return (current as any)[prop];
-  },
-}) as Strings;
+function getNestedValue(source: any, path: PropertyKey[]) {
+  return path.reduce((current, key) => current?.[key as any], source);
+}
+
+function createStringsProxy(path: PropertyKey[] = []): any {
+  return new Proxy(
+    {},
+    {
+      get(_target, prop) {
+        if (typeof prop === "symbol") return undefined;
+
+        const currentStrings = getStrings(usePrefStore.getState().language);
+        const nextPath = [...path, prop];
+        const value = getNestedValue(currentStrings, nextPath);
+
+        if (isPlainObject(value)) {
+          return createStringsProxy(nextPath);
+        }
+
+        return value;
+      },
+    },
+  );
+}
+
+// For non-React usage.
+// In JSX/components, prefer useStrings() so the UI re-renders on language change.
+export const strings = createStringsProxy() as Strings;
 
 export default en;

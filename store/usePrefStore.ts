@@ -1,21 +1,34 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import zustandStorage from "./storage";
-import { LanguageCode, ThemeMode } from "@/types/route";
+import { DEFAULT_LANGUAGE, LanguageCode, ThemeMode } from "@/types/route";
+
+const normalizeLanguage = (
+  language: LanguageCode | null | undefined,
+): LanguageCode => {
+  if (!language || typeof language !== "string") return DEFAULT_LANGUAGE;
+  return language;
+};
 
 type PrefStore = {
   themeMode: ThemeMode;
   setThemeMode: (mode: ThemeMode) => void;
+
   sourceColor: string;
   setSourceColor: (color: string) => void;
+
   language: LanguageCode;
   setLanguage: (language: LanguageCode) => void;
+
   notificationsEnabled: boolean;
   setNotificationsEnabled: (enabled: boolean) => void;
+
   locationEnabled: boolean;
   setLocationEnabled: (enabled: boolean) => void;
+
   homeStation: string | null;
   setHomeStation: (station: string | null) => void;
+
   workStation: string | null;
   setWorkStation: (station: string | null) => void;
 };
@@ -24,25 +37,39 @@ export const usePrefStore = create<PrefStore>()(
   persist(
     (set) => ({
       themeMode: "system",
-      setThemeMode: (mode: ThemeMode) => set({ themeMode: mode }),
+      setThemeMode: (mode) => set({ themeMode: mode }),
+
       sourceColor: "system",
-      setSourceColor: (color: string) => set({ sourceColor: color }),
-      language: "en",
-      setLanguage: (language: LanguageCode) => set({ language }),
+      setSourceColor: (color) => set({ sourceColor: color }),
+
+      language: DEFAULT_LANGUAGE,
+      setLanguage: (language) => set({ language: normalizeLanguage(language) }),
+
       notificationsEnabled: false,
-      setNotificationsEnabled: (enabled: boolean) =>
+      setNotificationsEnabled: (enabled) =>
         set({ notificationsEnabled: enabled }),
+
       locationEnabled: false,
-      setLocationEnabled: (enabled: boolean) =>
-        set({ locationEnabled: enabled }),
+      setLocationEnabled: (enabled) => set({ locationEnabled: enabled }),
+
       homeStation: null,
-      setHomeStation: (station: string | null) => set({ homeStation: station }),
+      setHomeStation: (station) => set({ homeStation: station }),
+
       workStation: null,
-      setWorkStation: (station: string | null) => set({ workStation: station }),
+      setWorkStation: (station) => set({ workStation: station }),
     }),
     {
       name: "pref",
       storage: zustandStorage,
+
+      migrate: (persistedState) => {
+        const state = persistedState as Partial<PrefStore> | undefined;
+
+        return {
+          ...state,
+          language: normalizeLanguage(state?.language),
+        };
+      },
     },
   ),
 );
