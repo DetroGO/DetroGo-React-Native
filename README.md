@@ -68,17 +68,53 @@ Open source, Material 3, and built to do exactly what a transit app should: help
 
 ## Supported Cities
 
-| City | Status |
-|------|--------|
-| **Delhi NCR** | Operational |
-| Mumbai | Planned |
-| Bengaluru | Planned |
-| Chennai | Planned |
-| Hyderabad | Planned |
+DetroGo currently supports **Delhi NCR**. More cities are planned as metro data gets added and verified.
+
+<table>
+  <tr>
+    <td width="100%">
+      <h3>🛺  Delhi NCR</h3>
+      <p><strong>Status:</strong> Operational</p>
+      <p>Currently live in DetroGo with metro route planning support.</p>
+    </td>
+  </tr>
+  <tr>
+    <td width="100%">
+      <h3>🚧 Mumbai</h3>
+      <p><strong>Status:</strong> Planned</p>
+      <p>Metro data still needs to be added and checked before this city can go live.</p>
+    </td>
+  </tr>
+  <tr>
+    <td width="100%">
+      <h3>🚧 Bengaluru</h3>
+      <p><strong>Status:</strong> Planned</p>
+      <p>upport will be added once reliable metro data is available in the app format.</p>
+    </td>
+  </tr>
+  <tr>
+    <td width="100%">
+      <h3>🚧 Chennai</h3>
+      <p><strong>Status:</strong> Planned</p>
+      <p>Support will be added once reliable metro data is available in the app format.</p>
+    </td>
+  </tr>
+  <tr>
+    <td width="100%">
+      <h3>🚇 And Even More Cities</h3>
+      <p><strong>Status:</strong> Coming Soon</p>
+      <p>Through Community Contributions we will be able to add even more cities</p>
+    </td>
+  </tr>
+</table>
+
+Want your city added? Check the [Contribution Guide](#Contributing) and help add station, line, and route data.
 
 ---
 
 ## Screenshots
+
+
 
 <p align="center">
   <img width="23%" alt="Search Dark" src="https://github.com/user-attachments/assets/504d4fb1-2da7-4d7d-8c33-8e14caa7d8f7" />
@@ -89,18 +125,19 @@ Open source, Material 3, and built to do exactly what a transit app should: help
 
 ### Dark Mode
 <p align="center">
-  <img width="23%" alt="Search Dark" src="https://github.com/user-attachments/assets/5dd92218-1615-4f7f-a54a-65184635c411" />
+
+  <img width="23%" alt="Search Dark" src="https://github.com/user-attachments/assets/f382713e-371d-4d96-89f1-82c22288c032" />
   <img width="23%" alt="Detail Dark" src="https://github.com/user-attachments/assets/dacd6cd3-53b1-485c-9b97-18bffa8c1274" />
   <img width="23%" alt="Settings Dark" src="https://github.com/user-attachments/assets/2923023e-0def-419e-9c53-e82f40e1f480" />
-  <img width="23%" alt="Map Dark" src="https://github.com/user-attachments/assets/034ef174-eb5a-4791-876a-c3428b69c966" />
+  <img width="23%" alt="Map Dark" src="https://github.com/user-attachments/assets/330c4913-3bdc-44b6-be11-a690e7c5928e" />
 </p>
 
 ### Light Mode
 <p align="center">
-  <img width="23%" alt="Map Light" src="https://github.com/user-attachments/assets/5c44afc8-ae74-49ca-ad6b-e2fefeaa9948" />
+  <img width="23%" alt="Map Light" src="https://github.com/user-attachments/assets/b31ca493-efed-4e7e-be79-591386c31d86" />
   <img width="23%" alt="Search Light" src="https://github.com/user-attachments/assets/f8227448-4983-4147-9fec-f80f146c4bcd" />
   <img width="23%" alt="Detail Light" src="https://github.com/user-attachments/assets/76ea5f60-b15a-4575-903f-0af26f5b0c0e" />
-  <img width="23%" alt="Settings Light" src="https://github.com/user-attachments/assets/6ebd220b-b6f1-4bad-b730-1045266f5723" />
+  <img width="23%" alt="Settings Light" src="https://github.com/user-attachments/assets/8300f57b-3129-4dd6-a44e-d42415bd8464" />
 </p>
 
 ---
