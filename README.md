@@ -14,6 +14,7 @@ Minimal, clean, and native experience.
 
 **[detrogo.vercel.app](https://detrogo.vercel.app/)**
 
+### [NEW: Help Translate DetroGo at Crowdin](https://crowdin.com/project/detrogo)
 </div>
 
 ---
