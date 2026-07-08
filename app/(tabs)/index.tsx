@@ -6,7 +6,7 @@ import { useMemo, useEffect } from "react";
 import { findNearestStation } from "@/utils/nearestStation";
 import { useNearestStationStore } from "@/store/useNearestStationStore";
 import stations from "@/cities/delhi/stationsdata.json";
-import { useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
+import { useAnimatedStyle, useSharedValue } from "react-native-reanimated";
 import { useAppTheme } from "@/hooks/useAppTheme";
 import { Pressable, Image, RefreshControl, Animated } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
@@ -523,9 +523,6 @@ export default function HomeScreen() {
     inputRange: [0.88, 1],
     outputRange: [14, 28],
   });
-  const fabWrapperStyle = useAnimatedStyle(() => ({
-    transform: [{ translateY: animatedPosition.value - FAB_HEIGHT - FAB_MARGIN }],
-  }));
 
   const onFabIn = () =>
     Animated.spring(fabScale, {
