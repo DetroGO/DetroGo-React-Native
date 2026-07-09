@@ -17,7 +17,7 @@ This guide covers how to get set up, the different ways you can contribute, and 
 
 1. Fork the repo and clone your fork:
 ```bash
-   git clone https://github.com/<your-username>/DetroGo-React-Native.git
+   git clone https://github.com/DetroGO/DetroGo-React-Native.git
    cd DetroGo-React-Native
 ```
 2. Install dependencies:
