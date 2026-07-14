@@ -8,9 +8,15 @@
 A Material 3 transit app for Delhi-NCR.  
 Minimal, clean, and native experience.
 
-[![GPL 3.0 License](https://img.shields.io/badge/license-GPL3-green.svg)](LICENSE)
-[![Made in Delhi](https://img.shields.io/badge/made%20in-Delhi-orange.svg)]()
+
+[![Version](https://img.shields.io/badge/version-v0.1.0--alpha-f59e0b)](https://github.com/DetroGO/DetroGo-React-Native)
 [![Crowdin](https://badges.crowdin.net/detrogo/localized.svg)](https://crowdin.com)
+<br/>
+[![wakatime](https://wakatime.com/badge/user/f983c5d0-c6d8-471e-a499-43763ad1d6b4/project/f4f4ecaf-a095-45e5-afee-2266e9064b67.svg)](https://wakatime.com/badge/user/f983c5d0-c6d8-471e-a499-43763ad1d6b4/project/f4f4ecaf-a095-45e5-afee-2266e9064b67)
+[![Discord](https://img.shields.io/badge/Discord-%235865F2.svg?&logo=discord&logoColor=white)](https://discord.gg/6ksFv4g9ze)
+
+
+
 
 **[detrogo.vercel.app](https://detrogo.vercel.app/)**
 
@@ -34,9 +40,9 @@ Minimal, clean, and native experience.
 
 ## About
 
-DetroGo is a focused transit app built for commuters who just want to plan their route nothing else. Indian transit apps have increasingly become cluttered super-apps, pushing unrelated services and ads to users who simply want to know the next train. DetroGo exists to fix that.
+DetroGo is a transit app built for transit commuters who just want to plan their route nothing else. Indian transit apps have increasingly become cluttered super-apps, pushing unrelated services and ads to users who simply want to know the route. DetroGo fixes these by simplifying the interface and focusing on just the essentials. it allows you search instantly for your route and get the nearest station in the picker. it lays out the route in a simple and easy to understand schematic map with along with real-time updates like where to transfer and how many stations are left you can also see towards which end point a transfer is needed. DetroGo exists to simplify your transit experience.
 
-Open source, Material 3, and built to do exactly what a transit app should: help you plan your commute, save routes, track your history, and navigate.
+Built with React Native and Expo. Fully Open source, uses Material 3 design principles, and built to do exactly what a transit app should: help you plan your commute, save routes, track your history, and navigate.
 
 ---
 
@@ -57,13 +63,13 @@ Open source, Material 3, and built to do exactly what a transit app should: help
 
 ## Tech Stack
 
-- **[React Native]([https://reactnative.dev/]) + [Expo]([https://expo.dev/])** — cross-platform app framework
+- **[React Native]([https://reactnative.dev/]) + [Expo]([https://expo.dev/])** — React Native with Expo
 - **TypeScript** — powering the core routing and data logic
 - **[Zustand]([https://github.com/pmndrs/zustand])** — lightweight state management
 - **[React Native Reanimated]([https://docs.swmansion.com/react-native-reanimated/])** — smooth, native-thread animations
 - **[MapLibre]([https://maplibre.org/])** — open-source map rendering
-- **[Custom Route Rendering Engine]([https://github.com/DetroGo/detrogo-map-renderer])** — Schematic map rendering engine using Svelte
-
+- **[Custom Route Rendering Engine]([https://github.com/DetroGo/detrogo-map-renderer])** — Schematic map rendering engine using Svelte and Javascript
+- **[Customized Expo Live Notifications]([https://github.com/DetroGo/expo-live-updates])** — Customized live notifications using Expo Live Updates(Software Mansion)
 ---
 
 ## Supported Cities
