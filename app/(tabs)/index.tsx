@@ -6,9 +6,9 @@ import { useMemo, useEffect } from "react";
 import { findNearestStation } from "@/utils/nearestStation";
 import { useNearestStationStore } from "@/store/useNearestStationStore";
 import stations from "@/cities/delhi/stationsdata.json";
-import { useAnimatedStyle, useSharedValue } from "react-native-reanimated";
+import ReanimatedLib,{ useAnimatedStyle, useSharedValue } from "react-native-reanimated";
 import { useAppTheme } from "@/hooks/useAppTheme";
-import { Pressable, Image, RefreshControl, Animated } from "react-native";
+import { Pressable, Image, RefreshControl, useWindowDimensions, Animated } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
 import React from "react";
 import * as Haptics from "expo-haptics";
@@ -490,7 +490,8 @@ export default function HomeScreen() {
   const language = usePrefStore((state) => state.language);
   const bottomSheetRef = useRef<BottomSheet>(null);
   const animatedPosition = useSharedValue(0); // distance from top of screen to top of sheet
-
+  const { height: screenHeight } = useWindowDimensions();
+  const FAB_GAP = 95; // space between FAB and sheet top edge
   const lastKnownCoords = useRef<[number, number] | null>(null);
   const snapPoints = useMemo(() => [70, 240, 420], []);
   const hasSeenTutorial = useOnboardingStore((state) => state.hasSeenTutorial);
@@ -523,6 +524,11 @@ export default function HomeScreen() {
     inputRange: [0.88, 1],
     outputRange: [14, 28],
   });
+  const fabAnimatedStyle = useAnimatedStyle(() => ({
+    transform: [
+      { translateY: animatedPosition.value - screenHeight + FAB_GAP },
+    ],
+  }));
 
   const onFabIn = () =>
     Animated.spring(fabScale, {
@@ -594,7 +600,7 @@ export default function HomeScreen() {
           }
           logoEnabled={false}
           attributionEnabled={false}
-          compassPosition={{ top: 420, right: 18 }}
+          compassPosition={{ top: 420, right: 16 }}
           onRegionWillChange={() => {
             // Stop tracking when user manually moves map
             if (tracking) {
@@ -779,17 +785,10 @@ export default function HomeScreen() {
         </Map>
       )}
 
-      <View style={styles.fab}>
-        <Animated.View
-          style={{
-            transform: [{ scale: fabScale }],
-          }}
-        >
-          <Pressable
-            onPressIn={onFabIn}
-            onPressOut={onFabOut}
-            onPress={locateMe}
-          >
+      <View style={{ display:"contents", backgroundColor:"transparent" }}>
+      <ReanimatedLib.View style={[styles.fab, fabAnimatedStyle]}>
+        <Animated.View style={{ transform: [{ scale: fabScale }] }}>
+          <Pressable onPressIn={onFabIn} onPressOut={onFabOut} onPress={locateMe}>
             <Animated.View
               style={[
                 styles.fabInner,
@@ -799,344 +798,342 @@ export default function HomeScreen() {
                 },
               ]}
             >
-              <IconButton
-                icon="crosshairs-gps"
-                size={22}
-                iconColor={theme.colors.onSecondaryContainer}
-              />
+              <IconButton icon="crosshairs-gps" size={22} iconColor={theme.colors.onSecondaryContainer} />
             </Animated.View>
           </Pressable>
         </Animated.View>
-      </View>
+      </ReanimatedLib.View>
+        <BottomSheet
+          ref={bottomSheetRef}
+          index={1}
+          snapPoints={snapPoints}
+          animatedPosition={animatedPosition}
+          style={{ zIndex: 10 }}
+          backgroundStyle={{
+            backgroundColor: theme.dark
+              ? theme.colors.surfaceDim
+              : theme.colors.surface,
+          }}
+          handleIndicatorStyle={{
+            backgroundColor: theme.colors.outlineVariant,
+            width: 40,
+          }}
+        >
+          <BottomSheetScrollView contentContainerStyle={styles.content}>
+            {bookmarks.length === 0 && recentTrips.length === 0 ? (
+              <View style={{ flex: 1 }}>
+                <EmptyRoutesState
+                  theme={theme}
+                  onTakeTour={() => {
+                    Haptics.selectionAsync();
+                    router.push("/onboarding");
+                  }}
+                  onPlanTrip={() => {
+                    Haptics.selectionAsync();
+                    router.push("/planner");
+                  }}
+                />
+              </View>
+            ) : (
+              <View style={{ flex: 1 }}>
+                <ScrollView
+                  style={{
+                    backgroundColor: theme.dark
+                      ? theme.colors.surfaceDim
+                      : theme.colors.surface,
+                  }}
+                  contentContainerStyle={styles.scroll}
+                  showsVerticalScrollIndicator={false}
+                  refreshControl={
+                    <RefreshControl
+                      refreshing={refreshing}
+                      onRefresh={onRefresh}
+                    />
+                  }
+                >
+                  {/* Header */}
 
-      <BottomSheet
-        ref={bottomSheetRef}
-        index={1}
-        snapPoints={snapPoints}
-        animatedPosition={animatedPosition}
-        style={{ zIndex: 10 }}
-        backgroundStyle={{
-          backgroundColor: theme.dark
-            ? theme.colors.surfaceDim
-            : theme.colors.surface,
-        }}
-        handleIndicatorStyle={{
-          backgroundColor: theme.colors.outlineVariant,
-          width: 40,
-        }}
-      >
-        <BottomSheetScrollView contentContainerStyle={styles.content}>
-          {bookmarks.length === 0 && recentTrips.length === 0 ? (
-            <View style={{ flex: 1 }}>
-              <EmptyRoutesState
-                theme={theme}
-                onTakeTour={() => {
-                  Haptics.selectionAsync();
-                  router.push("/onboarding");
-                }}
-                onPlanTrip={() => {
-                  Haptics.selectionAsync();
-                  router.push("/planner");
-                }}
-              />
-            </View>
-          ) : (
-            <View style={{ flex: 1 }}>
-              <ScrollView
-                style={{
-                  backgroundColor: theme.dark
-                    ? theme.colors.surfaceDim
-                    : theme.colors.surface,
-                }}
-                contentContainerStyle={styles.scroll}
-                showsVerticalScrollIndicator={false}
-                refreshControl={
-                  <RefreshControl
-                    refreshing={refreshing}
-                    onRefresh={onRefresh}
-                  />
-                }
-              >
-                {/* Header */}
-
-                <View style={styles.header}>
-                  <View
-                    style={{
-                      flexDirection: "column",
-                      alignItems: "center",
-                      justifyContent: "center",
-                    }}
-                  >
-                    <View
-                      style={{ alignItems: "center", justifyContent: "center" }}
-                    >
-                      {/*<Button
-                    icon="crosshairs-gps"
-                    mode="outlined"
-                    onPress={() => console.log("Pressed")}
-                  >
-                    Delhi
-                  </Button>*/}
-                    </View>
-                  </View>
-                </View>
-
-                {/* Saved Routes */}
-
-                <View>
-                  <View style={{ marginTop: 0, paddingTop: 0, gap: 10 }}>
+                  <View style={styles.header}>
                     <View
                       style={{
-                        marginLeft: 20,
-                        display: bookmarks.length > 0 ? "flex" : "none",
-
-                        marginBottom: 0,
-                        flexDirection: "row",
+                        flexDirection: "column",
                         alignItems: "center",
+                        justifyContent: "center",
                       }}
                     >
                       <View
+                        style={{ alignItems: "center", justifyContent: "center" }}
+                      >
+                        {/*<Button
+                      icon="crosshairs-gps"
+                      mode="outlined"
+                      onPress={() => console.log("Pressed")}
+                    >
+                      Delhi
+                    </Button>*/}
+                      </View>
+                    </View>
+                  </View>
+
+                  {/* Saved Routes */}
+
+                  <View>
+                    <View style={{ marginTop: 0, paddingTop: 0, gap: 10 }}>
+                      <View
                         style={{
-                          flex: 1,
+                          marginLeft: 20,
+                          display: bookmarks.length > 0 ? "flex" : "none",
+
+                          marginBottom: 0,
                           flexDirection: "row",
                           alignItems: "center",
                         }}
                       >
-                        <Icon
-                          source="bookmark-box-multiple"
-                          size={24}
-                          color={theme.colors.onSurfaceVariant}
-                        />
-                        <Text style={{ marginLeft: 6 }}>
-                          {strings.home.savedRoutes}
-                        </Text>
-                      </View>
-                      <Button
-                        style={{
-                          width: "auto",
-                          marginRight: 12,
-                        }}
-                        onPress={() =>
-                          router.push({
-                            pathname: "/listpage",
-                            params: { type: "saved" },
-                          })
-                        }
-                      >
-                        <Text
-                          style={{
-                            fontSize: 12,
-                            color: theme.colors.secondary,
-                          }}
-                        >
-                          {strings.common.viewall}
-                        </Text>
-                      </Button>
-                    </View>
-                    {bookmarks.length > 0 ? (
-                      <ScrollView
-                        horizontal
-                        showsHorizontalScrollIndicator={false}
-                        nestedScrollEnabled
-                        contentContainerStyle={{
-                          paddingHorizontal: 16,
-                          gap: 10,
-                        }}
-                      >
-                        {bookmarks.map((route, index) => (
-                          <BookmarkCard key={route.id} item={route} />
-                        ))}
-                      </ScrollView>
-                    ) : (
-                      <View
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          padding: 15,
-
-                          justifyContent: "center",
-                          flex: 1,
-                        }}
-                      >
                         <View
                           style={{
+                            flex: 1,
                             flexDirection: "row",
                             alignItems: "center",
-                            backgroundColor: theme.colors.surfaceContainerLow,
-                            padding: 16,
-                            margin: 2,
-                            borderRadius: 24,
                           }}
                         >
                           <Icon
-                            source="bookmark"
-                            size={34}
-                            color={theme.colors.outlineVariant}
+                            source="bookmark-box-multiple"
+                            size={24}
+                            color={theme.colors.onSurfaceVariant}
                           />
+                          <Text style={{ marginLeft: 6 }}>
+                            {strings.home.savedRoutes}
+                          </Text>
                         </View>
-                        <Text
-                          variant="labelLarge"
+                        <Button
                           style={{
-                            marginLeft: 5,
-                            marginTop: 8,
-                            color: theme.colors.outlineVariant,
+                            width: "auto",
+                            marginRight: 12,
                           }}
+                          onPress={() =>
+                            router.push({
+                              pathname: "/listpage",
+                              params: { type: "saved" },
+                            })
+                          }
                         >
-                          {strings.home.noSavedRoutes}
-                        </Text>
-                        <Text
-                          variant="labelSmall"
-                          style={{
-                            textAlign: "center",
-                            marginTop: 2,
-                            color: theme.colors.outlineVariant,
-                            width: 250,
-                          }}
-                        >
-                          {strings.home.noSavedRoutesdesc}
-                        </Text>
+                          <Text
+                            style={{
+                              fontSize: 12,
+                              color: theme.colors.secondary,
+                            }}
+                          >
+                            {strings.common.viewall}
+                          </Text>
+                        </Button>
                       </View>
-                    )}
-                  </View>
+                      {bookmarks.length > 0 ? (
+                        <ScrollView
+                          horizontal
+                          showsHorizontalScrollIndicator={false}
+                          nestedScrollEnabled
+                          contentContainerStyle={{
+                            paddingHorizontal: 16,
+                            gap: 10,
+                          }}
+                        >
+                          {bookmarks.map((route, index) => (
+                            <BookmarkCard key={route.id} item={route} />
+                          ))}
+                        </ScrollView>
+                      ) : (
+                        <View
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            padding: 15,
 
-                  {/* Recent Trips */}
-                  <View style={{ marginTop: 29, paddingHorizontal: 16 }}>
-                    <View
-                      style={{
-                        marginLeft: 5,
-                        marginBottom: 14,
-                        flexDirection: "row",
-                        alignItems: "center",
-                      }}
-                    >
+                            justifyContent: "center",
+                            flex: 1,
+                          }}
+                        >
+                          <View
+                            style={{
+                              flexDirection: "row",
+                              alignItems: "center",
+                              backgroundColor: theme.colors.surfaceContainerLow,
+                              padding: 16,
+                              margin: 2,
+                              borderRadius: 24,
+                            }}
+                          >
+                            <Icon
+                              source="bookmark"
+                              size={34}
+                              color={theme.colors.outlineVariant}
+                            />
+                          </View>
+                          <Text
+                            variant="labelLarge"
+                            style={{
+                              marginLeft: 5,
+                              marginTop: 8,
+                              color: theme.colors.outlineVariant,
+                            }}
+                          >
+                            {strings.home.noSavedRoutes}
+                          </Text>
+                          <Text
+                            variant="labelSmall"
+                            style={{
+                              textAlign: "center",
+                              marginTop: 2,
+                              color: theme.colors.outlineVariant,
+                              width: 250,
+                            }}
+                          >
+                            {strings.home.noSavedRoutesdesc}
+                          </Text>
+                        </View>
+                      )}
+                    </View>
+
+                    {/* Recent Trips */}
+                    <View style={{ marginTop: 29, paddingHorizontal: 16 }}>
                       <View
                         style={{
-                          flex: 1,
+                          marginLeft: 5,
+                          marginBottom: 14,
                           flexDirection: "row",
                           alignItems: "center",
                         }}
                       >
-                        <Icon
-                          source="history"
-                          size={24}
-                          color={theme.colors.onSurfaceVariant}
-                        />
-                        <Text style={{ marginLeft: 5 }}>
-                          {strings.home.recentTrips}
-                        </Text>
-                      </View>
-                    </View>
-                    {recentTrips.length > 0 ? (
-                      recentTrips
-                        .slice(0, 3)
-                        .map((trip, index) => (
-                          <RecentCard
-                            total={recentTrips.slice(0, 3).length}
-                            index={index}
-                            item={trip}
-                            key={trip.id}
-                          />
-                        ))
-                    ) : (
-                      <View
-                        style={{
-                          alignItems: "center",
-
-                          justifyContent: "center",
-
-                          marginTop: "-35%",
-                          flexDirection: "column",
-                          height: "100%",
-                        }}
-                      >
                         <View
                           style={{
+                            flex: 1,
                             flexDirection: "row",
                             alignItems: "center",
-                            padding: 2,
-                            margin: 3,
-                            borderRadius: 24,
                           }}
                         >
                           <Icon
                             source="history"
-                            size={38}
-                            color={theme.colors.outlineVariant}
+                            size={24}
+                            color={theme.colors.onSurfaceVariant}
                           />
+                          <Text style={{ marginLeft: 5 }}>
+                            {strings.home.recentTrips}
+                          </Text>
                         </View>
-                        <Text
-                          variant="labelLarge"
+                      </View>
+                      {recentTrips.length > 0 ? (
+                        recentTrips
+                          .slice(0, 3)
+                          .map((trip, index) => (
+                            <RecentCard
+                              total={recentTrips.slice(0, 3).length}
+                              index={index}
+                              item={trip}
+                              key={trip.id}
+                            />
+                          ))
+                      ) : (
+                        <View
                           style={{
-                            marginLeft: 5,
-                            marginTop: 10,
-                            color: theme.colors.outlineVariant,
+                            alignItems: "center",
+
+                            justifyContent: "center",
+
+                            marginTop: "-35%",
+                            flexDirection: "column",
+                            height: "100%",
                           }}
                         >
-                          {strings.home.noRecentTrips}
-                        </Text>
-                      </View>
-                    )}
+                          <View
+                            style={{
+                              flexDirection: "row",
+                              alignItems: "center",
+                              padding: 2,
+                              margin: 3,
+                              borderRadius: 24,
+                            }}
+                          >
+                            <Icon
+                              source="history"
+                              size={38}
+                              color={theme.colors.outlineVariant}
+                            />
+                          </View>
+                          <Text
+                            variant="labelLarge"
+                            style={{
+                              marginLeft: 5,
+                              marginTop: 10,
+                              color: theme.colors.outlineVariant,
+                            }}
+                          >
+                            {strings.home.noRecentTrips}
+                          </Text>
+                        </View>
+                      )}
+                    </View>
                   </View>
-                </View>
-              </ScrollView>
-              <View
-                style={{
-                  flex: 1,
-                  justifyContent: "center",
-                  alignItems: "center",
-                }}
-              >
-                {recentTrips.length > 3 ? (
-                  <Button
-                    style={{ width: "90%", padding: 5 }}
-                    mode="outlined"
-                    onPress={() =>
-                      router.push({
-                        pathname: "/listpage",
-                        params: { type: "recent" },
-                      })
-                    }
-                  >
-                    <Text
-                      style={{
-                        fontSize: 16,
-                        color: theme.colors.secondary,
-                      }}
-                    >
-                      {strings.common.viewall}
-                    </Text>
-                  </Button>
-                ) : null}
-              </View>
-            </View>
-          )}
-          <Portal>
-            <Dialog
-              style={{ backgroundColor: theme.colors.surface }}
-              visible={visible}
-              onDismiss={hideDialog}
-            >
-              <Dialog.Title style={{ textAlign: "center" }}>
-                {strings.home.selectnet}
-              </Dialog.Title>
-              <Dialog.Content>
-                {CITIES.map((item, index) => (
-                  <SystemCards key={item.id} index={index} item={item} />
-                ))}
-              </Dialog.Content>
-              <Dialog.Actions style={{ justifyContent: "center" }}>
-                <Button
-                  style={{ width: "100%" }}
-                  mode="contained-tonal"
-                  onPress={hideDialog}
+                </ScrollView>
+                <View
+                  style={{
+                    flex: 1,
+                    justifyContent: "center",
+                    alignItems: "center",
+                  }}
                 >
-                  {strings.common.done}
-                </Button>
-              </Dialog.Actions>
-            </Dialog>
-          </Portal>
-        </BottomSheetScrollView>
-      </BottomSheet>
+                  {recentTrips.length > 3 ? (
+                    <Button
+                      style={{ width: "90%", padding: 5 }}
+                      mode="outlined"
+                      onPress={() =>
+                        router.push({
+                          pathname: "/listpage",
+                          params: { type: "recent" },
+                        })
+                      }
+                    >
+                      <Text
+                        style={{
+                          fontSize: 16,
+                          color: theme.colors.secondary,
+                        }}
+                      >
+                        {strings.common.viewall}
+                      </Text>
+                    </Button>
+                  ) : null}
+                </View>
+              </View>
+            )}
+            <Portal>
+              <Dialog
+                style={{ backgroundColor: theme.colors.surface }}
+                visible={visible}
+                onDismiss={hideDialog}
+              >
+                <Dialog.Title style={{ textAlign: "center" }}>
+                  {strings.home.selectnet}
+                </Dialog.Title>
+                <Dialog.Content>
+                  {CITIES.map((item, index) => (
+                    <SystemCards key={item.id} index={index} item={item} />
+                  ))}
+                </Dialog.Content>
+                <Dialog.Actions style={{ justifyContent: "center" }}>
+                  <Button
+                    style={{ width: "100%" }}
+                    mode="contained-tonal"
+                    onPress={hideDialog}
+                  >
+                    {strings.common.done}
+                  </Button>
+                </Dialog.Actions>
+              </Dialog>
+            </Portal>
+          </BottomSheetScrollView>
+        </BottomSheet>
+      </View>
+
+
     </View>
   );
 }
@@ -1200,8 +1197,9 @@ const styles = StyleSheet.create({
   },
   fab: {
     position: "absolute",
-    bottom: "31.5%",
-    right: 12,
+    bottom: 0,
+    alignSelf: "flex-end", // or wherever you want it horizontally
+    right: 2,
   },
   fabInner: {
     width: 52,
