@@ -59,6 +59,11 @@ Built with React Native and Expo. Fully Open source, uses Material 3 design prin
 - **Route History** - Local storage for route history and user preferences
 - **i18n Language Support** - Local and international language support *(currently only supports english)* 
 
+### To Implement
+
+- **Live Route Tracking** - being able to get live tracking of your route in the route map
+- **Tickets Page** - store all your offline paper qr ticket just by scanning them or book a qr ticket online(will redirect to the whatsapp of the transit agency)
+
 ---
 
 ## Tech Stack
@@ -80,8 +85,10 @@ DetroGo currently supports **Delhi NCR**. More cities are planned as metro data 
   <tr>
     <td width="100%">
       <h3>🛺  Delhi NCR</h3>
+      <h4><strong>Coverage:</strong> 100%</h4>
       <p><strong>Status:</strong> Operational</p>
-      <p>Currently live in DetroGo with metro route planning support.</p>
+      
+      
     </td>
   </tr>
   <tr>
@@ -120,14 +127,6 @@ Want your city added? Check the [Contribution Guide](#Contributing) and help add
 
 ## Screenshots
 
-
-
-<p align="center">
-  <img width="23%" alt="Search Dark" src="https://github.com/user-attachments/assets/504d4fb1-2da7-4d7d-8c33-8e14caa7d8f7" />
-  <img width="23%" alt="Detail Dark" src="https://github.com/user-attachments/assets/6880f498-2c75-43eb-9a60-71afc999bb04" />
-  <img width="23%" alt="Settings Dark" src="https://github.com/user-attachments/assets/b240e9a6-b637-4e18-9bd9-db98bc75ffe3" />
-  <img width="23%" alt="Map Dark" src="https://github.com/user-attachments/assets/7e50573c-18b2-46e5-86e2-cdfede6511ca" />
-</p>
 
 ### Dark Mode
 <p align="center">
@@ -173,6 +172,8 @@ Want your city added? Check the [Contribution Guide](#Contributing) and help add
 
   ```
 3. **Build the development client( IMPORTANT - Does not work with Expo Go )**
+Since we use packages not compatible with the Expo Go app you will need to build the development client locally.
+
   ```bash
 
    npx expo run:android
@@ -183,11 +184,11 @@ Want your city added? Check the [Contribution Guide](#Contributing) and help add
 
 ## Contributing
 
-Contributions are welcome, whether that's fixing a bug, adding a feature, or bringing DetroGo to a new city.
+Contributions are welcomed, whether that's fixing a bug, adding a feature, or bringing DetroGo to a new city.
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for full guidelines.
 
-### Adding a New City
+## Adding a New City
 
 To add a new city you need to get the city's transit system GTFS file, or a JSON list of stations with coordinates and basic line data (names, colors, etc.), and follow the [Adding a New City](docs/adding_a_new_city.md) guide to get started.
 
@@ -197,7 +198,7 @@ To translate the app into your language just head on over to crowdin and start t
 
 for a more detailed guide on how to translate the app, see [docs/TRANSLATING.md](docs/TRANSLATING.md).
 
----
+
 
 ## 🤝 Contributors
 
