@@ -526,8 +526,9 @@ export default function HomeScreen() {
   });
   const fabAnimatedStyle = useAnimatedStyle(() => ({
     transform: [
-      { translateY: animatedPosition.value - screenHeight + FAB_GAP },
+      { translateY: animatedPosition.value > 190 ? animatedPosition.value - screenHeight + FAB_GAP : 0 },
     ],
+
   }));
 
   const onFabIn = () =>

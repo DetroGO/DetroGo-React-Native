@@ -87,8 +87,7 @@ DetroGo currently supports **Delhi NCR**. More cities are planned as metro data 
       <h3>🛺  Delhi NCR</h3>
       <h4><strong>Coverage:</strong> 100%</h4>
       <p><strong>Status:</strong> Operational</p>
-      
-      
+      <p></p>
     </td>
   </tr>
   <tr>
