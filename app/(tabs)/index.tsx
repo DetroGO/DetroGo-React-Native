@@ -28,6 +28,7 @@ import {
   FAB,
   Portal,
   Dialog,
+  Divider
 } from "react-native-paper";
 import {
   Camera,
@@ -106,10 +107,12 @@ const RecentCard = ({
           </Text>*/}
         </View>
         <View style={{ flex: 1 }}>
-          <Text variant="bodyMedium" style={{ color: theme.colors.onSurface }}>
+          <Text maxFontSizeMultiplier={1.2} numberOfLines={1} variant="bodyMedium" style={{ color: theme.colors.onSurface }}>
             {item.from}
           </Text>
           <Text
+            maxFontSizeMultiplier={1.2}
+            numberOfLines={1}
             variant="labelSmall"
             style={{ color: theme.colors.onSurfaceVariant, marginTop: 1 }}
           >
@@ -144,6 +147,9 @@ const BookmarkCard = ({ item }: { item: SavedRoute }) => {
       >
         <Card.Content style={{ paddingTop: 16, paddingHorizontal: 16 }}>
           <Text
+            maxFontSizeMultiplier={1.2}
+            numberOfLines={1}
+
             variant="labelLarge"
             style={{ color: theme.colors.onSurfaceVariant, opacity: 0.7 }}
           >
@@ -156,6 +162,8 @@ const BookmarkCard = ({ item }: { item: SavedRoute }) => {
               marginTop: 4,
               marginBottom: 12,
             }}
+            maxFontSizeMultiplier={1.2}
+
             numberOfLines={1}
           >
             {item.to}
@@ -170,6 +178,9 @@ const BookmarkCard = ({ item }: { item: SavedRoute }) => {
                 color={theme.colors.onSurfaceVariant}
               />
               <Text
+                maxFontSizeMultiplier={1}
+                numberOfLines={1}
+                ellipsizeMode="tail"
                 variant="labelMedium"
                 style={{ color: theme.colors.onSurfaceVariant }}
               >
@@ -186,6 +197,9 @@ const BookmarkCard = ({ item }: { item: SavedRoute }) => {
               />
               <Text
                 variant="labelMedium"
+                maxFontSizeMultiplier={1}
+                numberOfLines={1}
+                ellipsizeMode="tail"
                 style={{ color: theme.colors.onSurfaceVariant }}
               >
                 {item.transfers} {strings.common.transfers}
@@ -249,11 +263,14 @@ const SystemCards = ({ index, item }: { index: number; item: CityConfig }) => {
           />
         </View>
         <View style={{ flex: 1 }}>
-          <Text variant="bodyMedium" style={{ color: theme.colors.onSurface }}>
+          <Text  maxFontSizeMultiplier={1.2}
+          numberOfLines={1} variant="bodyMedium" style={{ color: theme.colors.onSurface }}>
             {item.name}
           </Text>
           <Text
             variant="labelSmall"
+            maxFontSizeMultiplier={1.2}
+            numberOfLines={1}
             style={{
               color: theme.colors.onSurfaceVariant,
               marginTop: 1,
@@ -372,6 +389,8 @@ function ActionButton({
         ]}
       >
         <Text
+          maxFontSizeMultiplier={1.2}
+          numberOfLines={1}
           variant={
             size === "large"
               ? "titleMedium"
@@ -434,6 +453,8 @@ function EmptyRoutesState({
       <View style={styles.cont2}>
         <View style={styles.versionContainer}>
           <Text
+            maxFontSizeMultiplier={1.2}
+
             variant="displayMedium"
             style={{
               color: theme.colors.onSurfaceVariant,
@@ -448,6 +469,8 @@ function EmptyRoutesState({
           </Text>
         </View>
         <Text
+          maxFontSizeMultiplier={1.2}
+
           variant="labelSmall"
           style={{
             color: theme.colors.outline,
@@ -491,9 +514,10 @@ export default function HomeScreen() {
   const bottomSheetRef = useRef<BottomSheet>(null);
   const animatedPosition = useSharedValue(0); // distance from top of screen to top of sheet
   const { height: screenHeight } = useWindowDimensions();
+  const screenWidth = useWindowDimensions().width;
   const FAB_GAP = 95; // space between FAB and sheet top edge
   const lastKnownCoords = useRef<[number, number] | null>(null);
-  const snapPoints = useMemo(() => [70, 240, 420], []);
+  const snapPoints = useMemo(() => [100, 320], []);
   const hasSeenTutorial = useOnboardingStore((state) => state.hasSeenTutorial);
   const [visible, setVisible] = useState(false);
   const recentTrips = useRecentTripsStore((state) => state.recentTrips);
@@ -514,6 +538,33 @@ export default function HomeScreen() {
   const setNearestStation = useNearestStationStore(
     (state) => state.setNearestStation,
   );
+  const nearestStation = useNearestStationStore((state) => state.nearestStation);
+  const distanceKm = useNearestStationStore((state) => state.distanceKm);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const { status } = await Location.requestForegroundPermissionsAsync();
+
+        if (status !== "granted") return;
+
+        const location = await Location.getCurrentPositionAsync();
+
+        const result = findNearestStation(
+          location.coords.latitude,
+          location.coords.longitude,
+          stations,
+        );
+
+        if (result.nearestStation) {
+          setNearestStation(result.nearestStation, result.distanceKm);
+        }
+      } catch (error) {
+        console.log("[nearestStation] FAILED:", error); // <-- was silently eaten before
+      }
+    })();
+  }, []);
+
   const [popup, setPopup] = useState<string | null>(null);
   const locationEnabled = usePrefStore((state) => state.locationEnabled);
 
@@ -563,6 +614,7 @@ export default function HomeScreen() {
     const target = lastKnownCoords.current ?? DELHI_CENTER;
     cameraRef.current?.flyTo({ center: target, zoom: 15, duration: 1200 });
   };
+
 
   // Station popup
   const onStationPress = (e: any) => {
@@ -807,6 +859,7 @@ export default function HomeScreen() {
         <BottomSheet
           ref={bottomSheetRef}
           index={1}
+
           snapPoints={snapPoints}
           animatedPosition={animatedPosition}
           style={{ zIndex: 10 }}
@@ -878,7 +931,33 @@ export default function HomeScreen() {
 
                   {/* Saved Routes */}
 
-                  <View>
+
+
+
+                    <View >
+                      {nearestStation && (
+                        <View style={{ marginBottom: 10, }}>
+                          <Text maxFontSizeMultiplier={1.2} numberOfLines={1} style={{ fontSize: 10, marginBottom: 1, marginLeft:20, color: theme.colors.secondary }}>
+                            {strings.planner.nearestStation}
+                          </Text>
+
+                          <View style={{ flexDirection: "row", justifyContent: "space-between", marginBottom:15, marginLeft: 20, marginRight:20, }}>
+                            <Text  maxFontSizeMultiplier={1.2}
+                            numberOfLines={1} style={{ fontSize: 20, fontWeight: "bold", color:theme.colors.onPrimaryContainer }}>
+                              {nearestStation?.stop_name}
+                            </Text>
+
+                            {/*<Text style={{ fontSize: 20, fontWeight: "bold" }}>
+                              10 min
+                            </Text>*/}
+                          </View>
+
+                          {/*<Divider />*/}
+                        </View>
+
+                      )}
+
+
                     <View style={{ marginTop: 0, paddingTop: 0, gap: 10 }}>
                       <View
                         style={{
@@ -902,7 +981,8 @@ export default function HomeScreen() {
                             size={24}
                             color={theme.colors.onSurfaceVariant}
                           />
-                          <Text style={{ marginLeft: 6 }}>
+                          <Text  maxFontSizeMultiplier={1.2}
+                          numberOfLines={1} style={{ marginLeft: 6 }}>
                             {strings.home.savedRoutes}
                           </Text>
                         </View>
@@ -918,7 +998,9 @@ export default function HomeScreen() {
                             })
                           }
                         >
-                          <Text
+                            <Text
+                              maxFontSizeMultiplier={1.2}
+                              numberOfLines={1}
                             style={{
                               fontSize: 12,
                               color: theme.colors.secondary,
@@ -969,7 +1051,9 @@ export default function HomeScreen() {
                               color={theme.colors.outlineVariant}
                             />
                           </View>
-                          <Text
+                              <Text
+                                maxFontSizeMultiplier={1.2}
+                                numberOfLines={1}
                             variant="labelLarge"
                             style={{
                               marginLeft: 5,
@@ -979,7 +1063,9 @@ export default function HomeScreen() {
                           >
                             {strings.home.noSavedRoutes}
                           </Text>
-                          <Text
+                              <Text
+                                maxFontSizeMultiplier={1.2}
+
                             variant="labelSmall"
                             style={{
                               textAlign: "center",
@@ -1016,7 +1102,8 @@ export default function HomeScreen() {
                             size={24}
                             color={theme.colors.onSurfaceVariant}
                           />
-                          <Text style={{ marginLeft: 5 }}>
+                          <Text  maxFontSizeMultiplier={1.2}
+                          numberOfLines={1} style={{ marginLeft: 5 }}>
                             {strings.home.recentTrips}
                           </Text>
                         </View>
@@ -1059,7 +1146,9 @@ export default function HomeScreen() {
                               color={theme.colors.outlineVariant}
                             />
                           </View>
-                          <Text
+                              <Text
+                                maxFontSizeMultiplier={1.2}
+                                numberOfLines={1}
                             variant="labelLarge"
                             style={{
                               marginLeft: 5,
@@ -1092,7 +1181,9 @@ export default function HomeScreen() {
                         })
                       }
                     >
-                      <Text
+                        <Text
+                          maxFontSizeMultiplier={1.2}
+                          numberOfLines={1}
                         style={{
                           fontSize: 16,
                           color: theme.colors.secondary,

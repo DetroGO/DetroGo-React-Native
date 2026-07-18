@@ -46,6 +46,8 @@ export default function SearchBar({ onPress, hint }: Props) {
             }}
           />
           <Text
+            maxFontSizeMultiplier={1.2}
+            numberOfLines={1}
             variant="bodyLarge"
             style={{ color: theme.colors.onSecondaryContainer, flex: 1 }}
           >
