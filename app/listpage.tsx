@@ -123,6 +123,7 @@ function RouteCard({
             {/* Text block */}
             <View style={{ flex: 1 }}>
               <Text
+                maxFontSizeMultiplier={1.2}
                 variant="labelSmall"
                 style={{ color: theme.colors.onSurfaceVariant }}
                 numberOfLines={1}
@@ -130,6 +131,7 @@ function RouteCard({
                 {item.from}
               </Text>
               <Text
+                maxFontSizeMultiplier={1.2}
                 variant="titleSmall"
                 style={{
                   color: selected
@@ -152,6 +154,7 @@ function RouteCard({
                     color={theme.colors.onSurfaceVariant}
                   />
                   <Text
+                    maxFontSizeMultiplier={1.2}
                     variant="labelSmall"
                     style={{ color: theme.colors.onSurfaceVariant }}
                   >
@@ -167,6 +170,7 @@ function RouteCard({
                     color={theme.colors.onSurfaceVariant}
                   />
                   <Text
+                    maxFontSizeMultiplier={1.2}
                     variant="labelSmall"
                     style={{ color: theme.colors.onSurfaceVariant }}
                   >
@@ -296,6 +300,7 @@ export default function ListPage() {
             />
             <View style={{ flex: 1, paddingLeft: 4 }}>
               <Text
+                maxFontSizeMultiplier={1.2}
                 variant="titleLarge"
                 style={{ color: theme.colors.onSurface }}
               >
@@ -333,7 +338,8 @@ export default function ListPage() {
                 size={22}
                 color={theme.colors.onSurface}
               />
-              <Text
+                <Text
+                  maxFontSizeMultiplier={1.2}
                 variant="titleLarge"
                 style={{ color: theme.colors.onSurface }}
               >
@@ -355,6 +361,7 @@ export default function ListPage() {
         {/* ── Count label ── */}
         {data.length > 0 && !selectMode && (
           <Text
+            maxFontSizeMultiplier={1.2}
             variant="labelSmall"
             style={{
               color: theme.colors.onSurfaceVariant,
@@ -381,6 +388,7 @@ export default function ListPage() {
                 color={theme.colors.outlineVariant}
               />
               <Text
+                maxFontSizeMultiplier={1.2}
                 variant="bodyMedium"
                 style={{
                   color: theme.colors.onSurfaceVariant,
@@ -450,6 +458,7 @@ export default function ListPage() {
               color={theme.colors.onErrorContainer}
             />
             <Text
+              maxFontSizeMultiplier={1.2}
               style={{
                 color: theme.colors.onErrorContainer,
                 fontSize: 16,

@@ -152,6 +152,7 @@ function StationNavigator({
       </Animated.View>
 
       <Text
+        maxFontSizeMultiplier={1.2}
         style={{
           maxWidth: 200,
           flex: 1.4,
@@ -237,11 +238,12 @@ function NotificationCard({
             <Icon source={icon} size={34} color={cardfg} />
           </View>
           <View style={{ flex: 1, flexDirection: "column", gap: 1 }}>
-            <Text style={{ fontWeight: "600", fontSize: 14, color: cardfg }}>
+            <Text maxFontSizeMultiplier={1.2} style={{ fontWeight: "600", fontSize: 14, color: cardfg }}>
               {title}
             </Text>
             <View style={{ flexDirection: "row", gap: 3 }}>
               <Text
+                maxFontSizeMultiplier={1.2}
                 style={{
                   fontSize: 12,
                   fontWeight: "400",
@@ -253,6 +255,7 @@ function NotificationCard({
                 {desc}
               </Text>
               <Text
+                maxFontSizeMultiplier={1.2}
                 style={{
                   fontSize: 12,
                   fontWeight: "400",
@@ -283,7 +286,7 @@ export default function RoutePlanScreen() {
   const locationEnabled = usePrefStore(
     (state) => state.locationEnabled,
   );
-  
+
   const screenWidth = Dimensions.get("window").width;
   const [liveNavId, setLiveNavId] = useState<number | string | undefined>(
     undefined,
@@ -691,7 +694,8 @@ export default function RoutePlanScreen() {
                 color={theme.colors.onSurfaceVariant}
               />
             ) : (
-              <Text
+                <Text
+                  maxFontSizeMultiplier={1.2}
                 variant="titleLarge"
                 style={{
                   color: theme.colors.onSurface,
@@ -704,10 +708,11 @@ export default function RoutePlanScreen() {
             )}
           </View>
           <View style={{ flex: 1 }}>
-            <Text variant="bodyLarge" style={{ color: theme.colors.onSurface }}>
+            <Text maxFontSizeMultiplier={1.2} variant="bodyLarge" style={{ color: theme.colors.onSurface }}>
               {item.station}
             </Text>
             <Text
+              maxFontSizeMultiplier={1.2}
               variant="labelSmall"
               style={{ color: theme.colors.onSurfaceVariant, marginTop: 1 }}
             >
@@ -719,6 +724,7 @@ export default function RoutePlanScreen() {
                 : item.line}
             </Text>
             <Text
+              maxFontSizeMultiplier={1.2}
               variant="labelSmall"
               style={{
                 display:
@@ -919,6 +925,7 @@ export default function RoutePlanScreen() {
                   }}
                 >
                   <Text
+                    maxFontSizeMultiplier={1.2}
                     style={{ flex: 1, flexWrap: "wrap", textAlign: "left" }}
                     numberOfLines={2}
                     variant="titleSmall"
@@ -961,6 +968,7 @@ export default function RoutePlanScreen() {
                   </Animated.View>
 
                   <Text
+                    maxFontSizeMultiplier={1.2}
                     style={{ flex: 1, flexWrap: "wrap", textAlign: "right" }}
                     numberOfLines={2}
                     variant="titleSmall"
@@ -994,6 +1002,7 @@ export default function RoutePlanScreen() {
                         size={28}
                       />
                       <Text
+                        maxFontSizeMultiplier={1.2}
                         variant="headlineMedium"
                         style={{
                           fontWeight: "700",
@@ -1004,7 +1013,7 @@ export default function RoutePlanScreen() {
                         {routeData.stops + 1}
                       </Text>
                     </View>
-                    <Text variant="bodySmall">{strings.common.stations}</Text>
+                    <Text maxFontSizeMultiplier={1.2} variant="bodySmall">{strings.common.stations}</Text>
                   </View>
 
                   <View
@@ -1031,6 +1040,7 @@ export default function RoutePlanScreen() {
                         size={28}
                       />
                       <Text
+                        maxFontSizeMultiplier={1.2}
                         variant="headlineMedium"
                         style={{
                           fontWeight: "700",
@@ -1040,7 +1050,7 @@ export default function RoutePlanScreen() {
                         {routeData.transferStations.length}
                       </Text>
                     </View>
-                    <Text variant="bodySmall">{strings.common.transfers}</Text>
+                    <Text maxFontSizeMultiplier={1.2} variant="bodySmall">{strings.common.transfers}</Text>
                   </View>
                 </View>
               </Card.Content>

@@ -85,7 +85,7 @@ const StationRow = React.memo(function StationRow({
         }}
       >
         <View style={{ flex: 1 }}>
-          <Text variant="bodyMedium" style={{ color: theme.colors.onSurface }}>
+          <Text maxFontSizeMultiplier={1.2} variant="bodyMedium" style={{ color: theme.colors.onSurface }}>
             {item}
           </Text>
         </View>
@@ -101,7 +101,7 @@ const SectionHeader = React.memo(function SectionHeader({
 }) {
   return (
     <View style={{ marginBottom: 5 }}>
-      <Text style={{ margin: 10 }} variant="titleMedium">
+      <Text maxFontSizeMultiplier={1.2} style={{ margin: 10 }} variant="titleMedium">
         {title}
       </Text>
     </View>
@@ -455,12 +455,14 @@ export default function ModalScreen() {
                 />
                 <View style={{ flex: 1 }}>
                   <Text
+                    maxFontSizeMultiplier={1.2}
                     variant="labelSmall"
                     style={{ color: theme.colors.onErrorContainer }}
                   >
                     {strings.planner.nearestStation}
                   </Text>
                   <Text
+                    maxFontSizeMultiplier={1.2}
                     variant="titleMedium"
                     style={{ color: theme.colors.onErrorContainer }}
                   >
@@ -514,7 +516,8 @@ export default function ModalScreen() {
                   />
                 )}
                 <View style={{ flex: 1 }}>
-                  <Text
+                    <Text
+                      maxFontSizeMultiplier={1.2}
                     variant="labelSmall"
                     style={{
                       color: theme.dark
@@ -525,7 +528,8 @@ export default function ModalScreen() {
                     {strings.planner.nearestStation}
                   </Text>
                   {isLoading ? (
-                    <Text
+                      <Text
+                        maxFontSizeMultiplier={1.2}
                       variant="titleMedium"
                       style={{
                         color: theme.dark
@@ -536,7 +540,8 @@ export default function ModalScreen() {
                       {strings.common.searching}
                     </Text>
                   ) : (
-                    <Text
+                        <Text
+                          maxFontSizeMultiplier={1.2}
                       variant="titleMedium"
                       style={{
                         color: theme.dark
@@ -594,6 +599,7 @@ export default function ModalScreen() {
                 size={24}
               />
               <Text
+                maxFontSizeMultiplier={1.2}
                 style={{
                   color: theme.dark
                     ? theme.colors.onPrimaryContainer
@@ -636,6 +642,7 @@ export default function ModalScreen() {
                 size={24}
               />
               <Text
+                maxFontSizeMultiplier={1.2}
                 style={{
                   color: theme.dark
                     ? theme.colors.onPrimaryContainer
@@ -715,7 +722,7 @@ export default function ModalScreen() {
                   source={editingMode === "start" ? "crosshairs-gps" : "home"}
                   size={24}
                 />
-                <Text variant="titleMedium">
+                <Text maxFontSizeMultiplier={1.2} variant="titleMedium">
                   {startsel ? startStation : strings.planner.startStation}
                 </Text>
               </Card.Content>
@@ -750,7 +757,7 @@ export default function ModalScreen() {
                 }}
               >
                 <Icon source="flag" size={24} />
-                <Text variant="titleMedium">{finalStation}</Text>
+                <Text maxFontSizeMultiplier={1.2} variant="titleMedium">{finalStation}</Text>
               </Card.Content>
             </Card>
           </Animated.View>
@@ -853,6 +860,7 @@ export default function ModalScreen() {
               showsVerticalScrollIndicator={false}
               renderSectionHeader={({ section }) => (
                 <Text
+                  maxFontSizeMultiplier={1.2}
                   variant="labelSmall"
                   style={{
                     color: theme.colors.onSurfaceVariant,

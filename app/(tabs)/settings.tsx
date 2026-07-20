@@ -159,6 +159,7 @@ function ThemeOptionCard({
           </View>
           <Text
             variant="bodyMedium"
+            maxFontSizeMultiplier={1.2}
             style={{
               flex: 1,
               color: selected
@@ -256,12 +257,14 @@ function SettingsRow({
           </View>
           <View style={{ flex: 1 }}>
             <Text
+              maxFontSizeMultiplier={1.2}
               variant="bodyMedium"
               style={{ color: theme.colors.onSurface, marginBottom: 2 }}
             >
               {row.label}
             </Text>
             <Text
+              maxFontSizeMultiplier={1.2}
               variant="labelSmall"
               style={{ color: theme.colors.onSurfaceVariant }}
             >
@@ -288,6 +291,7 @@ function SectionLabel({ label }: { label: string }) {
   return (
     <Text
       variant="labelSmall"
+      maxFontSizeMultiplier={1.2}
       style={{
         color: theme.colors.onSurfaceVariant,
         marginBottom: 10,
@@ -335,6 +339,7 @@ function OptionRow({
         }}
       >
         <Text
+          maxFontSizeMultiplier={1.2}
           variant="bodyMedium"
           style={{
             flex: 1,
@@ -421,6 +426,7 @@ function StationPickerDialog({
             showsVerticalScrollIndicator={false}
             renderSectionHeader={({ section }) => (
               <Text
+                maxFontSizeMultiplier={1.2}
                 variant="labelSmall"
                 style={{
                   color: theme.colors.onSurfaceVariant,
@@ -683,6 +689,7 @@ export default function Settings() {
           style={{ paddingHorizontal: 15, paddingTop: 54, paddingBottom: 8 }}
         >
           <Text
+            maxFontSizeMultiplier={1.2}
             variant="headlineSmall"
             style={{ color: theme.colors.onSurface }}
           >
@@ -742,12 +749,14 @@ export default function Settings() {
                 </View>
                 <View style={{ flex: 1 }}>
                   <Text
+                    maxFontSizeMultiplier={1.2}
                     variant="bodyMedium"
                     style={{ color: theme.colors.onSurface }}
                   >
                     {strings.settings.theme}
                   </Text>
                   <Text
+                    maxFontSizeMultiplier={1.2}
                     variant="labelSmall"
                     style={{ color: theme.colors.onSurfaceVariant }}
                   >
@@ -823,12 +832,14 @@ export default function Settings() {
                 </View>
                 <View style={{ flex: 1 }}>
                   <Text
+                    maxFontSizeMultiplier={1.2}
                     variant="bodyMedium"
                     style={{ color: theme.colors.onSurface }}
                   >
                     {strings.settings.colorScheme}
                   </Text>
                   <Text
+                    maxFontSizeMultiplier={1.2}
                     variant="labelSmall"
                     style={{ color: theme.colors.primary }}
                   >
@@ -948,6 +959,7 @@ export default function Settings() {
                 }}
               />
               <Text
+                maxFontSizeMultiplier={1.2}
                 style={{
                   color: theme.colors.primary,
                   textAlign: "center",
@@ -958,6 +970,7 @@ export default function Settings() {
                 v0.1.0-alpha
               </Text>
               <Text
+                maxFontSizeMultiplier={1.2}
                 style={{
                   color: theme.colors.onSecondaryContainer,
                   textAlign: "center",
