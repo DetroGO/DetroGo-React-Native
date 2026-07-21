@@ -510,6 +510,7 @@ const DELHI_CENTER: [number, number] = [77.2195, 28.6329];
 export default function HomeScreen() {
   const theme = useAppTheme();
   const isFocused = useIsFocused();
+
   const language = usePrefStore((state) => state.language);
   const bottomSheetRef = useRef<BottomSheet>(null);
   const animatedPosition = useSharedValue(0); // distance from top of screen to top of sheet
@@ -517,12 +518,13 @@ export default function HomeScreen() {
   const screenWidth = useWindowDimensions().width;
   const FAB_GAP = 95; // space between FAB and sheet top edge
   const lastKnownCoords = useRef<[number, number] | null>(null);
-  const snapPoints = useMemo(() => [100, 320], []);
+  const [snapPoints, setSnapPoints] = useState([70, 240, 420]);
   const hasSeenTutorial = useOnboardingStore((state) => state.hasSeenTutorial);
   const [visible, setVisible] = useState(false);
   const recentTrips = useRecentTripsStore((state) => state.recentTrips);
   const bookmarks = useBookmarksStore((state) => state.bookmarks);
   const showDialog = () => setVisible(true);
+  const locationEnabled = usePrefStore((state) => state.locationEnabled);
 
   const hideDialog = () => setVisible(false);
   const [refreshing, setRefreshing] = React.useState(false);
@@ -556,17 +558,36 @@ export default function HomeScreen() {
           stations,
         );
 
+
+
         if (result.nearestStation) {
           setNearestStation(result.nearestStation, result.distanceKm);
+
         }
+
       } catch (error) {
         console.log("[nearestStation] FAILED:", error); // <-- was silently eaten before
       }
     })();
   }, []);
 
+  useEffect(() => {
+    if (locationEnabled) {
+      if (nearestStation) {
+        setSnapPoints([100, 320]);
+      } else {
+        setSnapPoints([70, 240, 420]);
+      }
+    }
+    else {
+      setSnapPoints([70, 240, 420]);
+    }
+
+
+  }, [nearestStation, locationEnabled]);
+
   const [popup, setPopup] = useState<string | null>(null);
-  const locationEnabled = usePrefStore((state) => state.locationEnabled);
+
 
   // Spring FAB
   const fabScale = useRef(new Animated.Value(1)).current;
@@ -935,7 +956,7 @@ export default function HomeScreen() {
 
 
                     <View >
-                      {nearestStation && (
+                      {nearestStation  && locationEnabled && (
                         <View style={{ marginBottom: 10, }}>
                           <Text maxFontSizeMultiplier={1.2} numberOfLines={1} style={{ fontSize: 10, marginBottom: 1, marginLeft:20, color: theme.colors.secondary }}>
                             {strings.planner.nearestStation}
