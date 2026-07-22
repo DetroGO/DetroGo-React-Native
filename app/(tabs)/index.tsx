@@ -98,7 +98,7 @@ const RecentCard = ({
           }}
         >
           <Icon
-            source="source-commit"
+          source="history"
             size={30}
             color={theme.colors.onSurfaceVariant}
           />
@@ -543,33 +543,103 @@ export default function HomeScreen() {
   const nearestStation = useNearestStationStore((state) => state.nearestStation);
   const distanceKm = useNearestStationStore((state) => state.distanceKm);
 
+  // useEffect(() => {
+  //   (async () => {
+  //     try {
+  //       const { status } = await Location.requestForegroundPermissionsAsync();
+
+  //       if (status !== "granted") return;
+
+  //       const location = await Location.getCurrentPositionAsync();
+
+  //       const result = findNearestStation(
+  //         location.coords.latitude,
+  //         location.coords.longitude,
+  //         stations,
+  //       );
+
+
+
+  //       if (result.nearestStation) {
+  //         setNearestStation(result.nearestStation, result.distanceKm);
+
+  //       }
+
+  //     } catch (error) {
+  //       console.log("[nearestStation] FAILED:", error); // <-- was silently eaten before
+  //     }
+  //   })();
+  // }, []);
+
+
+  const RECOMPUTE_THRESHOLD_M = 150;
+  const lastComputedCoords = useRef<[number, number] | null>(null);
+
+  function distanceMeters(
+    [lon1, lat1]: [number, number],
+    [lon2, lat2]: [number, number],
+  ) {
+    const R = 6371000;
+    const dLat = ((lat2 - lat1) * Math.PI) / 180;
+    const dLon = ((lon2 - lon1) * Math.PI) / 180;
+    const a =
+      Math.sin(dLat / 2) ** 2 +
+      Math.cos((lat1 * Math.PI) / 180) *
+        Math.cos((lat2 * Math.PI) / 180) *
+        Math.sin(dLon / 2) ** 2;
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  }
+
+  const applyNearestStation = useCallback(
+    (lat: number, lon: number) => {
+      const result = findNearestStation(lat, lon, stations);
+      if (!result.nearestStation) return;
+      setNearestStation(result.nearestStation, result.distanceKm);
+      lastComputedCoords.current = [lon, lat];
+    },
+    [setNearestStation],
+  );
+
+
   useEffect(() => {
     (async () => {
       try {
         const { status } = await Location.requestForegroundPermissionsAsync();
-
         if (status !== "granted") return;
-
-        const location = await Location.getCurrentPositionAsync();
-
-        const result = findNearestStation(
-          location.coords.latitude,
-          location.coords.longitude,
-          stations,
-        );
-
-
-
-        if (result.nearestStation) {
-          setNearestStation(result.nearestStation, result.distanceKm);
-
-        }
-
+        const location = await Location.getCurrentPositionAsync({
+          accuracy: Location.Accuracy.Balanced,
+        });
+        applyNearestStation(location.coords.latitude, location.coords.longitude);
       } catch (error) {
-        console.log("[nearestStation] FAILED:", error); // <-- was silently eaten before
+        console.log("[nearestStation] initial fetch FAILED:", error);
       }
     })();
-  }, []);
+  }, [applyNearestStation]);
+
+  // Ongoing updates from UserLocation throttled so we're not
+  // re-scanning stations on every 20m displacement tick.
+  const onLocationUpdate = useCallback(
+    (location: Location.LocationObject) => {
+      const coords: [number, number] = [
+        location.coords.longitude,
+        location.coords.latitude,
+      ];
+      lastKnownCoords.current = coords;
+
+      if (!hasFocusedUser.current && cameraRef.current) {
+        hasFocusedUser.current = true;
+        cameraRef.current.flyTo({ center: coords, zoom: 15, duration: 1800 });
+      }
+
+      const last = lastComputedCoords.current;
+      if (last && distanceMeters(last, coords) < RECOMPUTE_THRESHOLD_M) {
+        return;
+      }
+
+      applyNearestStation(location.coords.latitude, location.coords.longitude);
+    },
+    [applyNearestStation],
+  );
 
   useEffect(() => {
     if (locationEnabled) {
@@ -623,7 +693,6 @@ export default function HomeScreen() {
   const locateMe = async () => {
     const { status } = await Location.getForegroundPermissionsAsync();
     if (status !== "granted") {
-      // just fly to Delhi center, don't crash
       cameraRef.current?.flyTo({
         center: DELHI_CENTER,
         zoom: 11,
@@ -631,11 +700,35 @@ export default function HomeScreen() {
       });
       return;
     }
+
     setTracking("default");
+
+    // Fly immediately using last known coords for a snappy feel...
     const target = lastKnownCoords.current ?? DELHI_CENTER;
     cameraRef.current?.flyTo({ center: target, zoom: 15, duration: 1200 });
-  };
 
+    // ...then fetch a fresh fix in the background and force a
+    // nearest-station recompute regardless of the distance throttle
+    try {
+      const location = await Location.getCurrentPositionAsync({
+        accuracy: Location.Accuracy.Balanced,
+      });
+      const coords: [number, number] = [
+        location.coords.longitude,
+        location.coords.latitude,
+      ];
+      lastKnownCoords.current = coords;
+      applyNearestStation(location.coords.latitude, location.coords.longitude);
+
+      // If the fresh fix is meaningfully different from where we
+      // just flew to, correct the camera
+      if (target === DELHI_CENTER || distanceMeters(target, coords) > 50) {
+        cameraRef.current?.flyTo({ center: coords, zoom: 15, duration: 800 });
+      }
+    } catch (error) {
+      console.log("[locateMe] refresh FAILED:", error);
+    }
+  };
 
   // Station popup
   const onStationPress = (e: any) => {
@@ -686,31 +779,7 @@ export default function HomeScreen() {
           <UserLocation
             visible={locationEnabled}
             minDisplacement={20}
-            onUpdate={(location) => {
-              const coords: [number, number] = [
-                location.coords.longitude,
-                location.coords.latitude,
-              ];
-              lastKnownCoords.current = coords;
-
-              const result = findNearestStation(
-                location.coords.latitude,
-                location.coords.longitude,
-                stations,
-              );
-              if (result.nearestStation) {
-                setNearestStation(result.nearestStation, result.distanceKm);
-              }
-
-              if (!hasFocusedUser.current && cameraRef.current) {
-                hasFocusedUser.current = true;
-                cameraRef.current.flyTo({
-                  center: coords,
-                  zoom: 15,
-                  duration: 1800,
-                });
-              }
-            }}
+            onUpdate={onLocationUpdate}
           />
           {/* Camera */}
           <Camera
@@ -1119,7 +1188,7 @@ export default function HomeScreen() {
                           }}
                         >
                           <Icon
-                            source="history"
+                            source="invoice-list"
                             size={24}
                             color={theme.colors.onSurfaceVariant}
                           />
@@ -1131,10 +1200,10 @@ export default function HomeScreen() {
                       </View>
                       {recentTrips.length > 0 ? (
                         recentTrips
-                          .slice(0, 3)
+                          .slice(0, 2)
                           .map((trip, index) => (
                             <RecentCard
-                              total={recentTrips.slice(0, 3).length}
+                              total={recentTrips.slice(0, 2).length}
                               index={index}
                               item={trip}
                               key={trip.id}
@@ -1191,9 +1260,9 @@ export default function HomeScreen() {
                     alignItems: "center",
                   }}
                 >
-                  {recentTrips.length > 3 ? (
+                  {recentTrips.length > 2 ? (
                     <Button
-                      style={{ width: "90%", padding: 5 }}
+                      style={{ width: "90%", padding: 3 }}
                       mode="outlined"
                       onPress={() =>
                         router.push({
@@ -1206,7 +1275,7 @@ export default function HomeScreen() {
                           maxFontSizeMultiplier={1.2}
                           numberOfLines={1}
                         style={{
-                          fontSize: 16,
+                          fontSize: 14,
                           color: theme.colors.secondary,
                         }}
                       >

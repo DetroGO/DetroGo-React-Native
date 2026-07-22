@@ -55,6 +55,7 @@ function RouteCard({
   const spring = useSpringPress();
   const isFirst = index === 0;
   const isLast = index === total - 1;
+    const { type } = useLocalSearchParams<{ type: string }>();
 
   return (
     <Animated.View
@@ -110,7 +111,7 @@ function RouteCard({
               }}
             >
               <Icon
-                source={selectMode ? (selected ? "check" : "minus") : "drag"}
+                source={selectMode ? (selected ? "check" : "minus") : type === "saved" ? "bookmark" : "history"}
                 size={28}
                 color={
                   selected
